@@ -34,18 +34,6 @@
             }
         }
 
-        // tooltip demo
-        $('.tooltip-demo.well').tooltip({
-            selector: "a[rel=tooltip]"
-        })
-        
-        // popover demo
-        $("a[rel=popover]")
-        .popover({placement: 'top'})
-        .click(function(e) {
-            e.preventDefault()
-        })
-
         // button state demo
         $('#fat-btn')
         .click(function () {

@@ -118,7 +118,7 @@ function tpl_quote_list($quotes, $page, $pages, $sort_str, $phrase, $as_page = t
 function tpl_write_quote_item() {
     tpl_item_before("Zitat hinzufügen", "pencil", "item-send item-quote-send");
     ?>
-        <input type="text" placeholder="Zitierter Lehrer" name="person" class="teacher_typeahead" require="on"/>
+        <input type="text" placeholder="Zitierter Lehrer" name="person" class="teacher_typeahead" required="on" pattern="([A-ZÄÖÜ.]([a-zßäöü.](-[a-zßäöüA-ZÄÖÜ.])?)+ ?){1,3}"/>
         <textarea name="text" placeholder="Zitat" require="on"></textarea>
 	<?php
 	tpl_item_after_send_anonymous("Hinzufügen", "Anonym hinzufügen", "sendQuote(false)", "sendQuote(true)");

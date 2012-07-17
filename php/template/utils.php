@@ -29,12 +29,12 @@ function tpl_infobox($strong_text, $message_text) {
 
 function tpl_usermode_combobox($name, $preset_modenum = User::NORMAL_MODE, $without_superadmin = false) {
     $arr = array(
-        User::ADMIN_MODE => "Moderator",
+        User::MODERATOR_MODE => "Moderator",
         User::EDITOR_MODE => "Editor",
         User::NORMAL_MODE => "Normal"
     );
     if (!$without_superadmin) {
-        $arr = array_merge($arr, array(User::SUPERADMIN_MODE => "Administrator"));
+        $arr = array_merge($arr, array(User::ADMIN_MODE => "Administrator"));
     }
     ?>
     <select style="display: inline;" name="<?php echo $name ?>" class="user_mode_combobox">
@@ -49,8 +49,8 @@ function tpl_usermode_combobox($name, $preset_modenum = User::NORMAL_MODE, $with
 
 function tpl_usermode_to_text($mode) {
     $arr = array(
-        User::SUPERADMIN_MODE => "Administrator",
-        User::ADMIN_MODE => "Moderator",
+        User::ADMIN_MODE => "Administrator",
+        User::MODERATOR_MODE => "Moderator",
         User::EDITOR_MODE => "Editor",
         User::NORMAL_MODE => "Normal",
         User::NO_MODE => "Gast"
@@ -99,7 +99,7 @@ function tpl_user_span($user_id = -1, $with_icon = true) {
 
 function tpl_url($relative_url) {
     global $env;
-    return $env->url . '/' . $relative_url;
+    return URL . '/' . $relative_url;
 }
 
 $id_username_dic = array();

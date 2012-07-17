@@ -31,8 +31,13 @@ class DBSetupHandler extends ToroHandler {
         "root_mathteacher" => array("label" => "Root Mathelehrer"),
         "root_mathcourse" => array("default" => "1", "label" => "Root Mathekurs"),
         "root_mailadress" => array("default" => "test@test.de", "label" => "Root Mailadresse", "type" => "email"),
-        "URL" => array("default" => "http://localhost/abipage", "label" => "URL")
+        "URL" => array("default" => "", "label" => "URL"),
     );
+
+    public function __construct() {
+        self::$db_setup_vals["DB_HOST"]["default"] = $_SERVER["SERVER_NAME"];
+        self::$db_setup_vals["URL"]["default"] = 'http://' . $_SERVER["SERVER_NAME"] . $_SERVER["REQUEST_URI"];
+    }
 
     public function get() {
         if (!defined('DB_NAME')) {
@@ -48,22 +53,37 @@ class DBSetupHandler extends ToroHandler {
                 $str = "<?php\n";
                 foreach (self::$db_setup_vals as $key => $value) {
                     if (!preg_match("/root.*/", $key)) {
-                        $str .= "\ndefine(\"" . $key . '", "' . $_POST[$key] . '");';
+                        $val = $_POST[$key];
+                        if ($key == "URL" && substr($val, strlen($val) - 1) == "/"){
+                            $val = substr($val, 0, strlen($val) - 1);
+                        }
+                        $str .= "\ndefine(\"" . $key . '", "' . $val . '");';
                     }
                 }
                 //For debug purposes...
-                /* define("DB_HOST", "localhost");
+               /*define("DB_HOST", "localhost");
                   define("DB_NAME", "db");
                   define("DB_USER", "root");
                   define("DB_PASSWORD", "");
-                  define("DB_PREFIX", "abipage_" . time() . "_"); */
+                  define("DB_PREFIX", "abipage_" . time() . "_");*/
                 file_put_contents(dirname(__FILE__) . '/db_config.php', $str);
+                $uploads_dir = dirname(dirname(__FILE__)) . '/uploads';
+                if (!is_dir($uploads_dir)) {
+                    mkdir($uploads_dir);
+                }
+                if (!is_dir($uploads_dir . '/thumbs')) {
+                    mkdir($uploads_dir . '/thumbs');
+                }
+                $htaccess_file = dirname(dirname(__FILE__)) . "/.htaccess";
+                $htaccess = file_get_contents($htaccess_file);
+                $uri = str_replace($_SERVER["SERVER_NAME"], "", str_replace('http://', "", $_POST["URL"]));
+                file_put_contents($htaccess_file, str_replace("/abipage/", $uri, $htaccess));
                 require dirname(__FILE__) . '/bootloader.php';
                 Database::setup();
                 global $db;
                 $db = Database::getConnection();
                 if ($db != null) {
-                    User::create($_POST["root_name"], $_POST["root_mathcourse"], $_POST["root_mathteacher"], $_POST["root_mailadress"], $_POST["root_pwd"], User::SUPERADMIN_MODE, 1);
+                    User::create($_POST["root_name"], $_POST["root_mathcourse"], $_POST["root_mathteacher"], $_POST["root_mailadress"], $_POST["root_pwd"], User::ADMIN_MODE, 1);
                     Auth::login($_POST["root_name"], $_POST["root_pwd"]);
                     $prefs = new PreferencesHandler();
                     $prefs->fillDBWithDefaultValues();

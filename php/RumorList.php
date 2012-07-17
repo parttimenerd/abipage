@@ -23,7 +23,7 @@ class RumorList extends RatableUserContentList {
         parent::__construct("rumors");
     }
 
-    public function addRumor($text, $anonymous, $senduser = null, $time = -1) {
+    public function addRumor($text, $anonymous, $response_to = -1, $senduser = null, $time = -1) {
         global $env;
         if ($senduser == null) {
             $senduser = Auth::getUser();
@@ -32,7 +32,7 @@ class RumorList extends RatableUserContentList {
             $time = time();
         }
         $text = cleanInputText($text, $this->db);
-        $this->db->query("INSERT INTO " . $this->table . "(id, text, userid, isanonymous, time, rating) VALUES(NULL, '" . $text . "', " . $senduser->getID() . ", " . ($anonymous ? 1 : 0) . ", " . intval($time) . ", 0)") or die($this->db->error);
+        $this->db->query("INSERT INTO " . $this->table . "(id, text, userid, isanonymous, time, rating, response_to) VALUES(NULL, '" . $text . "', " . $senduser->getID() . ", " . ($anonymous ? 1 : 0) . ", " . intval($time) . ", 0, " . intval($response_to) . ")") or die($this->db->error);
         $env->addAction($this->db->insert_id, $senduser->getName(), "add_rumor");
     }
 

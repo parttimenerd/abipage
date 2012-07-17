@@ -1,0 +1,37 @@
+@import "bootstrap/bootstrap.less";
+@import "bootstrap/responsive-utilities.less";
+
+// Phones to portrait tablets and narrow desktops
+@import "bootstrap/responsive-767px-max.less";
+
+// Tablets to regular desktops
+@import "bootstrap/responsive-768px-979px.less";
+
+// Large desktops
+@import "bootstrap/responsive-1200px-min.less";
+
+
+// RESPONSIVE NAVBAR
+// ------------------
+
+// From 979px and below, show a button to toggle navbar contents
+@import "bootstrap/responsive-navbar.less";
+
+
+/* plugins */
+@import "plugins/chocolat.less";
+@import "plugins/colorpicker.less";
+@import "plugins/tablesorter.less";
+
+/* own-styles */
+@media (max-width: 980px) {
+    .sidebar_span {
+        display: none;
+    }
+}
+
+@media (max-width: 979px) {
+    body {
+        margin-top: 0px !important;
+    }
+}

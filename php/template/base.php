@@ -1,5 +1,4 @@
 <?php
-
 /*
  * Copyright (C) 2012 Johannes Bechberger
  *
@@ -46,7 +45,7 @@ function tpl_before($class = null, $title = null, $subtitle = null, $subnav = nu
                 $subtitle = tpl_get_user_subtitle($user);
             }
             //$userapp["user"] = array("Benutzerseite");
-            $userapp["user"] = array("Beutzerseite", tpl_get_user_subtitle($user));
+            $userapp["user/me"] = array("Benutzerseite", tpl_get_user_subtitle($user));
             $userapp["user/me/preferences"] = array("Einstellungen", $env->userpreferences_subtitle);
             if ($env->user_characteristics_editable) {
                 $userapp["user_characteristics"] = array("Steckbrief", $env->uc_subtitle);
@@ -106,21 +105,24 @@ function tpl_before($class = null, $title = null, $subtitle = null, $subnav = nu
             <title><?php echo ($title != null ? ($title . $env->title_sep . $env->title) : '') ?></title>
             <meta name="author" content="Johannes Bechberger"/>
             <meta name="viewport" content="width=device-width"/>
-
-            <link href="<?php echo tpl_url("css/bootstrap.css") ?>" rel="stylesheet"/>
-            <link href="<?php echo tpl_url("css/bootstrap-responsive.css") ?>" rel="stylesheet"/>
-            <link href="<?php echo tpl_url("css/docs.css") ?>" rel="stylesheet"/>
+            <link href="<?php echo tpl_url("css/project.min.css") ?>" rel="stylesheet"/>   
             <link href="<?php echo tpl_url("css/style.css") ?>" rel="stylesheet"/>
             <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
             <script>window.jQuery || document.write('<script src="<?php echo tpl_url("js/libs/jquery-1.7.2.min.js") ?>"><\/script>')</script>
-            <!-- scripts concatenated and minified via ant build script-->
             <script src="<?php echo tpl_url("js/libs/modernizr-2.5.3.js") ?>"></script>
             <link rel="shortcut icon" href="<?php echo tpl_url($env->favicon) ?>"/>
             <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
             <!--[if lt IE 9]>
-            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+                <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+            <![endif]-->
             <link href='http://fonts.googleapis.com/css?family=Voltaire|Josefin+Sans:400,700,600,400italic,300|Just+Me+Again+Down+Here' rel='stylesheet' type='text/css'/>
+            <!--
+                Thanks for looking behind the surface of the code.
+                Please visit the github repo of the CMS behind the website (https://github.com/parttimenerd/abipage) to find out more about the internals and help developing this program.
+                The whole code is licensed under the GNU GPL, so you're able to use parts of it.
+            
+                The CMS is developed by some (currently one) nerd, please take a look at the humans.txt to find out more about them.
+            -->
         </head>
 
         <!-- Navbar
@@ -194,7 +196,7 @@ function tpl_before($class = null, $title = null, $subtitle = null, $subnav = nu
     <!-- Footer
     ================================================== -->
     <footer class="footer">
-        <p>Powered by abipage. Designed and built by Johannes Bechberger with <a href="http://twitter.github.com/bootstrap/">Twitter Bootstrap</a>. <a href="<?php echo tpl_url("humans.txt") ?>">humans.txt</a>
+        <p>Powered by <a href="https://github.com/parttimenerd/abipage/">abipage</a>. Designed and built by Johannes Bechberger with <a href="http://twitter.github.com/bootstrap/">Twitter Bootstrap</a>. <a href="<?php echo tpl_url("humans.txt") ?>">humans.txt</a>
     </footer>
     </div><!--/.container -->
     <div class="go_up">
@@ -239,6 +241,9 @@ function tpl_no_subnav() {
             function tpl_subnav($url_part, $page, $pagecount, $phrase) {
                 global $has_sidebar, $env;
                 ?>
+                <script>
+                    var sidebar_ajax_url = "<?php echo tpl_url("ajax") ?>";
+                </script>
                 <div class="subnav">
                     <div class="nav nav-pills">
                         <input type="text" name="phrase" id="search_field" placeholder="Suche" value="<?php echo $phrase ?>" onkeypress="if (event.keyCode == 13) search($(this).val())"/>
@@ -247,59 +252,65 @@ function tpl_no_subnav() {
                 </header>
 
                 <div class="row">
-                    <div class="<?php echo (Auth::getUserMode() != User::NO_MODE && !$env->open && $has_sidebar) ? "span9" : "span12" ?> content">
+                    <div class="<?php echo (Auth::getUserMode() != User::NO_MODE && !$env->open && $has_sidebar) ? "span9 with_sidebar" : "span12 without_sidebar" ?> content">
                         <?php
                     }
 
                     function tpl_actions_sidebar() {
-                        global $env;
+                        global $env, $store;
                         ?>
                         <script>
                             var actions_url = "<?php echo tpl_url("ajax/actions"); ?>";
+                            var last_action_id = "<?php echo $store->last_action_id ?>";
+                            var showed_actions = "<?php echo $env->showed_actions ?>";
                         </script>
                         <div class="span3 sidebar">
                             <div class="well">
                                 <ul class="nav nav-list">
                                     <li class="nav-header" id="action_header">Aktionen</li>
                                     <?php
-                                    foreach ($env->getLastActions() as $action) {
-                                        echo '<li id="action_' . $action["id"] . '">';
-                                        tpl_timediff_span(time() - $action["time"]);
-                                        switch ($action["type"]) {
-                                            case "add_user_comment":
-                                                echo "Kommentar bei ";
-                                                tpl_userlink(intval($action["person"]));
-                                                break;
-                                            case "add_quote":
-                                                echo '<a href="' . tpl_url('quotes') . '">Zitat</a> von ' . $action["person"];
-                                                break;
-                                            case "add_rumor":
-                                                echo '<a href="' . tpl_url('rumors') . '">Stimmt es...</a> Beitrag geschrieben';
-                                                break;
-                                            case "upload_image":
-                                                echo '<a href="' . tpl_url('images') . '">Bild</a> hochgeladen';
-                                                break;
-                                            case "new_user":
-                                                tpl_userlink(intval($action["person"]));
-                                                echo " registriert";
-                                                break;
-                                            case "delete_images":
-                                                echo '<a href="' . tpl_url('images') . '">Bild</a> gelöscht';
-                                                break;
-                                            case "delete_quotes":
-                                                echo '<a href="' . tpl_url('quotes') . '">Zitat</a> gelöscht';
-                                                break;
-                                            case "delete_rumors":
-                                                echo '<a href="' . tpl_url('rumors') . '">Stimmt es...</a> Beitrag gelöscht';
-                                                break;
-                                        }
-                                        echo "</li>\n";
-                                    }
+                                    tpl_actions($env->getLastActions());
                                     ?>
                                 </ul>
                             </div><!--/.well -->
                         </div><!--/span .sidebar-->
                         <?php
+                    }
+
+                    function tpl_actions($actions) {
+                        foreach ($actions as $action) {
+                            echo '<li class="action_list_item" id="action_' . $action["id"] . '">';
+                            tpl_timediff_span(time() - $action["time"]);
+                            switch ($action["type"]) {
+                                case "add_user_comment":
+                                    echo "Kommentar bei ";
+                                    tpl_userlink(intval($action["person"]));
+                                    break;
+                                case "add_quote":
+                                    echo '<a href="' . tpl_url('quotes') . '">Zitat</a> von ' . $action["person"];
+                                    break;
+                                case "add_rumor":
+                                    echo '<a href="' . tpl_url('rumors') . '">Stimmt es...</a> Beitrag geschrieben';
+                                    break;
+                                case "upload_image":
+                                    echo '<a href="' . tpl_url('images') . '">Bild</a> hochgeladen';
+                                    break;
+                                case "new_user":
+                                    tpl_userlink(intval($action["person"]));
+                                    echo " registriert";
+                                    break;
+                                case "delete_images":
+                                    echo '<a href="' . tpl_url('images') . '">Bild</a> gelöscht';
+                                    break;
+                                case "delete_quotes":
+                                    echo '<a href="' . tpl_url('quotes') . '">Zitat</a> gelöscht';
+                                    break;
+                                case "delete_rumors":
+                                    echo '<a href="' . tpl_url('rumors') . '">Stimmt es...</a> Beitrag gelöscht';
+                                    break;
+                            }
+                            echo "</li>\n";
+                        }
                     }
 
                     function tpl_timediff_span($timediff) {
@@ -308,9 +319,9 @@ function tpl_no_subnav() {
                             60 => array("Sekunde", "n"),
                             60 => array("Minute", "n"),
                             24 => array("Stunde", "n"),
-                            30.4 => array("Tag", "e"),
-                            12 => array("Monat", "e"),
-                            1 => array("Jahr", "e")
+                            30.4 => array("Tag", "en"),
+                            12 => array("Monat", "en"),
+                            1 => array("Jahr", "en")
                         );
 
                         $start = 1;

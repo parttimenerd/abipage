@@ -67,7 +67,8 @@ if (!function_exists('require_dir')) {
         require_once('KeyValueStore.php');
         $store = new KeyValueStore();
         register_shutdown_function(function() {
-                    if (isset($store)) {
+                    global $store;
+                    if ($store) {
                         $store->updateDB();
                     }
                 });

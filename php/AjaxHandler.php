@@ -20,9 +20,13 @@
 class AjaxHandler extends ToroHandler {
 
     public function get($slug = "") {
+        global $env, $store;
+        $slug = $slug != "" ? substr($slug, 1) : "";
         switch ($slug) {
-            case "actions":
-                tpl_actions_sidebar();
+            case "last_actions":
+                if (isset($_GET["last_id"]) && $store->last_action_id > intval($_GET["last_id"])) {
+                    tpl_actions($env->getLastActions($_GET["last_id"]));
+                }
         }
     }
 

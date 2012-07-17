@@ -1,6 +1,0 @@
-Zufälligen Datensatz aus der Tabelle:
-SELECT * FROM Table T JOIN (SELECT FLOOR(MAX(ID)*RAND()) AS ID FROM Table) AS x ON T.ID >= x.ID LIMIT 1;
-
-
-
-rating überarbeiten

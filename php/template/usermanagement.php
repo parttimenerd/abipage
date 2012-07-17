@@ -54,7 +54,7 @@ function tpl_usermanagement($userarr, $as_page = true, $urlapp = "") {
         Ausgewählte Benutzer  
         <button class="btn" type="submit" name="activate">Aktivieren</button>
         <button class="btn" type="submit" name="deactivate">Deaktivieren</button><br/>
-        <?php if (Auth::getUserMode() == User::SUPERADMIN_MODE): ?>
+        <?php if (Auth::getUserMode() == User::ADMIN_MODE): ?>
             Modus <?php tpl_usermode_combobox("mode") ?>
             <button class="btn" type="submit" name="setmode">setzen</button><br/>
         <?php endif ?>

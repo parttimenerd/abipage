@@ -23,7 +23,7 @@ class QuoteList extends RatableUserContentList {
         parent::__construct("quotes");
     }
 
-    public function addQuote($person, $text, $anonymous, $teacherid = -1, $senduser = null, $time = -1) {
+    public function addQuote($person, $text, $anonymous, $response_to = -1, $teacherid = -1, $senduser = null, $time = -1) {
         global $env;
         if ($senduser == null) {
             $senduser = Auth::getUser();
@@ -53,7 +53,7 @@ class QuoteList extends RatableUserContentList {
                 }
             }
         }
-        $this->db->query("INSERT INTO " . $this->table . "(id, person, teacherid, text, userid, isanonymous, time, rating) VALUES(NULL, '" . $person . "', " . $tid . ", '" . $text . "', " . $senduser->getID() . ", " . ($anonymous ? 1 : 0) . ", " . intval($time) . ", 0)");
+        $this->db->query("INSERT INTO " . $this->table . "(id, person, teacherid, text, userid, isanonymous, time, rating, response_to) VALUES(NULL, '" . $person . "', " . $tid . ", '" . $text . "', " . $senduser->getID() . ", " . ($anonymous ? 1 : 0) . ", " . intval($time) . ", 0, " . intval($response_to) . ")");
         $env->addAction($this->db->insert_id, $name, "add_quote");
     }
 

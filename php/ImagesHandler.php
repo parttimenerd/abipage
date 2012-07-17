@@ -28,13 +28,14 @@ class ImagesHandler extends RatableUserContentHandler {
         if (!empty($_FILES["uploaded_file"]) && ($_FILES['uploaded_file']['error'] == 0) && isset($_POST["description"])) {
             $id = $this->list->addImage($_POST["description"]);
             $env->uploadImage($id);
+            return true;
         }
+        return false;
     }
 
     public function processPhraseImpl($phrase) {
         $phrase = cleanInputText($phrase);
-        $this->list->appendToWhereApp(" AND description LIKE '%" . $phrase . "%'");
-        //$this->list->appendToWhereApp(" AND MATCH(description) AGAINST('" . $phrase . "') ");
+        $this->list->appendToWhereApp(" AND (MATCH(description) AGAINST('" . $phrase . "') OR description LIKE '%" . $phrase . "%')");
     }
 
 }

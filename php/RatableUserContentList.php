@@ -46,7 +46,7 @@ class RatableUserContentList {
                 $this->item_count = $arr["count"];
             }
         }
-        return $this->item_count;
+        return intval($this->item_count);
     }
 
     public function isEmpty() {
@@ -57,19 +57,21 @@ class RatableUserContentList {
         return ceil($this->getCount() / floatval($this->items_per_page));
     }
 
-    public function getItems($start, $time_sort = true, $desc = true, $user = null) {
+    public function getItems($start = 0, $time_sort = true, $desc = true, $user = null) {
         if (!$user) {
             $user = Auth::getUser();
         }
-        if ($start > $this->getCount()) {
-            $start = ($this->getPageCount() * $this->items_per_page) - $this->items_per_page;
-        }
-        $start = intval($start) - (intval($start) % $this->items_per_page);
-        $res = $this->db->query("SELECT " . $this->table . ".*, (SELECT " . $this->table . "_ratings.rating FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id AND userid=" . $user->getID() . ") AS own_rating FROM " . $this->table . ", " . DB_PREFIX . "user u " . $this->from_app . " WHERE u.id = userid AND u.activated = 1 " . $this->where_app . " ORDER BY " . ($time_sort ? "time" : "rating") . " " . ($desc ? "DESC" : "ASC") . " LIMIT " . $start . ", " . $this->items_per_page) or die($this->db->error);
         $arr = array();
-        if ($res != null) {
-            while ($result = $res->fetch_array()) {
-                $arr[] = $result;
+        if ($this->getCount() > 0) {
+            if ($start > $this->getCount()) {
+                $start = ($this->getPageCount() * $this->items_per_page) - $this->items_per_page;
+            }
+            //$start = intval($start) - (intval($start) % $this->items_per_page);
+            $res = $this->db->query("SELECT " . $this->table . ".*, (SELECT " . $this->table . "_ratings.rating FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id AND userid=" . $user->getID() . ") AS own_rating FROM " . $this->table . ", " . DB_PREFIX . "user u " . $this->from_app . " WHERE u.id = userid AND u.activated = 1 " . $this->where_app . " ORDER BY " . ($time_sort ? "time" : "rating") . " " . ($desc ? "DESC" : "ASC") . " LIMIT " . $start . ", " . $this->items_per_page) or die($this->db->error);
+            if ($res != null) {
+                while ($result = $res->fetch_array()) {
+                    $arr[] = $result;
+                }
             }
         }
         return array("items" => $arr, "start" => $start, "page" => ($start / $this->items_per_page) + 1);

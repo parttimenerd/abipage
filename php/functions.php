@@ -73,6 +73,12 @@ function sendMail($to, $topic, $text) {
             . "X-Mailer: PHP/" . phpversion());
 }
 
+function sendAdminMail($topic, $text){
+    foreach (User::getByMode(User::ADMIN_MODE) as $user){
+        sendMail($user->getMailAdress(), $topic, $text);
+    }
+}
+
 function register_user_in_forum($user, $password) {
     global $env;
     if ($user != null && $env->has_forum) {
@@ -200,34 +206,3 @@ function resizeImage($newWidth, $originalFile, $targetFile = "") {
     $func($tmp, $targetFile, $ext_target != "png" ? $env->pic_quality : round(100 - $env->pic_quality / 10));
     return true;
 }
-
-//HACK extend unzip method with dest parameter
-//source: php.net
-function unzip($file) {
-    $zip = zip_open($file);
-    if (is_resource($zip)) {
-        $tree = "";
-        while (($zip_entry = zip_read($zip)) !== false) {
-            echo "Unpacking " . zip_entry_name($zip_entry) . "\n";
-            if (strpos(zip_entry_name($zip_entry), DIRECTORY_SEPARATOR) !== false) {
-                $last = strrpos(zip_entry_name($zip_entry), DIRECTORY_SEPARATOR);
-                $dir = substr(zip_entry_name($zip_entry), 0, $last);
-                $file = substr(zip_entry_name($zip_entry), strrpos(zip_entry_name($zip_entry), DIRECTORY_SEPARATOR) + 1);
-                if (!is_dir($dir)) {
-                    @mkdir($dir, 0755, true) or die("Unable to create $dir\n");
-                }
-                if (strlen(trim($file)) > 0) {
-                    $return = @file_put_contents($dir . "/" . $file, zip_entry_read($zip_entry, zip_entry_filesize($zip_entry)));
-                    if ($return === false) {
-                        die("Unable to write file $dir/$file\n");
-                    }
-                }
-            } else {
-                file_put_contents($file, zip_entry_read($zip_entry, zip_entry_filesize($zip_entry)));
-            }
-        }
-    } else {
-        echo "Unable to open zip file\n";
-    }
-}
-

@@ -24,9 +24,9 @@ function tpl_pref_table($val_arr, $css_class = "") {
     <table class="pref_table<?php if ($css_class != "") echo ' ' . $css_class ?>">
         <?php foreach ($val_arr as $key => $val): ?>
             <tr<?php if (isset($val["css_class"])) echo ' class="' . $val["css_class"] . '"' ?>>
-                <td><?php echo isset($val["label"]) ? $val["label"] : $key
+                <td class="left_column"><?php echo isset($val["label"]) ? $val["label"] : $key
         ?></td>
-                <td><?php
+                <td class="right_column"><?php
         $default = isset($val["default"]) ? $val["default"] : '';
         $type = isset($val["type"]) ? $val["type"] : "inputfield";
         switch ($type) {
@@ -69,14 +69,14 @@ function tpl_dbsetup($val_arr) {
     </form>
     <?php
     tpl_infobox("Wichtig", "Diese Einstellungen können zum Teil nachträglich in der Datei 'db_options.php' verändert werden, welche bei einer Neuinstallation gelöscht werden muss.<br/>
-	Sie Stimmen mit dem Installieren dieser Software den Lizenzbestimmungen (zufinden in der LICENCE-Datei des Hauptordners) zu und verpflichten sich Außerdem dem Autor dieser Software eine Abizeitungen zukommen zu lassen, zu welcher diese Software ihren Beitrag geleistet hat.
-	Über eine zusätzliche Spende würde sich der Autor dieses Programms natürlich auch freuen.");
+	Sie Stimmen mit dem Installieren dieser Software den Lizenzbestimmungen (zufinden in der LICENCE-Datei des Hauptordners) zu und verpflichten sich außerdem dem Autor dieser Software eine Abizeitungen zukommen zu lassen, zu welcher diese Software ihren Beitrag geleistet hat.
+	Über eine Spende würde sich der Autor dieses Programms natürlich auch freuen.");
     //tpl_after();
 }
 
 function tpl_preferences($val_arr) {
     tpl_before("preferences", "Einstellungen");
-    tpl_item_before_form();
+    tpl_item_before_form(array("action" => tpl_url("preferences")));
     ?>
     <?php tpl_pref_table($val_arr) ?>
     <?php

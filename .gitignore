@@ -166,3 +166,5 @@ uploads
 
 # Mac crap
 .DS_Store
+!/less/bootstrap/
+/build_js.bat

@@ -71,12 +71,11 @@ if (!defined('DB_NAME')) {
     );
     $pages = $normal_pages;
     switch (Auth::getUserMode()) {
-        case User::SUPERADMIN_MODE:
-            $pages = array_merge($pages, $superadmin_pages);
         case User::ADMIN_MODE:
+            $pages = array_merge($pages, $superadmin_pages);
+        case User::MODERATOR_MODE:
             $pages = array_merge($pages, $admin_pages);
     }
-    //var_dump($pages);
     if (Auth::getUserMode() != User::NO_MODE || $env->open) {
         $site = new ToroApplication($pages);
     } else if (Auth::isNotActivated()) {

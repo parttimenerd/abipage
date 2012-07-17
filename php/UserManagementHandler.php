@@ -25,7 +25,7 @@ class UserManagementHandler extends ToroHandler {
     }
 
     public function post() {
-        if (Auth::getUserMode() >= User::ADMIN_MODE) {
+        if (Auth::getUserMode() >= User::MODERATOR_MODE) {
             if (!empty($_POST)) {
                 foreach ($_POST as $key => $value) {
                     if (preg_match("/^[0-9]+/", $key)) {
@@ -35,7 +35,7 @@ class UserManagementHandler extends ToroHandler {
                         } else if (isset($_POST["deactivate"])) {
                             $user->deactivate();
                         } else if (isset($_POST["setmode"]) && isset($_POST["mode"]) &&
-                                (Auth::getUserMode() == User::SUPERADMIN_MODE || Auth::getUserMode() > intval($_POST["mode"]))) {
+                                (Auth::getUserMode() == User::ADMIN_MODE || Auth::getUserMode() > intval($_POST["mode"]))) {
                             $user->setMode(intval($_POST["mode"]));
                         } else if (isset($_POST["setpassword"]) && isset($_POST["password"])) {
                             $user->setPassword($_POST["password"], true);

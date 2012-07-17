@@ -71,13 +71,12 @@ function tpl_user($user) {
                         <a class="sign-icon" href="?action=unnotify&id="<?php echo $comment["id"] ?>>+</a>
                     <?php } else { ?>
                         <a class="sign-icon" href="?action=notify&id="<?php echo $comment["id"] ?>>-</a>
-                <?php } ?>
+                    <?php } ?>
                 </span>
-        <?php endif ?>			
+            <?php endif ?>			
         </div>
         </div>
     <?php endforeach ?>
-    </div>
     </div>
     <?php
     tpl_after();
@@ -92,7 +91,7 @@ function tpl_item_after_user($time, $user) {
     </div>
     <div class="item-footer">
         <?php tpl_time_span($time) ?>
-    <?php tpl_user_span($user) ?>
+        <?php tpl_user_span($user) ?>
     </div>
     </div>
     <?php

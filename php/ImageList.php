@@ -54,6 +54,11 @@ class ImageList extends RatableUserContentList {
 
     public function addImage($descr = "", $time = -1, $user = null) {
         global $env;
+        if (get_upload_dir_size_mib() + 3 > $env->max_uploads_size){
+            sendAdminMail("Upload-Ordner ist voll", "Es können keine Bilder mehr hochgeladen werden, da der Upload-Ordner voll ist, bitte löschen sie entweder Bilder oder vergrößern sie die Größe des Upload-Ordners in den Seiteneinstellungen.");
+            return;
+        }
+        global $env;
         if ($time == -1) {
             $time = time();
         }

@@ -142,10 +142,10 @@ class Environment {
         return false;
     }
 
-    public function getLastActions() {
+    public function getLastActions($last_action_id = -1) {
         global $db;
         $actions = array();
-        $res = $db->query("SELECT * FROM " . DB_PREFIX . "actions ORDER BY time DESC LIMIT 0, " . $this->showed_actions) or die($db->error);
+        $res = $db->query("SELECT * FROM " . DB_PREFIX . "actions WHERE id > " . intval($last_action_id) . " ORDER BY time DESC LIMIT 0, " . $this->showed_actions) or die($db->error);
         while ($action = $res->fetch_array()) {
             $actions[] = $action;
         }
@@ -153,7 +153,7 @@ class Environment {
     }
 
     public function addAction($itemid, $person, $type, $time = -1, $user = null) {
-        global $db;
+        global $db, $store;
         if ($user == null) {
             $user = Auth::getUser();
         }
@@ -163,6 +163,8 @@ class Environment {
         $person = $db->real_escape_string($person);
         $type = $db->real_escape_string($type);
         $db->query("INSERT INTO " . DB_PREFIX . "actions(id, userid, itemid, person, type, time) VALUES(NULL, " . $user->getID() . ", " . intval($itemid) . ", '" . $person . "', '" . $type . "', " . $time . ")") or die($db->error);
+        $store->last_action_id = $db->insert_id;
+        $store->updateDB();
     }
 
 }

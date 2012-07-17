@@ -1,25 +1,32 @@
 <?php
 
 /* ToroPHP by Anand Kunal
-https://github.com/anandkunal/ToroPHP */
+  https://github.com/anandkunal/ToroPHP */
 
-class InvalidRouteType extends Exception {}
+class InvalidRouteType extends Exception {
+    
+}
 
 // Provided by Danillo César de O. Melo
 // https://github.com/danillos/fire_event/blob/master/Event.php
 class ToroHook {
+
     private static $instance;
-  
     private $hooks = array();
-  
-    private function __construct() { }
-    private function __clone() { }
-  
+
+    private function __construct() {
+        
+    }
+
+    private function __clone() {
+        
+    }
+
     public static function add($hook_name, $fn) {
         $instance = self::get_instance();
         $instance->hooks[$hook_name][] = $fn;
     }
-  
+
     public static function fire($hook_name, $params = NULL) {
         $instance = self::get_instance();
         if (array_key_exists($hook_name, $instance->hooks)) {
@@ -28,16 +35,18 @@ class ToroHook {
             }
         }
     }
-  
+
     public static function get_instance() {
         if (!isset(self::$instance)) {
             self::$instance = new ToroHook();
         }
         return self::$instance;
     }
+
 }
 
 class ToroApplication {
+
     private $_handler_route_pairs = array();
 
     public function __construct($handler_route_pairs) {
@@ -48,7 +57,7 @@ class ToroApplication {
 
     public function serve() {
         ToroHook::fire('before_request');
-    
+
         $request_method = strtolower($_SERVER['REQUEST_METHOD']);
         $path_info = '/';
         $path_info = isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : $path_info;
@@ -61,14 +70,13 @@ class ToroApplication {
             list($pattern, $handler_name) = $handler;
 
             if ($path_info == $pattern) {
-                $discovered_handler = $handler_name;            
+                $discovered_handler = $handler_name;
                 $regex_matches = array($path_info, preg_replace('/^\//', '', $path_info));
                 $method_arguments = $this->get_argument_overrides($handler);
                 break;
-            }
-            else {
-                $pattern = str_replace('/', '\/', $pattern);                
-                
+            } else {
+                $pattern = str_replace('/', '\/', $pattern);
+
                 if (preg_match('/^\/' . $pattern . '\/?$/', $path_info, $matches)) {
                     $discovered_handler = $handler_name;
                     $regex_matches = $matches;
@@ -93,24 +101,21 @@ class ToroApplication {
                 header('Cache-Control: no-cache, must-revalidate');
                 header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
                 $request_method .= '_xhr';
-            }
-            else if ($this->ipad_request() && method_exists($discovered_handler, $request_method . '_ipad')) {
+            } else if ($this->ipad_request() && method_exists($discovered_handler, $request_method . '_ipad')) {
                 $request_method .= '_ipad';
-            }
-            else if ($this->mobile_request() && method_exists($discovered_handler, $request_method . '_mobile')) {
+            } else if ($this->mobile_request() && method_exists($discovered_handler, $request_method . '_mobile')) {
                 $request_method .= '_mobile';
             }
 
             ToroHook::fire('before_handler');
             call_user_func_array(array($handler_instance, $request_method), $method_arguments);
             ToroHook::fire('after_handler');
-        }
-        else {
+        } else {
             header('HTTP/1.0 404 Not Found');
-			tpl_404();
-			exit;
+            tpl_404();
+            exit;
         }
-    
+
         ToroHook::fire('after_request');
     }
 
@@ -132,14 +137,19 @@ class ToroApplication {
     private function mobile_request() {
         return strstr($_SERVER['HTTP_USER_AGENT'], 'iPhone') || strstr($_SERVER['HTTP_USER_AGENT'], 'iPod') || strstr($_SERVER['HTTP_USER_AGENT'], 'Android') || strstr($_SERVER['HTTP_USER_AGENT'], 'webOS');
     }
+
 }
 
 class ToroHandler {
-    public function __construct() { }
+
+    public function __construct() {
+        
+    }
 
     public function __call($name, $arguments) {
         header('HTTP/1.0 404 Not Found');
-		tpl_404();
+        tpl_404();
         exit;
     }
+
 }

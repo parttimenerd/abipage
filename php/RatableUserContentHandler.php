@@ -62,10 +62,12 @@ class RatableUserContentHandler extends ToroHandler {
                 echo intval($_POST["id"]);
             }
         } else if (isset($_POST["send"]) || !empty($_FILES["uploaded_file"]) || isset($_POST["send_anonymous"])) {
-            $this->post_impl();
-            //$this->get();
-            $arr = $this->list->getItems(0, true, true);
-            call_user_func($this->tpl_list_func_name, array($arr["items"][0]), $arr["page"], $this->list->getPageCount(), "", "", false);
+            if ($this->post_impl()) {
+                $arr = $this->list->getItems(0, true, true);
+                if (count($arr["items"]) != 0) {
+                    call_user_func($this->tpl_list_func_name, array($arr["items"][0]), $arr["page"], $this->list->getPageCount(), "", "", false);
+                }
+            }
         } else {
             $begin = isset($_POST["page"]) ? intval($_POST["page"]) * $env->items_per_page : 0;
             $time_sort = true;

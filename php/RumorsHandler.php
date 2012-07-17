@@ -25,14 +25,15 @@ class RumorsHandler extends RatableUserContentHandler {
 
     public function post_impl() {
         if (issetAndNotEmptyArr(array("text"), $_POST)) {
-			$this->list->addRumor($_POST["text"], isset($_POST["send_anonymous"]));
+            $this->list->addRumor($_POST["text"], isset($_POST["send_anonymous"]));
+            return true;
         }
+        return false;
     }
 
-    public function processPhraseImpl($phrase){
+    public function processPhraseImpl($phrase) {
         $phrase = cleanInputText($phrase);
-        //$this->list->appendToWhereApp(" AND text LIKE '%" . $phrase . "%'");
-	$this->list->appendToWhereApp(" AND MATCH(text) AGAINST('" . $phrase . "') ");
-	}
+        $this->list->appendToWhereApp(" AND (MATCH(text) AGAINST('" . $phrase . "') OR text LIKE '%" . $phrase . "%')");
+    }
 
 }

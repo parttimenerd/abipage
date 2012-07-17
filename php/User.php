@@ -19,8 +19,8 @@
 
 class User {
 
-    const SUPERADMIN_MODE = 3;
-    const ADMIN_MODE = 2;
+    const ADMIN_MODE = 3;
+    const MODERATOR_MODE = 2;
     const EDITOR_MODE = 1;
     const NORMAL_MODE = 0;
     const NO_MODE = -1;
@@ -34,6 +34,7 @@ class User {
     private $activated;
     private $crypt_str;
     private $visible;
+    private $db;
 
     public function __construct($id, $name, $math_course, $math_teacher, $mail_adress, $mode, $activated, $crypt_str, $visible = true) {
         $db = Database::getConnection();
@@ -46,6 +47,7 @@ class User {
         $this->activated = $activated;
         $this->crypt_str = $db->real_escape_string($crypt_str);
         $this->visible = $visible;
+        $this->db = Database::getConnection();
     }
 
     public static function getFromArray($array) {
@@ -70,7 +72,7 @@ class User {
     }
 
     public static function getByName($name) {
-        $db = Database::getConnection();
+        global $db;
         $arr = explode(" ", $db->real_escape_string($name));
         $str = $arr[0];
         for ($i = 1; $i < count($arr) - 1; $i++) {
@@ -80,13 +82,23 @@ class User {
     }
 
     public static function getByID($id) {
-        $db = Database::getConnection();
+        global $db;
         return User::getFromMySQLResult($db->query("SELECT * FROM " . DB_PREFIX . "user WHERE id=" . intval($id)));
     }
 
     public static function getByEMailAdress($mail_adress) {
-        $db = Database::getConnection();
-        return User::getFromMySQLResult($db->query("SELECT * FROM " . DB_PREFIX . "user WHERE id=" . cleanInputText($mail_adress)));
+        global $db;
+        return User::getFromMySQLResult($db->query("SELECT * FROM " . DB_PREFIX . "user WHERE mail_adress=" . cleanInputText($mail_adress)));
+    }
+    
+    public static function getByMode($mode) {
+        global $db;
+        $res = $db->query("SELECT * FROM " . DB_PREFIX . "user WHERE mode=" . intval($mode));
+        $retarr = array();
+        while ($user = User::getFromMySQLResult($res)){
+            $retarr[] = $user;
+        }
+        return new UserArray($retarr);
     }
 
     /**
@@ -96,7 +108,7 @@ class User {
       }
      */
     public static function create($name, $math_course, $math_teacher, $mail_adress, $pwd, $mode = self::NORMAL_MODE, $activated = 0, $visible = 1) {
-        $db = Database::getConnection();
+        global $db;
         $name_arr = explode(' ', $db->real_escape_string($name));
         $str = $name_arr[0];
         for ($i = 1; $i < count($name_arr) - 1; $i++) {
@@ -104,7 +116,7 @@ class User {
         }
         $name_arr[0] = $str;
         $name_arr[1] = $name_arr[count($name_arr) - 1];
-        $math_course = $db->real_escape_string($math_course);
+        $math_course = intval(is_numeric($math_course) ? $math_course : substr($math_course, 1));
         $math_teacher = $db->real_escape_string($math_teacher);
         $mail_adress = $db->real_escape_string($mail_adress);
         $crypt_str = Auth::crypt($pwd);
@@ -112,21 +124,20 @@ class User {
         $activated = intval($activated);
         $visible = intval($visible);
         if (self::getByName($name) == null) {
-            $db->query('INSERT INTO ' . DB_PREFIX . "user(id, first_name, last_name, math_course, math_teacher, mail_adress, mode, activated, visible, crypt_str) VALUES(NULL, '$name_arr[0]', '$name_arr[1]', '$math_course', '$math_teacher', '$mail_adress', $mode, $activated, $visible, '$crypt_str')");
+            $db->query('INSERT INTO ' . DB_PREFIX . "user(id, first_name, last_name, math_course, math_teacher, mail_adress, mode, activated, visible, crypt_str) VALUES(NULL, '$name_arr[0]', '$name_arr[1]', $math_course, '$math_teacher', '$mail_adress', $mode, $activated, $visible, '$crypt_str')");
         } else {
             return false;
         }
     }
 
     public function updateDB() {
-        $db = Database::getConnection();
-        $db->query("UPDATE " . DB_PREFIX . "user SET
-		first_name='" . $db->real_escape_string($this->getFirstName()) . "' 
-		last_name='" . $db->real_escape_string($this->getLastName()) . "' 
-		math_course='" . $db->real_escape_string($this->getMathCourse()) . "' 
-		math_teacher='" . $db->real_escape_string($this->getMathTeacher()) . "'
-		mail_adress='" . $db->real_escape_string($this->getMailAdress()) . "' 
-		crypt_str='" . $db->real_escape_string($this->getCryptStr()) . "' 
+        $this->db->query("UPDATE " . DB_PREFIX . "user SET
+		first_name='" . $this->db->real_escape_string($this->getFirstName()) . "' 
+		last_name='" . $this->db->real_escape_string($this->getLastName()) . "' 
+		math_course='" . $this->db->real_escape_string($this->getMathCourse()) . "' 
+		math_teacher='" . $this->db->real_escape_string($this->getMathTeacher()) . "'
+		mail_adress='" . $this->db->real_escape_string($this->getMailAdress()) . "' 
+		crypt_str='" . $this->db->real_escape_string($this->getCryptStr()) . "' 
 		mode=" . intval($this->getMode()) . " 
 		activated=" . ($this->isActivated() ? 1 : 0) . " 
 		visible=" . ($this->isVisible() ? 1 : 0) . "
@@ -246,7 +257,7 @@ class User {
 
     public function setMode($mode) {
         $mode = intval($mode);
-        $this->mode = $mode > User::SUPERADMIN_MODE ? User::NORMAL_MODE : $mode;
+        $this->mode = $mode > User::ADMIN_MODE ? User::NORMAL_MODE : $mode;
     }
 
     public function setActivated($activated) {

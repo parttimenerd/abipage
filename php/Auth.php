@@ -129,11 +129,11 @@ class Auth {
     }
 
     public static function isSuperAdmin() {
-        return self::getUser() != null ? (self::$user->getMode() == User::SUPERADMIN_MODE) : false;
+        return self::getUser() != null ? (self::$user->getMode() == User::ADMIN_MODE) : false;
     }
 
     public static function isAdmin() {
-        return self::getUser() != null ? (self::$user->getMode() >= User::ADMIN_MODE) : false;
+        return self::getUser() != null ? (self::$user->getMode() >= User::MODERATOR_MODE) : false;
     }
 
     public static function isSameUser($user) {
