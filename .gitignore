@@ -168,3 +168,4 @@ uploads
 .DS_Store
 !/less/bootstrap/
 /build_js.bat
+/php/db_config.php
