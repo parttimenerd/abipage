@@ -128,7 +128,7 @@ class Auth {
         return self::getUser() != null ? self::$user->getID() : -1;
     }
 
-    public static function isSuperAdmin() {
+    public static function isModerator() {
         return self::getUser() != null ? (self::$user->getMode() == User::ADMIN_MODE) : false;
     }
 
@@ -143,6 +143,11 @@ class Auth {
 
     public static function isNotActivated() {
         return self::$user_not_activated;
+    }
+    
+    public static function isViewingResults(){
+        global $env, $store;
+        return $env->results_viewable && $store->result_mode_ud;
     }
 
 }

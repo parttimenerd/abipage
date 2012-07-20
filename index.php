@@ -30,10 +30,10 @@ if (!defined('DB_NAME')) {
         tpl_under_construction();
         exit;
     }
-    $superadmin_pages = array(
+    $admin_pages = array(
         array("preferences", "PreferencesHandler")
     );
-    $admin_pages = array(
+    $moderator_pages = array(
         array("usermanagement", "UserManagementHandler"),
         array('admin', 'AdminHandler'),
         array('teacherlist', 'TeacherListHandler'),
@@ -58,7 +58,7 @@ if (!defined('DB_NAME')) {
     if ($env->user_polls_open) {
         $pages = array_unshift($normal_pages, array('userpolls', 'UserPollsHandler'));
     }
-    if ($env->stats_open || Auth::isAdmin()) {
+    if ($env->stats_open || Auth::isModerator()) {
         $pages = array_unshift($normal_pages, array('stats', 'StatsHandler'));
     }
     //array_merge($env->stats_open ? $normal_pages : $admin_pages, array('stats(\/.*)?', 'StatsHandler'));
@@ -72,11 +72,11 @@ if (!defined('DB_NAME')) {
     $pages = $normal_pages;
     switch (Auth::getUserMode()) {
         case User::ADMIN_MODE:
-            $pages = array_merge($pages, $superadmin_pages);
-        case User::MODERATOR_MODE:
             $pages = array_merge($pages, $admin_pages);
+        case User::MODERATOR_MODE:
+            $pages = array_merge($pages, $moderator_pages);
     }
-    if (Auth::getUserMode() != User::NO_MODE || $env->open) {
+    if (Auth::getUserMode() != User::NO_MODE) {
         $site = new ToroApplication($pages);
     } else if (Auth::isNotActivated()) {
         $site = new ToroApplication('.*', 'WaitForActivationHandler');

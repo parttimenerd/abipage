@@ -49,6 +49,8 @@ function tpl_image_list($images, $page, $pages, $sort_str = "", $phrase = "", $a
 		</div>
 		<?php
         tpl_after();
+    } else {
+        PiwikHelper::echoJSTrackerCode();
     }
 }
 
@@ -99,7 +101,7 @@ function tpl_quote_list($quotes, $page, $pages, $sort_str, $phrase, $as_page = t
         tpl_write_quote_item();
     }
     foreach ($quotes as $quote) {
-        tpl_quote_item($quote["id"], $quote["person"], $quote["text"], $quote["userid"], $quote["time"], $quote["own_rating"], $quote["rating"], (!$quote["isanonymous"] || Auth::isAdmin()));
+        tpl_quote_item($quote["id"], $quote["person"], $quote["text"], $quote["userid"], $quote["time"], $quote["own_rating"], $quote["rating"], (!$quote["isanonymous"] || Auth::isModerator()));
     }
     ?>
     <script>
@@ -112,6 +114,8 @@ function tpl_quote_list($quotes, $page, $pages, $sort_str, $phrase, $as_page = t
     <?php
     if ($as_page) {
         tpl_after();
+    } else {
+        PiwikHelper::echoJSTrackerCode();
     }
 }
 
@@ -123,7 +127,9 @@ function tpl_write_quote_item() {
 	<?php
 	tpl_item_after_send_anonymous("Hinzufügen", "Anonym hinzufügen", "sendQuote(false)", "sendQuote(true)");
     tpl_add_js('var teacher_arr = ' . json_encode(TeacherList::getTeacherNameList()) . ';
-	$(".teacher_typeahead").typeahead({source: teacher_arr});');
+        $(".teacher_typeahead").ready(function(){
+            $(this).typeahead({source: teacher_arr});
+        });');
     //tpl_item_after();
 }
 
@@ -143,7 +149,7 @@ function tpl_rumor_list($rumors, $page, $pages, $sort_str, $phrase, $as_page = t
         tpl_write_rumor_item();
     }
     foreach ($rumors as $rumor) {
-        tpl_rumor_item($rumor["id"], $rumor["text"], $rumor["userid"], $rumor["time"], $rumor["own_rating"], $rumor["rating"], (!$rumor["isanonymous"] || Auth::isAdmin()));
+        tpl_rumor_item($rumor["id"], $rumor["text"], $rumor["userid"], $rumor["time"], $rumor["own_rating"], $rumor["rating"], (!$rumor["isanonymous"] || Auth::isModerator()));
     }
     ?>
     <script>
@@ -156,6 +162,8 @@ function tpl_rumor_list($rumors, $page, $pages, $sort_str, $phrase, $as_page = t
     <?php
     if ($as_page) {
         tpl_after();
+    } else {
+        PiwikHelper::echoJSTrackerCode();
     }
 }
 
@@ -178,11 +186,11 @@ function tpl_item_after_ruc($id, $time, $user, $own_rating, $avrating, $show_nam
     ?>
     </div>
 	<hr/>
-    <div class="item-footer <?php echo Auth::isAdmin() ? "deletable" : '' ?>">
+    <div class="item-footer <?php echo Auth::isModerator() ? "deletable" : '' ?>">
         <?php tpl_time_span($time) ?>
         <?php tpl_rating($id, $own_rating, $user, $avrating) ?>
         <?php tpl_user_span($show_name ? $user : null) ?>
-        <?php if (Auth::isAdmin()) tpl_item_delete_span($id) ?>
+        <?php if (Auth::isModerator()) tpl_item_delete_span($id) ?>
     </div>
     </div>
     <?php
@@ -213,54 +221,3 @@ function tpl_rating($id, $own, $senduser, $average_rating) {
 	</span>
     <?php
 }
-
-/*
-function tpl_page_back_forth($page, $pagecount, $url, $with_page_selector = false, $sort_str = "") {
-    ?>
-    <div class="page_back_forth">
-        <?php if ($page > 1) { ?>
-            <span class="<?php echo $with_page_selector ? "back_forth_wps" : "back_forth" ?> back_area">
-                <a href="<?php echo $url . '/' . ($page - 1) ?>" class="button back_area_button">← Vorherige Seite</a>
-            </span>
-            <?php
-        }
-        if ($sort_str == "") {
-            $sort_str = "time_desc";
-        }
-        if ($with_page_selector):
-            ?>
-            <span class="back_forth_wps page_selector_area">
-                <form method="GET" action="<?php echo $url ?>">
-                    <select style="display: inline;" name="page">
-                        <?php
-                        for ($i = 1; $i <= $pagecount; $i++) {
-                            echo '<option value="' . $i . '"' . ($i == $page ? ' selected="selected"' : '') . '>Seite ' . $i . '</option>' . "\n";
-                        }
-                        ?>
-                    </select> 
-                    <select style="display: inline;" name="sort">
-                        <?php
-                        $arr = array(
-                            "time_desc" => "↓Zeit",
-                            "time_asc" => "↑Zeit",
-                            "rating_desc" => "↓Bewertung",
-                            "rating_asc" => "↑Bewertung"
-                        );
-                        foreach ($arr as $key => $value) {
-                            echo '<option value="' . $key . '"' . ($key == $sort_str ? ' selected="selected"' : '') . '>' . $value . '</option>' . "\n";
-                        }
-                        ?>
-                    </select>
-                    <input type = "submit" value = "Gehe zu"/>
-                </form>
-            </span>
-        <?php endif ?>
-        ?>
-        <?php if ($page < $pagecount): ?>
-            <span class="<?php echo $with_page_selector ? "back_forth_wps" : "back_forth" ?> forth_area">
-                <a href="<?php echo $url . '/' . ($page + 1) ?>" class="button forth_area_button">Nächste Seite →</a>
-            </span>
-        <?php endif ?>
-    </div>
-    <?php
-}*/

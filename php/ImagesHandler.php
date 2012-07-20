@@ -28,6 +28,9 @@ class ImagesHandler extends RatableUserContentHandler {
         if (!empty($_FILES["uploaded_file"]) && ($_FILES['uploaded_file']['error'] == 0) && isset($_POST["description"])) {
             $id = $this->list->addImage($_POST["description"]);
             $env->uploadImage($id);
+            if (isset($_POST["send_anonymous"]))
+                PiwikHelper::addTrackGoalJS("Anonymous contribution");
+            PiwikHelper::echoTrackGoalJS("Image uploaded", $_POST["description"]);
             return true;
         }
         return false;

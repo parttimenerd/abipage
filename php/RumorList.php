@@ -32,6 +32,7 @@ class RumorList extends RatableUserContentList {
             $time = time();
         }
         $text = cleanInputText($text, $this->db);
+        PiwikHelper::addTrackGoalJS("Rumor written");
         $this->db->query("INSERT INTO " . $this->table . "(id, text, userid, isanonymous, time, rating, response_to) VALUES(NULL, '" . $text . "', " . $senduser->getID() . ", " . ($anonymous ? 1 : 0) . ", " . intval($time) . ", 0, " . intval($response_to) . ")") or die($this->db->error);
         $env->addAction($this->db->insert_id, $senduser->getName(), "add_rumor");
     }

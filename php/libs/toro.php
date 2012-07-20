@@ -56,6 +56,7 @@ class ToroApplication {
     }
 
     public function serve() {
+        global $env;
         ToroHook::fire('before_request');
 
         $request_method = strtolower($_SERVER['REQUEST_METHOD']);
@@ -105,6 +106,9 @@ class ToroApplication {
                 $request_method .= '_ipad';
             } else if ($this->mobile_request() && method_exists($discovered_handler, $request_method . '_mobile')) {
                 $request_method .= '_mobile';
+            } else if ($request_method == "get" && (($env->results_viewable && str_replace('/result', '', $method_arguments) != $method_arguments) || Auth::isViewingResults())){
+                $method_arguments = str_replace('/result', '', $method_arguments);
+                $request_method .= "_result";
             }
 
             ToroHook::fire('before_handler');

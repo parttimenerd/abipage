@@ -19,7 +19,7 @@
 
 class UserHandler extends ToroHandler {
 
-    public function get($slug = "") {
+     public function get($slug = "") {
         global $env;
         $arr = explode('/', substr($slug, 1));
         $user = $this->getUserFromSlug($slug);
@@ -33,6 +33,16 @@ class UserHandler extends ToroHandler {
             } else {
                 tpl_user($user);
             }
+        }
+    }
+    
+    public function get_result($slug = "") {
+        global $env;
+        $user = $this->getUserFromSlug($slug);
+        if (!$user) {
+            tpl_userlist($env->getUserNames());
+        } else {
+            tpl_user_page($user);
         }
     }
 
@@ -55,7 +65,7 @@ class UserHandler extends ToroHandler {
         $arr = explode('/', substr($slug, 1));
         $user = $this->getUserFromSlug($slug);
         if (count($arr) == 2 && $arr[1] == "preferences" && ($user->getID() == Auth::getUserID() || Auth::isAdmin()) &&
-                ($user->getID() == Auth::getUserID() || Auth::isSuperAdmin())) {
+                ($user->getID() == Auth::getUserID() || Auth::isAdmin())) {
             if (isset($_POST["name"]) && $_POST["name"] != "") {
                 $user->setName($_POST["name"]);
             }
@@ -78,17 +88,22 @@ class UserHandler extends ToroHandler {
             }
             $user->updateDB();
             Auth::login($_POST["name"], $_POST["password"]);
+            $this->get($slug);
         } else if (isset($_POST["id"]) && $user->getID() == Auth::getUserID()) {
             if ($_POST["action"] == "notify") {
                 $user->notifyUserComment($_POST["id"]);
+                echo $_POST["id"] . "|notified";
             } else {
                 $user->unnotifyUserComment($_POST["id"]);
+                echo $_POST["id"] . "|unnotified";
             }
         } else if (isset($_POST["text"]) && $_POST["text"] != "" &&
                 $user->getID() != Auth::getUserID()) {
-            $user->postUserComment($_POST["text"], isset($_POST["isanonymous"]));
+            $user->postUserComment($_POST["text"], isset($_POST["send_anonymous"]));
+            if (isset($_POST["send_anonymous"]))
+                PiwikHelper::addTrackGoalJS("Anonymous contribution");
+            PiwikHelper::addTrackGoalJS("User commented", $_POST["text"]);
         }
-        $this->get($slug);
     }
 
 }

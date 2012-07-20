@@ -31,7 +31,7 @@ class TeacherListHandler extends ToroHandler {
                     if (isset($_POST["edit"]) && isset($_POST["last_name" . $key]) &&
                             isset($_POST["first_name" . $key]) && isset($_POST["ismale" . $key])) {
                         TeacherList::edit($_POST[$key], $_POST["last_name" . $key], $_POST["ismale" . $key], $_POST["first_name" . $key]);
-                    } else if (isset($_POST["delete"]) && Auth::isSuperAdmin()) {
+                    } else if (isset($_POST["delete"]) && Auth::isModerator()) {
                         TeacherList::delete($key);
                     }
                 }

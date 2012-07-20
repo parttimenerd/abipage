@@ -19,8 +19,8 @@
 $js = "";
 $has_sidebar = false;
 
-function tpl_before($class = null, $title = null, $subtitle = null, $subnav = null) {
-    global $env;
+function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null) {
+    global $env, $store;
     $usermenu = null;
     if (Auth::getUserMode() != User::NO_MODE || $env->open) {
         $menus = array(
@@ -33,7 +33,7 @@ function tpl_before($class = null, $title = null, $subtitle = null, $subnav = nu
             $menus["userpolls"] = array("Umfragen", $env->userpolls_subtitle);
         }
         $menus["meta"] = array("head" => array("Meta", ""), "dropdown" => array());
-        if ($env->stats_open || Auth::isAdmin()) {
+        if ($env->stats_open || Auth::isModerator()) {
             $meta_dropdown["stats"] = array("Statistiken", $env->stats_subtitle);
         }
         $userapp = array();
@@ -50,14 +50,14 @@ function tpl_before($class = null, $title = null, $subtitle = null, $subnav = nu
             if ($env->user_characteristics_editable) {
                 $userapp["user_characteristics"] = array("Steckbrief", $env->uc_subtitle);
             }
-            if (Auth::isAdmin()) {
+            if (Auth::isModerator()) {
                 $meta_dropdown["usermanagement"] = array("Benutzerverwaltung", $env->usermanagement_subtitle);
                 $meta_dropdown["teacherlist"] = array("Lehrerliste", $env->teacherlist_subtitle);
                 $meta_dropdown["admin"] = array("Dashboard", $env->dashboard_subtitle);
                 $meta_dropdown["uc_management"] = array("Steckbriefverwaltung", $env->uc_management_subtitle);
                 $meta_dropdown["up_management"] = array("Umfragenverwaltung", $env->up_management_subtitle);
             }
-            if (Auth::isSuperAdmin()) {
+            if (Auth::isAdmin()) {
                 $meta_dropdown["preferences"] = array("Einstellungen", $env->preferences_subtitle);
             }
             $meta_dropdown["terms_of_use"] = array("Nutzungsbedigungen", $env->terms_of_use_subtitle);
@@ -76,7 +76,7 @@ function tpl_before($class = null, $title = null, $subtitle = null, $subnav = nu
             "terms_of_use" => array("Nutzungsbedigungen", $env->terms_of_use_subtitle)
         );
     }
-    if ($class != null) {
+    if ($class != "") {
         if (isset($menus[$class])) {
             $arr = $menus[$class];
         } else if ($class == "user") {
@@ -88,12 +88,13 @@ function tpl_before($class = null, $title = null, $subtitle = null, $subnav = nu
         } else {
             $arr = array("", "");
         }
-        if ($title == null) {
+        if ($title == "") {
             $title = $arr[0];
         }
-        if ($subtitle == null) {
+        if ($subtitle == "") {
             $subtitle = $arr[1];
         }
+        PiwikHelper::addCustomVariableJS(3, "Page name", $class, true);
     }
     ?>
     <!doctype html>
@@ -157,6 +158,11 @@ function tpl_before($class = null, $title = null, $subtitle = null, $subnav = nu
                                             <?php foreach ($dropdown as $key2 => $value2): ?>
                                                 <li><a href="<?php echo tpl_url($key2) ?>"><?php echo $value2[0] ?></a></li>
                                             <?php endforeach ?>
+                                            <?php if ($key == "user" && $env->results_viewable): ?>
+                                                <li>
+                                                    <input id="result_mode" type="checkbox" onclick="setResultMode($(this).is(':checked'))"<?= $store->result_mode_ud ? 'checked="checked"' : ""?>>Ergebnisse anzeigen</input>
+                                                </li>
+                                            <?php endif; ?>
                                         </ul>
                                     </li>
                                 <?php
@@ -205,19 +211,19 @@ function tpl_before($class = null, $title = null, $subtitle = null, $subnav = nu
         </a>
     </div>
     </div><!-- /container -->
-    <?php if ($env->has_piwik) echo $env->piwik_tracking_code ?>
     <!-- Le javascript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
+    <?php if ($env->has_piwik) PiwikHelper::echoJSTrackerCode() ?>
+        <script>
+            var ajax_url = "<?php echo tpl_url("ajax") ?>";
+        var has_sidebar = <?php echo $has_sidebar ? "true" : "false" ?>;
+    <?php echo $js ?>
+    </script>
     <script src="<?php echo tpl_url("js/libs/bootstrap.min.js") ?>"></script>
     <script src="<?php echo tpl_url("js/plugins.js") ?>"></script>
     <script src="<?php echo tpl_url("js/script.js") ?>"></script>
     <script src="<?php echo tpl_url("js/application.js") ?>"></script>
-
-    <script>
-        piwik_custom_variable(1, "user_mode", "<?php echo tpl_usermode_to_text(Auth::getUserMode()) ?>", "visit");
-    <?php echo $js ?>
-    </script>
     <div id="side_bar_helper_div"/>
     <div id="more_helper_div"/>
     </body>
@@ -241,9 +247,6 @@ function tpl_no_subnav() {
             function tpl_subnav($url_part, $page, $pagecount, $phrase) {
                 global $has_sidebar, $env;
                 ?>
-                <script>
-                    var sidebar_ajax_url = "<?php echo tpl_url("ajax") ?>";
-                </script>
                 <div class="subnav">
                     <div class="nav nav-pills">
                         <input type="text" name="phrase" id="search_field" placeholder="Suche" value="<?php echo $phrase ?>" onkeypress="if (event.keyCode == 13) search($(this).val())"/>

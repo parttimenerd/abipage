@@ -46,7 +46,7 @@ function tpl_teacherlist($teacherarr) {
     <div class="item-footer">
         Ausgewählte Lehrer 
         <button class="btn" type="submit" name="edit">Ändern"</button>
-        <?php if (Auth::isSuperAdmin()): ?>
+        <?php if (Auth::isAdmin()): ?>
             <button class="btn" type="submit" name="delete">Löschen</button>
         <?php endif ?>
     </div>

@@ -12,10 +12,13 @@ class KeyValueStore {
         $res = $db->query("SELECT `key`, value, userid FROM " . DB_PREFIX . "keyvaluestore WHERE userid=" . Auth::getUserID() . " OR userid=0") or die($db->error);
         if ($res != null) {
             while ($arr = $res->fetch_array()) {
+                $value = $arr["value"];
+                if (is_bool($value))
+                    $value = $value == "true";
                 if ($arr["userid"] != 0) {
-                    $this->__dic_ud[$arr["key"]] = $arr["value"];
+                    $this->__dic_ud[$arr["key"]] = $value;
                 } else {
-                    $this->__dic[$arr["key"]] = $arr["value"];
+                    $this->__dic[$arr["key"]] = $value;
                 }
             }
         }

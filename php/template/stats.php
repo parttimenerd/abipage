@@ -21,7 +21,7 @@ function tpl_stats_page($teacher_with_quote_rating_and_count) {
     $tarr = $teacher_with_quote_rating_and_count;
     tpl_item_before("Lehrer", "", "stats teacher_stats");
     ?>
-    <?php if (Auth::isAdmin()): ?>
+    <?php if (Auth::isModerator()): ?>
         <a href="teacherlist">Liste verändern</a><br/>
     <?php endif ?>
     <table class="stats teacher_table">

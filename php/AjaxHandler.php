@@ -27,6 +27,19 @@ class AjaxHandler extends ToroHandler {
                 if (isset($_GET["last_id"]) && $store->last_action_id > intval($_GET["last_id"])) {
                     tpl_actions($env->getLastActions($_GET["last_id"]));
                 }
+                break;
+        }
+    }
+    
+    public function post($slug = "") {
+        global $env, $store;
+        $slug = $slug != "" ? substr($slug, 1) : "";
+        switch ($slug) {
+            case "result_mode":
+                if (isset($_POST["value"]) && $env->results_viewable) {
+                    $store->result_mode_ud = $_POST["value"] == "true";
+                }
+                break;
         }
     }
 

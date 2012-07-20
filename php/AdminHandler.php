@@ -21,7 +21,7 @@ class AdminHandler extends ToroHandler {
 
     public function get() {
         global $env;
-        if (Auth::isAdmin()) {
+        if (Auth::isModerator()) {
             tpl_admin($env->getNotActivatedUsers(), $env->getNotReviewedUserComments());
         } else {
             tpl_404();
@@ -29,7 +29,7 @@ class AdminHandler extends ToroHandler {
     }
 
     public function post() {
-        if (Auth::isAdmin()) {
+        if (Auth::isModerator()) {
             if (!empty($_POST)) {
                 if (isset($_POST["usermanagement"])) {
                     $handler = new UserManagementHandler();

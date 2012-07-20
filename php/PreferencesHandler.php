@@ -94,15 +94,18 @@ Das Copyright an den Beiträgen geht mit dem Hochladen bzw. Schreiben auf dieser
             "upload_path" => array("default" => "uploads", "label" => "Order in welchem die hochgeladenen Bilder gespeichert werden"),
             "items_per_page" => array("default" => "30", "label" => "Angezeigte Einträge pro Seite"),
             "images_per_page" => array("default" => "5", "label" => "Angezeigte Bilder pro Seite"),
-            "has_piwik" => array("default" => "false", "label" => "Wird Piwik als Webanalysis Werkzeug verwendet?", "type" => "checkbox"),
-            "piwik_tracking_code" => array("default" => "", "label" => "Piwik Tracking Code"),
+            "has_piwik" => array("default" => "false", "label" => "Wird Piwik als Webanalysis Werkzeug verwendet?
+Wenn ja, sollte piwik installiert sein und diese Website hinzugefügt worden sein.", "type" => "checkbox"),
+            "piwik_site_id" => array("default" => "", "label" => "Piwik-Seiten-ID"),
+            "piwik_url" => array("default" => URL . "/piwik/", "label" => "Piwik URL"),
+            "piwik_token_auth" => array("default" => "", "label" => "Piwik token_auth-Wert, findbar im API Menu der Piwik-Installation dort: '&token_auth=[token_auth-Wert]'"),
             "footer_appendix" => array("default" => "", "label" => "Code, der nach dem Footer eingefügt wird", "type" => "textarea"),
             "show_userpolls" => array("default" => "false", "label" => "Wird die Umfragenseite angezeigt?", "type" => "checkbox"),
             "show_usercharacteristics" => array("default" => "false", "label" => "Wird die Steckbriefseite angezeigt?", "type" => "checkbox"),
             "news_enabled" => array("default" => "false", "label" => "Ist die einfache Nachrichtenseite aktiviert?", "type" => "checkbox"),
             "showed_actions" => array("default" => "12", "label" => "Angezeigte Aktionen in der Seitenleiste"),
-            "user_polls_result_length" => array("default" => "3", "label" => "Anzahl der Personen die pro Umfrage in der Ergebnisliste angezeigt werden"),
-            "open" => array("default" => "false", "label" => "Ist die Seite offen nach außen?", "type" => "checkbox"),
+            "userpolls_result_length" => array("default" => "3", "label" => "Anzahl der Personen die pro Umfrage in der Ergebnisliste angezeigt werden"),
+            "results_viewable" => array("default" => "false", "label" => "Kann sich ein Benutzer (mindestens vom Rang eines Editors), die Ergebnisse anzeigen lassen", "type" => "checkbox"),
             "stats_open" => array("default" => "false", "label" => "Ist die Statitikseite auch für normale Benutzer sichtbar?", "type" => "checkbox"),
             "images_editable" => array("default" => "true", "label" => "Können Bilder hinzugefügt werden?", "type" => "checkbox"),
             "quotes_editable" => array("default" => "true", "label" => "Können Zitate hinzugefügt werden?", "type" => "checkbox"),
@@ -111,7 +114,6 @@ Das Copyright an den Beiträgen geht mit dem Hochladen bzw. Schreiben auf dieser
             "user_characteristics_editable" => array("default" => "false", "label" => "Kann der eigene Steckbrief bearbeitet werden?", "type" => "checkbox"),
             "user_polls_open" => array("default" => "false", "label" => "Ist die Umfragenseite sichtbar?", "type" => "checkbox"),
             "user_polls_editable" => array("default" => "false", "label" => "Ist die Umfragenbearbeitung möglich (wenn nicht werden die Ergebnisse angezeigt)?", "type" => "checkbox"),
-            "user_page_open" => array("default" => "false", "label" => "Werden die Benutzerseiten im Abizeitungsstil angezeigt?")
         );
     }
 
@@ -129,7 +131,7 @@ Das Copyright an den Beiträgen geht mit dem Hochladen bzw. Schreiben auf dieser
 
     public function get() {
         global $env;
-        if (Auth::isSuperAdmin() || $env == null) {
+        if (Auth::isAdmin() || $env == null) {
             $this->loadDefaultVals();
             tpl_preferences($this->pref_vals);
         } else {
@@ -138,7 +140,7 @@ Das Copyright an den Beiträgen geht mit dem Hochladen bzw. Schreiben auf dieser
     }
 
     public function post() {
-        if (Auth::isSuperAdmin()) {
+        if (Auth::isAdmin()) {
             foreach ($this->pref_vals as $key => $value) {
                 if (isset($value["type"]) && $value["type"] == "checkbox") {
                     $this->pref_vals[$key]["default"] = isset($_POST[$key]) ? "true" : "false";
@@ -150,6 +152,9 @@ Das Copyright an den Beiträgen geht mit dem Hochladen bzw. Schreiben auf dieser
             global $env;
             $env = new Environment();
             $this->get();
+            if ($env->has_piwik){
+                PiwikHelper::setup();
+            }
         } else {
             tpl_404();
         }
@@ -172,7 +177,11 @@ Das Copyright an den Beiträgen geht mit dem Hochladen bzw. Schreiben auf dieser
         $res = $db->query("SELECT * FROM " . DB_PREFIX . "preferences");
         while ($arr = $res->fetch_array()) {
             if ($arr["value"] != "") {
-                $this->pref_vals[$arr["key"]]["default"] = $arr["value"];
+                if (isset($this->pref_vals[$arr["key"]]["type"]) && $this->pref_vals[$arr["key"]]["type"] == "checkbox"){
+                    $this->pref_vals[$arr["key"]]["default"] = $arr["value"] == "true";
+                } else {
+                    $this->pref_vals[$arr["key"]]["default"] = $arr["value"];
+                }
             }
         }
     }

@@ -38,15 +38,21 @@ function rating(id, rating){
 
 function deleteItem(id){
     if (confirm("Wollen sie diesen Beitrag wirklich löschen?")){
+        var func = function(html){
+            if (typeof(html) != "string")
+                html = html.responseText;
+            if (html != ""){
+                var arr = html.split("|", 2);
+                $("#" + arr[0]).remove();
+                $(body).append(arr[1]);
+            }
+        }
         $.ajax({
             type: "POST",
             url: rating_url2,
             data: "delete=0&id=" + id,
-            success: function(html){
-                if (html != ""){
-                    $("#" + html).remove();
-                }
-            }
+            success: func,
+            error: func
         });
     }
 }
@@ -144,13 +150,6 @@ function search(_phrase){
     }
 }
 
-function piwik_custom_variable(index, key, value, scope){
-    if (window.piwikTracker !== undefined){
-        piwikTracker.setCustomVariable(index, key, value, scope);
-        piwikTracker.trackPageView();
-    }
-}
-
 if (window.max_page !== undefined){
     $(window).bottom({
         proximity: 0.2
@@ -174,7 +173,7 @@ function updateActionsSidebar(){
         }
         $.ajax({
             type: "GET",
-            url: sidebar_ajax_url + "/last_actions",
+            url: ajax_url + "/last_actions",
             data: $.param({
                 'last_id': last_action_id, 
             }),
@@ -187,7 +186,7 @@ function updateActionsSidebar(){
 
 var interval = 10000; //in ms
 
-if (window.sidebar_ajax_url !== undefined)
+if (has_sidebar)
     setInterval("updateActionsSidebar()", interval);
 
 /*function loadNew(){
@@ -410,3 +409,59 @@ function scrollToTop(){
 }
 
 //$("input[title!='']").tooltip({placement: 'left'});
+
+function userCommentNotify(id){
+    var func = function(html){
+        if (typeof(html) != "string")
+            html = html.responseText;
+        if (html != ""){
+            var arr = html.split("|", 2);
+            var id = arr[0];
+            if (arr[1] == "notified"){
+                $("#" + id).addClass("notified_as_bad");
+                $("#" + id + " .notify").html("+");
+            } else if (arr[1] == "unnotified"){
+                $("#" + id).removeClass("notified_as_bad");
+                $("#" + id + " .notify").html("-");
+            }
+        }
+    }
+    var action = $("#" + id).hasClass("notified_as_bad") ? "notify" : "unnotify"; 
+    $.ajax({
+        type: "POST",
+        url: rating_url2,
+        data: $.param({
+            action: action, 
+            id: id
+        }),
+        success: func,
+        error: func
+    });
+}
+
+function sendUserComment(is_anonymous){
+    var data = {
+        'text': $("#textarea").val(),
+    };
+    if (is_anonymous){
+        data['send_anonymous'] = '';
+    } else {
+        data['send'] = '';
+    }
+    is_loading = true;
+    $.ajax({
+        type: "POST",
+        url: "",
+        data: $.param(data),
+        success: func,
+        error: func
+    });
+}
+
+function setResultMode(view_results){
+    $.ajax({
+        type: "POST",
+        url: ajax_url + "/result_mode",
+        data: $.param({value: view_results})
+    });
+}

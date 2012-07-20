@@ -26,6 +26,9 @@ class QuotesHandler extends RatableUserContentHandler {
     public function post_impl() {
         if (issetAndNotEmptyArr(array("person", "text"), $_POST)) {
             $this->list->addQuote($_POST["person"], $_POST["text"], isset($_POST["send_anonymous"]));
+            if (isset($_POST["send_anonymous"]))
+                PiwikHelper::addTrackGoalJS("Anonymous contribution");
+            PiwikHelper::addTrackGoalJS("Quote written", $_POST["person"] . $_POST["text"]);
             return true;
         }
         return false;

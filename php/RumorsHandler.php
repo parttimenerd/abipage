@@ -26,14 +26,20 @@ class RumorsHandler extends RatableUserContentHandler {
     public function post_impl() {
         if (issetAndNotEmptyArr(array("text"), $_POST)) {
             $this->list->addRumor($_POST["text"], isset($_POST["send_anonymous"]));
+            if (isset($_POST["send_anonymous"]))
+                PiwikHelper::addTrackGoalJS("Anonymous contribution");
+            PiwikHelper::addTrackGoalJS("Rumor written", $_POST["text"]);
             return true;
         }
         return false;
     }
 
-    public function processPhraseImpl($phrase) {
+    public
+
+    function processPhraseImpl($phrase) {
         $phrase = cleanInputText($phrase);
         $this->list->appendToWhereApp(" AND (MATCH(text) AGAINST('" . $phrase . "') OR text LIKE '%" . $phrase . "%')");
     }
 
 }
+

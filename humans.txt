@@ -11,10 +11,13 @@
 /* THANKS */
   The Noun Project (thenounproject.com): for their awesome icons
   Julian Quast (julianquast.de): for the idea to build this project
+  Ulrich Stemmermann (stemmermann.info): for being the reason why I began to learn php and for bearing me the last to years in the computer science course
 
 /* SITE */
+  Last update: 2012/07/19
   Standards: HTML5, CSS3, ECMAScript 5, PHP 5
   Components: Twitter Bootstrap, HTML5 Boilerplate, Modernizr, PHP Markdown, ToroPHP, jQuery, TableSorter, Chocolat, Color picker, jQuery.bottom, Icon by The Noun Project
+  Doctype: HTML5
   Software: Notepad++, Netbeans, Firefox, XAMPP
 
 

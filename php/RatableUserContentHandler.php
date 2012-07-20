@@ -53,13 +53,22 @@ class RatableUserContentHandler extends ToroHandler {
         call_user_func($this->tpl_list_func_name, $arr["items"], $arr["page"], $this->list->getPageCount(), ($time_sort ? "time" : "rating") . '_' . ($sort_desc ? "desc" : "asc"), $phrase);
     }
 
+    public function get_result($slug = "") {
+        $_GET["sort"] = "rating_desc";
+        $this->get($slug);
+    }
+
     public function post() {
         global $env;
         if (isset($_POST["rating"])) {
             echo $this->list->rate(intval($_POST["rating"]));
-        } else if (isset($_POST["delete"]) && Auth::isAdmin() && isset($_POST["id"])) {
+            PiwikHelper::addJSTrackerCodeLine("Item rated");
+            echo PiwikHelper::echoJSTrackerCode();
+        } else if (isset($_POST["delete"]) && Auth::isModerator() && isset($_POST["id"])) {
             if ($this->list->deleteItem(intval($_POST["id"]))) {
-                echo intval($_POST["id"]);
+                PiwikHelper::addJSTrackerCodeLine("Item deleted");
+                echo intval($_POST["id"]) . '|';
+                PiwikHelper::echoJSTrackerCode();
             }
         } else if (isset($_POST["send"]) || !empty($_FILES["uploaded_file"]) || isset($_POST["send_anonymous"])) {
             if ($this->post_impl()) {

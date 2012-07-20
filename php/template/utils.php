@@ -66,7 +66,7 @@ function tpl_get_user_subtitle($user) {
     if ($user->getMathTeacher() != "") {
         $html .= ($html != "" ? "; " : "") . "Mathelehrer: " . $user->getMathTeacher();
     }
-    if (Auth::isAdmin()) {
+    if (Auth::isModerator()) {
         $html .= ($html != "" ? "; " : "") . tpl_usermode_to_text($user->getMode());
     }
     return $html;
