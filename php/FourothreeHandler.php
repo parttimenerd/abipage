@@ -17,18 +17,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-function tpl_404() {
-    global $env;
-    tpl_before(null, "Seite nicht gefunden", $env->fourofour_subtitle);
-    tpl_item_before("", "", "container");
-    ?>
-    <p>Entschuldigung, aber die Seite die sie versucht haben anzuschauen existiert nicht.</p>
-    <p>Es scheint, das dass ein Ergebnis von einem der folgenden Punkte ist:</p>
-    <ul>
-        <li>eine falsch eingegebene Adresse</li>
-        <li>ein nicht mehr aktueller Link</li>
-    </ul>
-    <?php
-    tpl_item_after();
-    tpl_after();
+/**
+ * Description of FourothreeHandler
+ *
+ * @author Johannes
+ */
+class FourothreeHandler {
+    
+    public function get($slug){
+        tpl_403();
+    }
+    
+    public function post($slug){
+        tpl_403();
+    }
 }
+
+?>

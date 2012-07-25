@@ -30,10 +30,10 @@ function tpl_teacherlist($teacherarr) {
         <?php
         foreach ($teacherarr as $teacher) {
             echo '<tr>';
-            echo '<td><input type="checkbox" key="' . $teacher["id"] . '" value="' . $teacher["id"] . '"/></td>';
-            echo '<td><input type="text" key="first_name' . $teacher["id"] . '" value="' . $teacher["first_name"] . '"/></td>';
-            echo '<td><input type="text" key="last_name' . $teacher["id"] . '" value="' . $teacher["last_name"] . '"/></td>';
-            echo '<td><select style="display: inline;" name="sex' . $teacher["id"] . '">
+            echo '<td><input type="checkbox" name="' . $teacher["id"] . '" value="' . $teacher["id"] . '"/></td>';
+            echo '<td><input type="text" name="' . $teacher["id"] . 'first_name" value="' . $teacher["first_name"] . '"/></td>';
+            echo '<td><input type="text" name="' . $teacher["id"] . 'last_name" value="' . $teacher["last_name"] . '"/></td>';
+            echo '<td><select style="display: inline;" name="' . $teacher["id"] . 'sex">
                 <option value="1"' . ($teacher["ismale"] ? ' selected="selected"' : '') . '>männlich</option>
                 <option value="0"' . (!$teacher["ismale"] ? ' selected="selected"' : '') . '>weiblich</option>
             </select></td>';
@@ -45,7 +45,7 @@ function tpl_teacherlist($teacherarr) {
     <hr/>
     <div class="item-footer">
         Ausgewählte Lehrer 
-        <button class="btn" type="submit" name="edit">Ändern"</button>
+        <button class="btn" type="submit" name="edit">Ändern</button>
         <?php if (Auth::isAdmin()): ?>
             <button class="btn" type="submit" name="delete">Löschen</button>
         <?php endif ?>

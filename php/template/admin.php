@@ -62,18 +62,20 @@ function tpl_admin($userarr, $comments) {
                     <td><input type="checkbox" value="true" name="<?php echo $comment["id"] ?>"/></td>
                     <td><?php echo $comment["id"] ?></td>
                     <td><?php echo $comment["text"] ?></td>
-                    <td><?php tpl_userlink($comment["commented_user"]) ?></td>
-                    <td><?php tpl_userlink($comment["commenting_user"]) ?></td>
-                    <td><?php tpl_time($comment["time"]) ?></td>
+                    <td><?php tpl_userlink($comment["commented_userid"]) ?></td>
+                    <td><?php tpl_userlink($comment["commenting_userid"]) ?></td>
+                    <td><?php tpl_time_span($comment["time"]) ?></td>
                 </tr>
             <?php endforeach ?>
         </table>
         Ausgewählte Kommentare 
-        <button class="btn" type="submit" name="review">Freigeben</button>
+        <button class="btn" type="submit" name="review">Freischalten</button>
         <button class="btn" type="submit" name="delete">Löschen</button>
     </form>
     <script>
-        $("table").tablesorter();
+        $("table").ready(function(){
+            $("table").tablesorter();
+        });
     </script>
     <?php
     tpl_item_after();

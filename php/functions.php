@@ -38,6 +38,9 @@ function formatInputText($text /* , $allow_html = false */) {
 //        }
 //        $text = $htmlpurifier->purify($text);
 //    } else {
+    $arr = array("\'" => "&apos;", '\"' => "&quot;");
+    foreach ($arr as $search => $replacement)
+        $text = str_replace($search, $replacement, $text);
     $text = strip_tags($text);
 //    }
     if (strlen($text < 20000)) {
@@ -49,9 +52,8 @@ function formatInputText($text /* , $allow_html = false */) {
 
 function formatPostArray() {
     $arr = array();
-    foreach ($_POST as $key => $value) {
+    foreach ($_POST as $key => $value)
         $arr[$key] = formatInputText($value);
-    }
     $_POST = $arr;
     return $arr;
 }
@@ -64,19 +66,10 @@ function cleanInputText($input, $db = null) {
 }
 
 function formatText($text) {
-    return str_replace("\n", "<br/>", Markdown($text));
-}
-
-function sendMail($to, $topic, $text) {
-    global $env;
-    mail($to, Markdown($topic), Markdown($text), "From: " . $env->title . "<info@" . $_SERVER['HTTP_HOST'] . ">\r\n"
-            . "X-Mailer: PHP/" . phpversion());
-}
-
-function sendAdminMail($topic, $text){
-    foreach (User::getByMode(User::ADMIN_MODE) as $user){
-        sendMail($user->getMailAdress(), $topic, $text);
-    }
+    $arr = array("\'" => "&apos;", '\"' => "&quot;");
+    foreach ($arr as $search => $replacement)
+        $text = str_replace($search, $replacement, $text);
+    return Markdown($text);
 }
 
 function register_user_in_forum($user, $password) {
@@ -84,7 +77,8 @@ function register_user_in_forum($user, $password) {
     if ($user != null && $env->has_forum) {
         require_once($env->forum_path . '/SSI.php');
         $regOptions = array(
-            'interface' => 'guest',
+            'is_guest' => 'true',
+            'interface' => 'admin',
             'username' => $user->getName(),
             'email' => $user->getMailAdress(),
             'password' => $password,
@@ -94,10 +88,11 @@ function register_user_in_forum($user, $password) {
             'check_email_ban' => false,
             'send_welcome_email' => true,
             'require' => false,
-            'memberGroup' => false,
+            'memberGroup' => 0,
         );
         require_once($env->main_dir . '/' . $env->forum_path . '/Sources/Subs-Members.php');
         registerMember($regOptions);
+        var_dump("Yeah");
     }
 }
 
@@ -203,6 +198,6 @@ function resizeImage($newWidth, $originalFile, $targetFile = "") {
     }
     $ext_target = pathinfo($targetFile, PATHINFO_EXTENSION);
     $func = "image" . $ext_target;
-    $func($tmp, $targetFile, $ext_target != "png" ? $env->pic_quality : round(100 - $env->pic_quality / 10));
+    $func($tmp, $targetFile, $ext_target != "png" ? $env->pic_quality : floor((100 - $env->pic_quality) / 10));
     return true;
 }

@@ -28,27 +28,27 @@ class PreferencesHandler extends ToroHandler {
             "title_sep" => array("default" => " | ", "label" => "Seitentitelteiler"),
             "subtitle" => array("default" => "Abizeitungsseite", "label" => "Untertitel/Slogan"),
             "favicon" => array("default" => "favicon.ico", "label" => "Favicon der Seite"),
-            "is_under_construction" => array("default" => "false", "label" => "Ist die Seite gerade Watungsmaßnahmen unterzogen?"),
+            "is_under_construction" => array("default" => "false", "label" => "Ist die Seite gerade Watungsmaßnahmen unterzogen?", "type" => "checkbox"),
             "fourothree_subtitle" => array("default" => '"To protect those who are not able to protect themselves is a duty which every one owes to society." - Lord Macnaghten', "label" => "403-Seite-Untertitel"),
             "fourofour_subtitle" => array("default" => '"Alles auf Erden lässt sich finden, wenn man nur zu suchen sich nicht verdrießen lässt." - Philemon, Fragmente', "label" => "404-Seite-Untertitel"),
             "images_subtitle" => array("default" => "Schöne, witzige oder sonst wie interessante Bilder", "label" => "Bilderseite-Untertitel"),
             "quotes_subtitle" => array("default" => "Schöne, komische oder sonstwie erwähnenswerte Zitate von Lehrern", "label" => "Zitateseite-Untertitel"),
             "rumors_subtitle" => array("default" => "Gerüchte, Halbwahrheiten und pointierte Fakten", "label" => "Stimmt es...-Seite-Untertitel"),
-            "userall_subtitle" => array("default" => '"We must not contradict, but instruct him that contradicts us; for a madman is not cured by another running mad also." - Antisthenes.', "label" => "Schülerlistemseite-Untertitel"),
+            "userall_subtitle" => array("default" => '"We must not contradict, but instruct him that contradicts us; for a madman is not cured by another running mad also." - Antisthenes', "label" => "Schülerlistemseite-Untertitel"),
             "userpolls_subtitle" => array("default" => 'Umfragen zu den wirklich wichtigen Themen des Schulalltags', "label" => "Umfragenseite-Untertitel"),
             "stats_subtitle" => array("default" => '"Musik ist die versteckte arithmetische Tätigkeit der Seele, die sich nicht dessen bewußt ist, daß sie rechnet." - Leibniz', "label" => "Statistikseite-Untertitel"),
             "uc_subtitle" => array("default" => '"Oft neutralisieren sich zwei große Eigenschaften und ergeben als Reinertrag eine mittelmäßige Leidenschaft." - Théodore Jouffroy, Das grüne Heft', "label" => "Steckbriefseite-Untertitel"),
             "usermanagement_subtitle" => array("default" => '"Alle Leute sind entweder charmant oder langweilig. Ich ergreife Partei für die Charmanten." - Oscar Wilde', "label" => "Benutzerverwaltungsseite-Untertitel"),
-            "teacherlist_subtitle" => array("default" => '"Wo Menschlichkeit geboten ist, steh\' nicht zurück - selbst hinter deinem Lehrer." - Konfuzius', "label" => "Lehrerlisteseite-Untertitel"),
+            "teacherlist_subtitle" => array("default" => '"Wo Menschlichkeit geboten ist, steh&apos; nicht zurück - selbst hinter deinem Lehrer." - Konfuzius', "label" => "Lehrerlisteseite-Untertitel"),
             "dashboard_subtitle" => array("default" => '"Herrschaft ist im Alltag primär: Verwaltung." - Max Weber', "label" => "Dashboard-Untertitel"),
             "uc_management_subtitle" => array("default" => '"Everything is as important as everything else." - John Lennon', "label" => "Steckbriefverwaltungsseite-Untertitel"),
-            "up_management_subtitle" => array("default" => '"Life is what happens to you, while you\'re busy making other plans" - John Lennon', "label" => "Umfragenverwaltungsseite-Untertitel"),
+            "up_management_subtitle" => array("default" => '"Life is what happens to you, while you&apos;re busy making other plans" - John Lennon', "label" => "Umfragenverwaltungsseite-Untertitel"),
             "preferences_subtitle" => array("default" => '"There are no problems, only solutions." - John Lennon', "label" => "Untertitel dieser Seite"),
             "userpreferences_subtitle" => array("default" => '', "label" => "Untertitel der Einstellungenseite jedes Benutzers"),
             "impress_subtitle" => array("default" => '', "label" => "Imressumsseite-Untertitel"),
             "terms_of_use_subtitle" => array("default" => '', "label" => "Nutzungsbedingungenseite-Untertitel"),
             "mainpage_text" => array(
-                "default" => "Dies ist die Abitzeitungswebsite der (zuk&uuml;nftigen) Abiturienten.",
+                "default" => "Dies ist die Abizeitungswebsite der (zuk&uuml;nftigen) Abiturienten.",
                 "label" => "Text auf der Hauptseite (Markdown formatiert)",
                 "type" => "textarea"
             ),
@@ -84,8 +84,10 @@ Das Copyright an den Beiträgen geht mit dem Hochladen bzw. Schreiben auf dieser
             ),
             "has_forum" => array("default" => "false", "label" => "Befindet sich ein SMF-Forum in einem Unterpfad des Seitenordners?", "type" => "checkbox"),
             "forum_path" => array("default" => "smf", "label" => "Pfad des SMF-Forum-Hauptordners relativ zum Seitenhauptordner"),
+            "forum_url" => array("default" => URL . "/smf", "label" => "Url des SMF-Forums"),
             "has_wiki" => array("default" => "false", "label" => "Existiert ein Mediawiki?", "type" => "checkbox"),
             "wiki_path" => array("default" => "mediawiki", "label" => "Pfad des Mediawiki-Hauptordners relativ zum Seitenhauptordner"),
+            "wiki_url" => array("default" => URL . "/mediawiki", "label" => "Url des Mediawikis"),
             "pic_width" => array("default" => "2400", "label" => "Breite der Bilder in Pixel"),
             "pic_quality" => array("default" => "85", "label" => "Bildqualität in %"),
             "pic_format" => array("default" => "jpg", "label" => "Bildformat"),
@@ -113,7 +115,6 @@ Wenn ja, sollte piwik installiert sein und diese Website hinzugefügt worden sei
             "user_comments_editable" => array("default" => "true", "label" => "Können Benutzerkommentare geschrieben werden?", "type" => "checkbox"),
             "user_characteristics_editable" => array("default" => "false", "label" => "Kann der eigene Steckbrief bearbeitet werden?", "type" => "checkbox"),
             "user_polls_open" => array("default" => "false", "label" => "Ist die Umfragenseite sichtbar?", "type" => "checkbox"),
-            "user_polls_editable" => array("default" => "false", "label" => "Ist die Umfragenbearbeitung möglich (wenn nicht werden die Ergebnisse angezeigt)?", "type" => "checkbox"),
         );
     }
 
@@ -145,7 +146,7 @@ Wenn ja, sollte piwik installiert sein und diese Website hinzugefügt worden sei
                 if (isset($value["type"]) && $value["type"] == "checkbox") {
                     $this->pref_vals[$key]["default"] = isset($_POST[$key]) ? "true" : "false";
                 } else {
-                    $this->pref_vals[$key]["default"] = $_POST[$key];
+                    $this->pref_vals[$key]["default"] = cleanInputText($_POST[$key]);
                 }
             }
             $this->fillDBWithDefaultValues();
@@ -163,6 +164,7 @@ Wenn ja, sollte piwik installiert sein und diese Website hinzugefügt worden sei
     public function fillDBWithDefaultValues() {
         $db = Database::getConnection();
         foreach ($this->pref_vals as $key => $value) {
+            $value["default"] = str_replace("'", "&apos;", str_replace('"', "&quot;", $value["default"]));
             $res = $db->query("SELECT * FROM " . DB_PREFIX . "preferences WHERE `key`='" . $key . "'");
             if ($res->num_rows > 0) {
                 $db->query("UPDATE " . DB_PREFIX . "preferences SET value='" . $db->real_escape_string($value["default"]) . "' WHERE `key`='" . $key . "'");

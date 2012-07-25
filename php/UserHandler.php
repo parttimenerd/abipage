@@ -92,10 +92,10 @@ class UserHandler extends ToroHandler {
         } else if (isset($_POST["id"]) && $user->getID() == Auth::getUserID()) {
             if ($_POST["action"] == "notify") {
                 $user->notifyUserComment($_POST["id"]);
-                echo $_POST["id"] . "|notified";
+                echo $_POST["id"] . "|unnotified";
             } else {
                 $user->unnotifyUserComment($_POST["id"]);
-                echo $_POST["id"] . "|unnotified";
+                echo $_POST["id"] . "|notified";
             }
         } else if (isset($_POST["text"]) && $_POST["text"] != "" &&
                 $user->getID() != Auth::getUserID()) {

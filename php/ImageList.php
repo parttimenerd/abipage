@@ -27,7 +27,7 @@ class ImageList extends RatableUserContentList {
         $this->items_per_page = $env->images_per_page;
     }
 
-    public function deleteItem($id) {
+    public function deleteItem($id, $trigger_action = true) {
         global $env;
         $cid = intval($id);
         $res = $this->db->query("SELECT id, format FROM " . $this->table . " WHERE id=" . $cid) or die($this->db->error);
@@ -55,7 +55,7 @@ class ImageList extends RatableUserContentList {
     public function addImage($descr = "", $time = -1, $user = null) {
         global $env;
         if (get_upload_dir_size_mib() + 3 > $env->max_uploads_size){
-            sendAdminMail("Upload-Ordner ist voll", "Es können keine Bilder mehr hochgeladen werden, da der Upload-Ordner voll ist, bitte löschen sie entweder Bilder oder vergrößern sie die Größe des Upload-Ordners in den Seiteneinstellungen.");
+            $env->sendAdminMail("Upload-Ordner ist voll", "Es können keine Bilder mehr hochgeladen werden, da der Upload-Ordner voll ist, bitte löschen sie entweder Bilder oder vergrößern sie die Größe des Upload-Ordners in den <a href='" . tpl_url("preferences") . "'>Seiteneinstellungen</a>.");
             return;
         }
         global $env;

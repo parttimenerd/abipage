@@ -20,9 +20,11 @@ function tpl_userlist($usernamearr) {
     tpl_before("user/all", "Schülerliste", "");
     tpl_item_before("", "", "userlist");
     ?>
-    <?php foreach ($usernamearr as $namearr): ?>
-        <?php tpl_userlink($namearr["both"]) ?>
-    <?php endforeach ?>
+    <ui>
+        <?php foreach ($usernamearr as $namearr): ?>
+            <li><?php tpl_userlink($namearr["both"], true) ?></li>
+        <?php endforeach ?>
+    </ui>
     <?php
     tpl_item_after();
     tpl_after();
@@ -32,7 +34,7 @@ function tpl_user_prefs($user) {
     tpl_before("user/me/preferences");
     tpl_item_before_form(array(), "", "", "userprefs");
     ?>
-    <input type="text" title="Name" placeholder="Name ([Vorname] [Nachname])" name="name" value="<?php echo $user->getName() ?>" pattern="([A-Z]([a-z](-[a-zA-Z])?)+ ?){2,3}"/><br/>
+    <input type="text" title="Name" placeholder="Name ([Vorname] [Nachname])" name="name" value="<?php echo $user->getName() ?>" pattern="(((von )?[A-Z]([a-z](-[a-zA-Z])?)+ ?){2,3}"/><br/>
     <input type="email" title="E-Mail-Adresse" placeholder="E-Mail-Adresse" name="mail_adress" value="<?php echo $user->getMailAdress() ?>"<?php echo!Auth::isModerator() ? " readonly='readonly'" : "" ?>/><br/>
     <input type="password" title="Passwort" placeholder="Passwort" name="password" autocomplete="off"/><br/>
     <input type="password" title="Passwort wiederholen" placeholder="Passwort wiederholen" name="password_repeat"/><br/>
@@ -46,40 +48,52 @@ function tpl_user_prefs($user) {
 
 function tpl_user($user) {
     global $env;
-    tpl_before("user");
-    if ($user->getID() != Auth::getUserID() && $env->user_comments_editable):
-        tpl_item_before_form(array(), "Kommentar schreiben", "pencil", "write_comment");
-        ?>
-        <textarea name="text" id="textarea"/><br/>
-        <?php
-        tpl_infobox("", "Die Kommentare müssen von einem Moderator freigeschalten werden.");
-        tpl_item_after_send_anonymous("Absenden", "Anonym absenden", "sendUserComment(false)", "sendUserComment(true)");
-    endif;
-    foreach ($user->getUserComments($user->getID() == Auth::getUserID() || Auth::isModerator()) as $comment):
-        tpl_item_before("", "", $comment["notified_as_bad"] ? " notified_as_bad" : "", $comment["id"]);
-        echo $comment["text"];
-        ?>
-        </div>
-        <div class="item-footer">
-            <?php
-            tpl_time_span($comment["time"]);
-            tpl_user_span(Auth::isModerator() || !$comment["isanonymous"] ? $comment["commenting_userid"] : null);
-            if ($user->getID() == Auth::getUserID()):
-                ?>
-                <span class="notify_as_bad">
-                    <?php if ($comment["notified_as_bad"]) { ?>
-                        <button class="btn sign-icon notify" onclick="userCommentNotify('<?php echo $comment["id"] ?>')">+</button>
-                    <?php } else { ?>
-                        <button class="btn sign-icon notify" onclick="userCommentNotify('<?php echo $comment["id"] ?>')">-</button>
-                    <?php } ?>
-                </span>
-            <?php endif ?>			
-        </div>
-        </div>
-    <?php endforeach ?>
+    if (Auth::isSameUser($user))
+        tpl_before("user");
+    else
+        tpl_before("user/" . str_replace(' ', '_', $user->getName()), $user->getName(), tpl_get_user_subtitle($user));
+    if ($user->getID() != Auth::getUserID() && $env->user_comments_editable)
+        tpl_user_write_comment();
+    foreach ($user->getUserComments($user->getID() == Auth::getUserID() || Auth::isModerator()) as $comment)
+        tpl_user_comment($user, $comment);
+    ?>
     </div>
     <?php
     tpl_after();
+}
+
+function tpl_user_write_comment() {
+    tpl_item_before("Kommentar schreiben", "pencil", "write_comment");
+    ?>
+    <textarea name="text" id="textarea" placeholder="Kommentar"></textarea>
+    <?php
+    tpl_infobox("", "Die Kommentare müssen von einem Moderator freigeschalten werden.");
+    tpl_item_after_send_anonymous("Absenden", "Anonym absenden", "sendUserComment(false)", "sendUserComment(true)");
+}
+
+function tpl_user_comment($user, $comment) {
+    tpl_item_before("", "", $comment["notified_as_bad"] ? " notified_as_bad" : "", $comment["id"]);
+    echo $comment["text"];
+    ?>
+    </div>
+    <hr/>
+    <div class="item-footer">
+        <?php
+        tpl_time_span($comment["time"]);
+        tpl_user_span(Auth::isModerator() || !$comment["isanonymous"] ? $comment["commenting_userid"] : null);
+        if (Auth::isSameUser($user)):
+            ?>
+            <span class="notify_as_bad">
+                <?php if ($comment["notified_as_bad"]) { ?>
+                    <button class="btn sign-icon notify" onclick="userCommentNotify('<?php echo $comment["id"] ?>')">+</button>
+                <?php } else { ?>
+                    <button class="btn sign-icon notify" onclick="userCommentNotify('<?php echo $comment["id"] ?>')">-</button>
+                <?php } ?>
+            </span>
+        <?php endif ?>			
+    </div>
+    </div>
+    <?php
 }
 
 function tpl_user_page() {

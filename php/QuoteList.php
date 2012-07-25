@@ -20,7 +20,7 @@
 class QuoteList extends RatableUserContentList {
 
     public function __construct() {
-        parent::__construct("quotes");
+        parent::__construct("quotes", true);
     }
 
     public function addQuote($person, $text, $anonymous, $response_to = -1, $teacherid = -1, $senduser = null, $time = -1) {

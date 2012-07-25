@@ -41,7 +41,7 @@ if (!defined('DB_NAME')) {
         array('up_management', 'UserPollsManagementHandler')
     );
     $normal_pages = array(
-        array('/', 'MainHandler'),
+        array('(/|(login)|(register))?', 'MainHandler'),
         array('impress', 'ImpressHandler'),
         array('user(/.*)?', 'UserHandler'),
         array('images(/.*)?', 'ImagesHandler'),
@@ -50,7 +50,7 @@ if (!defined('DB_NAME')) {
         array('impress', 'ImpressHandler'),
         array('logout', 'LogoutHandler'),
         array('ajax(/.*)?', 'AjaxHandler'),
-        array('terms_of_use', 'TermsOfUseHandler')
+        array('terms_of_use', 'TermsOfUseHandler'),
     );
     if ($env->user_characteristics_editable) {
         $pages = array_unshift($normal_pages, array('user_characteristics', 'UserCharacteristicsHandler'));
@@ -84,4 +84,8 @@ if (!defined('DB_NAME')) {
         $site = new ToroApplication($no_pages);
     }
     $site->serve();
+    
+    if ($store) {
+        $store->updateDB();
+    }
 }

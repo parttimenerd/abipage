@@ -1,5 +1,4 @@
 <?php
-
 /*
  * Copyright (C) 2012 Johannes Bechberger
  *
@@ -18,11 +17,11 @@
  */
 
 function tpl_image_list($images, $page, $pages, $sort_str = "", $phrase = "", $as_page = true) {
-	global $env;
+    global $env;
     if ($as_page) {
         tpl_before("images", null, null, array("url_part" => "images", "page" => $page, "pagecount" => $pages, "phrase" => $phrase));
-		echo '<div class="imagelist">';
-	}
+        echo '<div class="imagelist">';
+    }
     if ($page == 1 && $as_page && $env->images_editable) {
         tpl_image_upload_item();
     }
@@ -32,22 +31,22 @@ function tpl_image_list($images, $page, $pages, $sort_str = "", $phrase = "", $a
     ?>
     <script>
         var rating_url = "<?php echo tpl_url('images') ?>";
-        <?php if($as_page) echo 'var page = ' . $page . ';' ?>
+    <?php if ($as_page) echo 'var page = ' . $page . ';' ?>
         var max_page = pagecount = <?php echo $pages ?>;
-        <?php echo $sort_str == "" ? "" : 'var sort_str = "' . $sort_str . '";' ?>
-        <?php echo $phrase == "" ? "" : 'var phrase = "' . $phrase . '";' ?>
-		var chocolat_options = {
-			leftImg: '<?php echo tpl_url('img/chocolat/left.gif') ?>',
-			rightImg: '<?php echo tpl_url('img/chocolat/right.gif') ?>',
-			loadingImg: '<?php echo tpl_url('img/chocolat/loading.gif') ?>',
-			closeImg: '<?php echo tpl_url('img/chocolat/close.gif') ?>'
-		};
+    <?php echo $sort_str == "" ? "" : 'var sort_str = "' . $sort_str . '";' ?>
+    <?php echo $phrase == "" ? "" : 'var phrase = "' . $phrase . '";' ?>
+        var chocolat_options = {
+            leftImg: '<?php echo tpl_url('img/chocolat/left.gif') ?>',
+            rightImg: '<?php echo tpl_url('img/chocolat/right.gif') ?>',
+            loadingImg: '<?php echo tpl_url('img/chocolat/loading.gif') ?>',
+            closeImg: '<?php echo tpl_url('img/chocolat/close.gif') ?>'
+        };
     </script>
     <?php
     if ($as_page) {
-		?>
-		</div>
-		<?php
+        ?>
+        </div>
+        <?php
         tpl_after();
     } else {
         PiwikHelper::echoJSTrackerCode();
@@ -56,22 +55,22 @@ function tpl_image_list($images, $page, $pages, $sort_str = "", $phrase = "", $a
 
 function tpl_image_upload_item($with_descr = true) {//"enctype" => "multipart/form-data"
     //tpl_item_before_form(array("id" => "file_upload", "enctype" => "multipart/form-data"), "Bild hochladen", "camera", "item-send");
-	tpl_item_before("Bild hochladen", "camera", "item-send");
-	?>     
-<div id="drop_area">
-		<p><span>Bild hier ablegen.</span><br/>
-		Das Bild darf maximal 3MB groß sein und sollte die Dateiendung .png, .jpg, .jpeg, .bmp oder .gif haben.</p>
-	</div>	
-	<input type="hidden" name="MAX_FILE_SIZE" value="3000000"/>
-        <!--<input name="uploaded_file" id="file_input" type="file"/>-->
+    tpl_item_before("Bild hochladen", "camera", "item-send");
+    ?>     
+    <div id="drop_area">
+        <p><span>Bild hier ablegen.</span><br/>
+            Das Bild darf maximal 3MB groß sein und sollte die Dateiendung .png, .jpg, .jpeg, .bmp oder .gif haben.</p>
+    </div>	
+    <input type="hidden" name="MAX_FILE_SIZE" value="3000000"/>
+    <!--<input name="uploaded_file" id="file_input" type="file"/>-->
+    <?php
+    if ($with_descr) {
+        ?>
+        <hr/>
+        <textarea name="description" class="descr" placeholder="Kurze, aussagekräftige Bildbeschreibung" require="on"></textarea>
         <?php
-        if ($with_descr) {
-            ?>
-			<hr/>
-            <textarea name="description" class="descr" placeholder="Kurze, aussagekräftige Bildbeschreibung" require="on"></textarea>
-            <?php
-        }
-        ?>		
+    }
+    ?>		
     <?php
     tpl_item_after_send("Hochladen", "send", "uploadImage()", "<div class='progress' style='visibility: hidden'>
     <div class='bar' style=\"width: 0%;\"></div>
@@ -80,14 +79,15 @@ function tpl_image_upload_item($with_descr = true) {//"enctype" => "multipart/fo
 
 function tpl_image_item($imgfile, $id, $descr, $senduser, $time, $own_rating, $average_rating, $show_name) {
     global $env;
-    tpl_item_before("", "", "content-item", $id); 
+    tpl_item_before("", "", "content-item", $id);
     ?>
     <a class="item-content" href="<?php echo tpl_url($env->upload_path . '/' . $imgfile) ?>" title="<?php echo $descr = str_replace('\r\n', " ", formatText($descr)) ?>">
         <img src="<?php echo tpl_url($env->upload_path . '/thumbs/' . $imgfile) ?>"/>
     </a><br/>
     <?php
-	//var_dump(formatText($descr), $descr);
-	echo str_replace('&lt;br/>', "", formatText($descr)) ?>		
+    //var_dump(formatText($descr), $descr);
+    echo str_replace('&lt;br/>', "", formatText($descr))
+    ?>		
     <?php
     tpl_item_after_ruc($id, $time, $senduser, $own_rating, $average_rating, $show_name);
 }
@@ -106,7 +106,7 @@ function tpl_quote_list($quotes, $page, $pages, $sort_str, $phrase, $as_page = t
     ?>
     <script>
         var rating_url = "<?php echo tpl_url('quotes') ?>";
-        <?php if($as_page) echo 'var page = ' . $page . ';' ?>
+    <?php if ($as_page) echo 'var page = ' . $page . ';' ?>
         var max_page = <?php echo $pages ?>;
         var sort_str = "<?php echo $sort_str ?>";
         var phrase = "<?php echo $phrase ?>";
@@ -122,10 +122,10 @@ function tpl_quote_list($quotes, $page, $pages, $sort_str, $phrase, $as_page = t
 function tpl_write_quote_item() {
     tpl_item_before("Zitat hinzufügen", "pencil", "item-send item-quote-send");
     ?>
-        <input type="text" placeholder="Zitierter Lehrer" name="person" class="teacher_typeahead" required="on" pattern="([A-ZÄÖÜ.]([a-zßäöü.](-[a-zßäöüA-ZÄÖÜ.])?)+ ?){1,3}"/>
-        <textarea name="text" placeholder="Zitat" require="on"></textarea>
-	<?php
-	tpl_item_after_send_anonymous("Hinzufügen", "Anonym hinzufügen", "sendQuote(false)", "sendQuote(true)");
+    <input type="text" placeholder="Zitierter Lehrer" name="person" class="teacher_typeahead" required="on" pattern="([A-ZÄÖÜ.]([a-zßäöü.](-[a-zßäöüA-ZÄÖÜ.])?)+ ?){1,3}"/>
+    <textarea name="text" placeholder="Zitat" require="on"></textarea>
+    <?php
+    tpl_item_after_send_anonymous("Hinzufügen", "Anonym hinzufügen", "sendQuote(false)", "sendQuote(true)");
     tpl_add_js('var teacher_arr = ' . json_encode(TeacherList::getTeacherNameList()) . ';
         $(".teacher_typeahead").ready(function(){
             $(this).typeahead({source: teacher_arr});
@@ -154,7 +154,7 @@ function tpl_rumor_list($rumors, $page, $pages, $sort_str, $phrase, $as_page = t
     ?>
     <script>
         var rating_url = "<?php echo tpl_url('rumors') ?>";
-        <?php if($as_page) echo 'var page = ' . $page . ';' ?>
+    <?php if ($as_page) echo 'var page = ' . $page . ';' ?>
         var max_page = <?php echo $pages ?>;
         var sort_str = "<?php echo $sort_str ?>";
         var phrase = "<?php echo $phrase ?>";
@@ -170,7 +170,7 @@ function tpl_rumor_list($rumors, $page, $pages, $sort_str, $phrase, $as_page = t
 function tpl_write_rumor_item() {
     tpl_item_before("Beitrag schreiben", "pencil", "item-rumor-send");
     ?>
-        <textarea name="text" placeholder="..., dass" require="on">..., dass</textarea>
+    <textarea name="text" placeholder="..., dass" require="on">..., dass</textarea>
     <?php
     tpl_item_after_send_anonymous("Absenden", "Anonym absenden", "sendRumor(false)", "sendRumor(true)");
 }
@@ -185,12 +185,16 @@ function tpl_rumor_item($id, $text, $senduser, $time, $own_rating, $average_rati
 function tpl_item_after_ruc($id, $time, $user, $own_rating, $avrating, $show_name) {
     ?>
     </div>
-	<hr/>
+    <hr/>
     <div class="item-footer <?php echo Auth::isModerator() ? "deletable" : '' ?>">
-        <?php tpl_time_span($time) ?>
-        <?php tpl_rating($id, $own_rating, $user, $avrating) ?>
-        <?php tpl_user_span($show_name ? $user : null) ?>
-        <?php if (Auth::isModerator()) tpl_item_delete_span($id) ?>
+        <ul>
+            <li class="time_span_li"><?php tpl_time_span($time) ?>
+            <li class="rating_li"><?php tpl_rating($id, $own_rating, $user, $avrating) ?></li>
+            <li class="user_span_li"><?php tpl_user_span($show_name ? $user : null) ?></li>
+            <? if (Auth::isModerator()): ?>
+                <li class="delete_span_li"><? tpl_item_delete_span($id) ?></li>
+            <? endif ?>
+        </ul>
     </div>
     </div>
     <?php
@@ -203,21 +207,30 @@ function tpl_item_delete_span($id) {
 }
 
 function tpl_rating($id, $own, $senduser, $average_rating) {
-	$can_rate = (is_numeric($senduser) ? $senduser : $senduser->getID()) != Auth::getUserID();
-	?>
-    <span id="<?php echo $id ?>rating">
+    $can_rate = (is_numeric($senduser) ? $senduser : $senduser->getID()) != Auth::getUserID();
+    ?>
+    <span id="<?php echo $id ?>rating" class="rating">
         <?php if ($can_rate) { ?>
             <span class="stars">
                 <?php
                 for ($i = 1; $i <= 5; $i++) {
-                    echo '<span class="star ' . ($i <= $own ? "selected" : '') . '" onclick="rating' . $id . ', ' . $i . ')">&star;</span>';
+                    echo '<span class="star ' . ($i <= $own ? "selected" : '') . '" onclick="rating(' . $id . ', ' . $i . ')">&#9733;</span>';
                 }
                 ?>
             </span>
-        <?php }
-		if (!$can_rate || is_numeric($own)): ?>
-        <span class="average">[<span class="num" title="Durschnittliche Berwertung"><?php echo $average_rating ?></span>]</span>
-		<?php endif ?>
-	</span>
+            <?php
+        }
+        if (!$can_rate || is_numeric($own))
+            tpl_average($own)
+            ?>
+    </span>
+    <?php
+}
+
+function tpl_average($rating) {
+    ?>
+    <span class="average">
+        [<span class="num" title="Durschnittliche Bewertung"><?php echo round($rating, 2) ?></span>]
+    </span>
     <?php
 }

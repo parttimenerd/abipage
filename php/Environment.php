@@ -167,4 +167,18 @@ class Environment {
         $store->updateDB();
     }
 
+    function sendMail($to, $topic, $text) {
+        global $env;
+        if (is_a($to, "User"))
+                $to = $to->getMailAdress();
+        @mail($to, Markdown($topic), Markdown($text), "From: " . $env->title . "<info@" . $_SERVER['HTTP_HOST'] . ">\r\n"
+                . "X-Mailer: PHP/" . phpversion());
+    }
+
+    function sendAdminMail($topic, $text) {
+        foreach (User::getByMode(User::ADMIN_MODE) as $user) {
+            $this->sendMail($user->getMailAdress(), $topic, $text);
+        }
+    }
+
 }

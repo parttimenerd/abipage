@@ -595,4 +595,4 @@ table.tablesorter tbody tr.odd td{background-color:#F0F0F6;}
 table.tablesorter thead tr .headerSortUp{background-image:url(../img/tablesorter/asc.gif);}
 table.tablesorter thead tr .headerSortDown{background-image:url(../img/tablesorter/desc.gif);}
 table.tablesorter thead tr .headerSortDown,table.tablesorter thead tr .headerSortUp{background-color:#8dbdd8;}
-@media (max-width:980px){.sidebar_span{display:none;}}@media (max-width:979px){body{margin-top:0px !important;}}
+@media (max-width:980px){.sidebar{display: none;}}@media (max-width:979px){body{margin-top:0px !important;}}

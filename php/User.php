@@ -90,12 +90,12 @@ class User {
         global $db;
         return User::getFromMySQLResult($db->query("SELECT * FROM " . DB_PREFIX . "user WHERE mail_adress=" . cleanInputText($mail_adress)));
     }
-    
+
     public static function getByMode($mode) {
         global $db;
         $res = $db->query("SELECT * FROM " . DB_PREFIX . "user WHERE mode=" . intval($mode));
         $retarr = array();
-        while ($user = User::getFromMySQLResult($res)){
+        while ($user = User::getFromMySQLResult($res)) {
             $retarr[] = $user;
         }
         return new UserArray($retarr);
@@ -109,13 +109,7 @@ class User {
      */
     public static function create($name, $math_course, $math_teacher, $mail_adress, $pwd, $mode = self::NORMAL_MODE, $activated = 0, $visible = 1) {
         global $db;
-        $name_arr = explode(' ', $db->real_escape_string($name));
-        $str = $name_arr[0];
-        for ($i = 1; $i < count($name_arr) - 1; $i++) {
-            $str .= " " . $name_arr[$i];
-        }
-        $name_arr[0] = $str;
-        $name_arr[1] = $name_arr[count($name_arr) - 1];
+        $name_arr = self::splitName($db->real_escape_string($name));
         $math_course = intval(is_numeric($math_course) ? $math_course : substr($math_course, 1));
         $math_teacher = $db->real_escape_string($math_teacher);
         $mail_adress = $db->real_escape_string($mail_adress);
@@ -125,23 +119,25 @@ class User {
         $visible = intval($visible);
         if (self::getByName($name) == null) {
             $db->query('INSERT INTO ' . DB_PREFIX . "user(id, first_name, last_name, math_course, math_teacher, mail_adress, mode, activated, visible, crypt_str) VALUES(NULL, '$name_arr[0]', '$name_arr[1]', $math_course, '$math_teacher', '$mail_adress', $mode, $activated, $visible, '$crypt_str')");
+            return User::getByName($name);
         } else {
             return false;
         }
     }
 
     public function updateDB() {
-        $this->db->query("UPDATE " . DB_PREFIX . "user SET
-		first_name='" . $this->db->real_escape_string($this->getFirstName()) . "' 
-		last_name='" . $this->db->real_escape_string($this->getLastName()) . "' 
-		math_course='" . $this->db->real_escape_string($this->getMathCourse()) . "' 
-		math_teacher='" . $this->db->real_escape_string($this->getMathTeacher()) . "'
-		mail_adress='" . $this->db->real_escape_string($this->getMailAdress()) . "' 
-		crypt_str='" . $this->db->real_escape_string($this->getCryptStr()) . "' 
-		mode=" . intval($this->getMode()) . " 
-		activated=" . ($this->isActivated() ? 1 : 0) . " 
-		visible=" . ($this->isVisible() ? 1 : 0) . "
-		WHERE id=" . intval($this->id));
+        $query = "UPDATE " . DB_PREFIX . "user SET";
+        $query .= " first_name='" . $this->db->real_escape_string($this->getFirstName()) . "'";
+        $query .= ", last_name='" . $this->db->real_escape_string($this->getLastName()) . "'";
+        $query .= ", math_course=" . intval($this->getMathCourse());
+        $query .= ", math_teacher='" . $this->db->real_escape_string($this->getMathTeacher()) . "'";
+        $query .= ", mail_adress='" . $this->db->real_escape_string($this->getMailAdress()) . "'";
+        $query .= ", crypt_str='" . $this->db->real_escape_string($this->getCryptStr()) . "' ";
+        $query .= ", mode=" . intval($this->getMode());
+        $query .= ", activated=" . ($this->isActivated() ? 1 : 0);
+        $query .= ", visible=" . ($this->isVisible() ? 1 : 0);
+        $query .= " WHERE id=" . intval($this->id);
+        $this->db->query($query) or die($this->db->error);
     }
 
     public function getUserComments($with_notified_as_bad = false) {
@@ -187,7 +183,7 @@ class User {
 
     public static function deleteUserComment($id) {
         $db = Database::getConnection();
-        $db->query("DELETE FROM" . DB_PREFIX . "user_comments WHERE id=" . intval($id) . " AND reviewed=0");
+        $db->query("DELETE FROM " . DB_PREFIX . "user_comments WHERE id=" . intval($id)) or die($db->error);
     }
 
     public function getID() {
@@ -199,17 +195,29 @@ class User {
     }
 
     public function getFirstName() {
-        $arr = explode(" ", $this->name);
-        $str = $arr[0];
-        for ($i = 1; $i < count($arr) - 1; $i++) {
-            $str .= " " . $arr[$i];
-        }
-        return $str;
+        $arr = self::splitName($this->name);
+        return $arr[0];
     }
 
     public function getLastName() {
-        $arr = explode(" ", $this->name);
-        return $arr[count($arr) - 1];
+        $arr = self::splitName($this->name);
+        return $arr[1];
+    }
+    
+    public static function splitName($name){
+        $name_arr = explode(' ', $name);
+        $str = $name_arr[0];
+        $last_name_prefix = false;
+        for ($i = 1; $i < count($name_arr) - 1; $i++) {
+            if ($name_arr[$i] != "von"){
+                $str .= " " . $name_arr[$i];
+            } else {
+                $last_name_prefix = true;
+            }
+        }
+        $name_arr[0] = $str;
+        $name_arr[1] = $name_arr[count($name_arr) - ($last_name_prefix ? 2 : 1 )];
+        return $name_arr;
     }
 
     public function getMathCourse() {
@@ -227,7 +235,19 @@ class User {
     public function getMode() {
         return $this->mode;
     }
+    
+    public function isEditor() {
+        return $this->mode >= self::EDITOR_MODE;
+    }
 
+    public function isModerator() {
+        return $this->mode >= self::MODERATOR_MODE;
+    }
+    
+    public function isAdmin() {
+        return $this->mode == self::ADMIN_MODE;
+    }
+    
     public function isActivated() {
         return $this->activated;
     }
@@ -264,9 +284,14 @@ class User {
         $this->activated = $activated;
     }
 
-    public function activate() {
-        $this->activated = true;
-        $this->updateDB();
+    public function activate($send_mail = true) {
+        global $env;
+        if (!$this->activated) {
+            if ($send_mail)
+                $env->sendMail($this, "Ihr Benutzerkonto wurde aktiviert", "Ihr Benutzerkonto wurde aktiviert, sie können nun auf die Seite zugreifen.\n\nIhr \"" . $env->title . "\"-Team");
+            $this->activated = true;
+            $this->updateDB();
+        }
     }
 
     public function deactivate() {
@@ -275,15 +300,16 @@ class User {
     }
 
     public function setPassword($pwd, $mail_user = false) {
+        global $env;
         $this->crypt_str = Auth::crypt($pwd);
         if ($mail_user) {
-            sendMail($this->mail_adress, "Passwort verändert", "Benutzername: " . $this->name . "\nPasswort: " . $pwd);
+            $env->sendMail($this->mail_adress, "Passwort verändert", "Benutzername: " . $this->name . "\nPasswort: " . $pwd);
         }
         $this->updateDB();
     }
 
     public function isVisible() {
-        return $this->visible();
+        return $this->visible;
     }
 
     public function setVisible($visible) {

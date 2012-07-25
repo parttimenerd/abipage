@@ -24,7 +24,7 @@ class RumorsHandler extends RatableUserContentHandler {
     }
 
     public function post_impl() {
-        if (issetAndNotEmptyArr(array("text"), $_POST)) {
+        if (issetAndNotEmptyArr(array("text"), $_POST) && strlen($_POST["text"]) > 10) {
             $this->list->addRumor($_POST["text"], isset($_POST["send_anonymous"]));
             if (isset($_POST["send_anonymous"]))
                 PiwikHelper::addTrackGoalJS("Anonymous contribution");

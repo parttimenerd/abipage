@@ -17,23 +17,34 @@
  */
 
 function rating(id, rating){
-    num = rating;
-    $("#" + id + "rating stars star").each(function(ele){
-        if (num > 0){
-            ele.attr("css", "star selected");
-        } else {
-            ele.attr("css", "star");
-        }
-        num--;
-    })
+    fillStars(id, rating);
+    var func = function(html){
+        if (typeof(html) != "string")
+            html = html.responseText;
+        $("#" + id + "rating .average").replaceWith(html);
+    }
     $.ajax({
         type: "POST",
         url: rating_url2,
-        data: "rating=" + rating,
-        onsuccess: function(html){
-            $("#" + id + "rating .average .num").html(html);
-        }
+        data: $.param({
+            rating: rating, 
+            id: id
+        }),
+        success: func,
+        error: func
     });
+}
+
+function fillStars(id, rating){
+    num = rating;
+    $("#" + id + "rating .stars .star").each(function(){
+        if (num > 0){
+            $(this).attr("class", "star selected");
+        } else {
+            $(this).attr("class", "star");
+        }
+        num--;
+    })
 }
 
 function deleteItem(id){
@@ -44,7 +55,7 @@ function deleteItem(id){
             if (html != ""){
                 var arr = html.split("|", 2);
                 $("#" + arr[0]).remove();
-                $(body).append(arr[1]);
+                $("body").append(arr[1]);
             }
         }
         $.ajax({
@@ -186,8 +197,8 @@ function updateActionsSidebar(){
 
 var interval = 10000; //in ms
 
-if (has_sidebar)
-    setInterval("updateActionsSidebar()", interval);
+//if (has_sidebar)
+//    setInterval("updateActionsSidebar()", interval);
 
 /*function loadNew(){
     //var get_items = window.first_item_id !== undefined;
@@ -345,6 +356,8 @@ if ($("#drop_area").length != 0){
 if ($(".item-quote-send").length != 0){
     function sendQuote(is_anonymous){
         var func = function(html){
+            if (html == null)
+                return;
             if (typeof(html) != "string")
                 html = html.responseText;
             if (html != ""){
@@ -377,6 +390,8 @@ if ($(".item-quote-send").length != 0){
 if ($(".item-rumor-send").length != 0){
     function sendRumor(is_anonymous){
         var func = function(html){
+            if (html == null)
+                return;
             if (typeof(html) != "string")
                 html = html.responseText;
             if (html != ""){
@@ -419,10 +434,10 @@ function userCommentNotify(id){
             var id = arr[0];
             if (arr[1] == "notified"){
                 $("#" + id).addClass("notified_as_bad");
-                $("#" + id + " .notify").html("+");
+                $("#" + id + " .notify").html("+").attr("title", "Zeigen");
             } else if (arr[1] == "unnotified"){
                 $("#" + id).removeClass("notified_as_bad");
-                $("#" + id + " .notify").html("-");
+                $("#" + id + " .notify").html("-").attr("title", "Verstecken");
             }
         }
     }
@@ -448,6 +463,10 @@ function sendUserComment(is_anonymous){
     } else {
         data['send'] = '';
     }
+    var func = function(html){
+        $(".write_comment textarea").val("");
+        is_loading = false;
+    }
     is_loading = true;
     $.ajax({
         type: "POST",
@@ -462,6 +481,8 @@ function setResultMode(view_results){
     $.ajax({
         type: "POST",
         url: ajax_url + "/result_mode",
-        data: $.param({value: view_results})
+        data: $.param({
+            value: view_results
+        })
     });
 }

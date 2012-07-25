@@ -32,6 +32,10 @@ class UserManagementHandler extends ToroHandler {
                         $user = User::getByID(intval($key));
                         if (isset($_POST["activate"])) {
                             $user->activate();
+                            if ($user->getMode() == User::NO_MODE){
+                                $user->setMode(User::NORMAL_MODE);
+                                $user->updateDB();
+                            }
                         } else if (isset($_POST["deactivate"])) {
                             $user->deactivate();
                         } else if (isset($_POST["setmode"]) && isset($_POST["mode"]) &&

@@ -51,8 +51,7 @@ class Auth {
     }
 
     public static function verify($id, $pwd) {
-        $db = Database::getConnection();
-        $user = User::getFromMySQLResult($db->query("SELECT * FROM " . DB_PREFIX . "user WHERE id=" . $db->real_escape_string($id)));
+        $user = User::getByID($id);
         if ($user != null) {
             if ($user->isActivated()) {
                 if (self::cryptCompare($pwd, $user->getCryptStr())) {
@@ -77,7 +76,6 @@ class Auth {
     }
 
     public static function verifyByCookie() {
-//        var_dump($_COOKIE);
         if (isset($_COOKIE["abipage_id"]) && isset($_COOKIE["abipage_pwd"])) {
             return self::verify(intval($_COOKIE["abipage_id"]), $_COOKIE["abipage_pwd"]);
         }
@@ -91,7 +89,7 @@ class Auth {
     }
 
     public static function login($name, $pwd) {
-        $user = User::getByName($name);
+        $user = is_numeric($name) ? User::getById($name) : User::getByName($name);
         if ($user != null) {
             if (self::cryptCompare($pwd, $user->getCryptStr())) {
                 self::$user = $user;
@@ -127,13 +125,17 @@ class Auth {
     public static function getUserID() {
         return self::getUser() != null ? self::$user->getID() : -1;
     }
+    
+    public static function isEditor() {
+        return self::getUser() != null ? (self::$user->getMode() >= User::EDITOR_MODE) : false;
+    }
 
     public static function isModerator() {
-        return self::getUser() != null ? (self::$user->getMode() == User::ADMIN_MODE) : false;
+        return self::getUser() != null ? (self::$user->getMode() >= User::MODERATOR_MODE) : false;
     }
 
     public static function isAdmin() {
-        return self::getUser() != null ? (self::$user->getMode() >= User::MODERATOR_MODE) : false;
+        return self::getUser() != null ? (self::$user->getMode() == User::ADMIN_MODE) : false;
     }
 
     public static function isSameUser($user) {

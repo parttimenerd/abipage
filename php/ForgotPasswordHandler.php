@@ -46,7 +46,7 @@ class ForgotPasswordHandler extends ToroHandler {
 	klicken sie bitte auf diesen <a href=\"$link\">Link</a>, wenn nicht, 
 	dann ignorieren sie diese E-Mail bitte einfach.<br/><br/>Ihr \"" . $env->title . "\"-Team
 	</body></html>";
-                    sendMail($user->getMailAdress(), "Passwort zur�cksetzen", $text);
+                    $env->sendMail($user->getMailAdress(), "Passwort zurücksetzen", $text);
                     return;
                 }
             }

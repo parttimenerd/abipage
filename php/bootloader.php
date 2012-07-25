@@ -66,12 +66,6 @@ if (!function_exists('require_dir')) {
         $db = Database::getConnection();
         require_once('KeyValueStore.php');
         $store = new KeyValueStore();
-        register_shutdown_function(function() {
-                    global $store;
-                    if ($store) {
-                        $store->updateDB();
-                    }
-                });
         require_once('Environment.php');
         $env = new Environment();
     }

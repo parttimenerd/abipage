@@ -60,6 +60,12 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null) {
             if (Auth::isAdmin()) {
                 $meta_dropdown["preferences"] = array("Einstellungen", $env->preferences_subtitle);
             }
+            if ($env->has_forum){
+                $meta_dropdown[$env->forum_url] = array("Forum", "");
+            }
+            if ($env->has_wiki){
+                $meta_dropdown[$env->wiki_url] = array("Wiki", "");
+            }
             $meta_dropdown["terms_of_use"] = array("Nutzungsbedigungen", $env->terms_of_use_subtitle);
             $meta_dropdown["impress"] = array("Impressum", $env->impress_subtitle);
             $meta_dropdown["humans.txt"] = array("humans.txt", "");
@@ -122,7 +128,7 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null) {
                 Please visit the github repo of the CMS behind the website (https://github.com/parttimenerd/abipage) to find out more about the internals and help developing this program.
                 The whole code is licensed under the GNU GPL, so you're able to use parts of it.
             
-                The CMS is developed by some (currently one) nerd, please take a look at the humans.txt to find out more about them.
+                The CMS is developed by some (currently one) nerds, please take a look at the humans.txt to find out more about them.
             -->
         </head>
 
@@ -158,7 +164,7 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null) {
                                             <?php foreach ($dropdown as $key2 => $value2): ?>
                                                 <li><a href="<?php echo tpl_url($key2) ?>"><?php echo $value2[0] ?></a></li>
                                             <?php endforeach ?>
-                                            <?php if ($key == "user" && $env->results_viewable): ?>
+                                            <?php if ($key == "user" && $env->results_viewable && Auth::isEditor()): ?>
                                                 <li>
                                                     <input id="result_mode" type="checkbox" onclick="setResultMode($(this).is(':checked'))"<?= $store->result_mode_ud ? 'checked="checked"' : ""?>>Ergebnisse anzeigen</input>
                                                 </li>
@@ -384,7 +390,7 @@ function tpl_no_subnav() {
                             </div>
                             <hr/>
                             <div class="item-footer">
-                                <button class="btn" type="<?php echo $onclick == "" ? "submit" : "" ?>" name="<?php echo $name ?>" onclick="<?php echo $onclick ?>"><?php echo $title ?></button>
+                                <button class="btn" <?php echo $onclick == "" ? 'type="submit"' : "" ?> name="<?php echo $name ?>" onclick="<?php echo $onclick ?>"><?php echo $title ?></button>
                                 <?php echo $footerhtmlapp ?>
                             </div>
                             <?php echo $onclick == "" ? "</form>" : "" ?>
@@ -397,8 +403,8 @@ function tpl_no_subnav() {
                     </div>
                     <hr/>
                     <div class="item-footer">
-                        <button class="btn" type="<?php echo $onclick1 == "" ? "submit" : "" ?>" name="send" onclick="<?php echo $onclick1 ?>"><?php echo $title1 ?></button>
-                        <button class="btn" type="<?php echo $onclick2 == "" ? "submit" : "" ?>" name="send_anonymous" onclick="<?php echo $onclick2 ?>"><?php echo $title2 ?></button>
+                        <button class="btn" <?php echo $onclick1 == "" ? 'type="submit"' : "" ?> name="send" onclick="<?php echo $onclick1 ?>"><?php echo $title1 ?></button>
+                        <button class="btn" <?php echo $onclick2 == "" ? 'type="submit"' : "" ?> name="send_anonymous" onclick="<?php echo $onclick2 ?>"><?php echo $title2 ?></button>
                     </div>
                     <?php echo ($onclick1 == "" && $onclick2 == "") ? "</form>" : "" ?>
                 </div>

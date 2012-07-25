@@ -24,13 +24,12 @@ class TeacherListHandler extends ToroHandler {
     }
 
     public function post() {
-        //var_dump($_POST);
         if (isset($_POST["edit"]) || isset($_POST["delete"])) {
             foreach ($_POST as $key => $value) {
-                if (preg_match("/^[0-9]+/", $key)) {
-                    if (isset($_POST["edit"]) && isset($_POST["last_name" . $key]) &&
-                            isset($_POST["first_name" . $key]) && isset($_POST["ismale" . $key])) {
-                        TeacherList::edit($_POST[$key], $_POST["last_name" . $key], $_POST["ismale" . $key], $_POST["first_name" . $key]);
+                if (preg_match("/^[0-9]+$/", $key)) {
+                    if (isset($_POST["edit"]) && isset($_POST[$key . "last_name"]) &&
+                            isset($_POST[$key . "first_name"]) && isset($_POST[$key . "sex"])) {
+                        TeacherList::edit($_POST[$key], $_POST[$key . "last_name"], $_POST[$key . "sex"], $_POST[$key . "first_name"]);
                     } else if (isset($_POST["delete"]) && Auth::isModerator()) {
                         TeacherList::delete($key);
                     }

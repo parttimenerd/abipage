@@ -22,23 +22,22 @@ function tpl_register() {
     tpl_before("register");
     tpl_item_before_form(array(), "", "", "register");
     ?>
-    <input type="text" name="name" title="Name ([Vorname] [Nachname])" placeholder="Name ([Vorname] [Nachname])" autocomplete="on" required="on" pattern="([A-ZÄÖÜ]([a-zßäöü](-[a-zßäöüA-ZÄÖÜ])?)+ ?){2,3}"/><br/>
-    <input type="email" name="mail_adress" title="E-MailAdresse" placeholder="E-MailAdresse" autocomplete="on" required="on"/><br/>
+    <input type="text" name="name" title="Name ([Vorname] [Nachname])" placeholder="Name ([Vorname] [Nachname])" autocomplete="on" required="on" pattern="((von )?[A-ZÄÖÜ]([a-zßäöü](-[a-zßäöüA-ZÄÖÜ])?)+ ?){2,3}"/><br/>
+    <input type="email" name="mail_adress" title="E-Mail-Adresse" placeholder="E-Mail-Adresse" autocomplete="on" required="on"/><br/>
     <input type="password" name="password" title="Passwort" placeholder="Passwort" autocomplete="on" required="on"/><br/>
     <input type="password" name="password_repeat" title="Passwort wiederholen" placeholder="Passwort wiederholen" autocomplete="on" required="on"/><br/>
     <input type="number" name="math_course" title="Mathekursnummer, z.B.: 1" placeholder="Mathekursnummer, z.B.: 1" min="1" max="20" required="on"/><br/>
-    <input type="text" name="math_teacher" title='Mathelehrer, z.B. "Herr Müller"' placeholder='Mathelehrer, z.B. "Herr Müller"' required="on" pattern="([A-ZÄÖÜ]([a-zßäöü](-[a-zßäöüA-ZÄÖÜ])?)+ ?){2,3}"/><br/>
+    <input type="text" name="math_teacher" title='Mathelehrer, z.B. "Herr Müller"' placeholder='Mathelehrer, z.B. "Herr Müller"' required="on" pattern="(((von )?[A-ZÄÖÜ]([a-zßäöü](-[a-zßäöüA-ZÄÖÜ])?)+ ?){2,3}"/><br/>
     <?php if ($env->has_forum): ?>
-        <input type="checkbox" value="true" name="reg_in_forum" selected="selected"/> Automatisch auch im Forum registrieren<br/>
+        <input type="checkbox" value="true" name="reg_in_forum" selected="selected"/> <label for="reg_in_forum">Automatisch auch im Forum registrieren</label><br/>
     <?php endif ?>
     <?php if ($env->has_wiki): ?>
-        <input type="checkbox" value="true" name="reg_in_wiki" selected="selected"/> Automatisch auch im Wiki registrieren<br/>
+        <input type="checkbox" value="true" name="reg_in_wiki" selected="selected"/> <label for="reg_in_wiki">Automatisch auch im Wiki registrieren</label><br/>
     <?php endif ?>
     <?php
     tpl_infobox("", 'Sie stimmen mit der Registrierung den <a href="terms_of_use" target="_blank">Nutzungsbedingungen</a> zu.<br/>
                 Außerdem werden <a href="https://de.wikipedia.org/wiki/Cookie" target="_blank">Cookies</a> auf ihrem Computer zwecks Anmeldung und Statistik gespeichert.');
     tpl_item_after_send("Registrieren", "register");
-    tpl_item_after();
     tpl_after();
 }
 
@@ -56,9 +55,9 @@ function tpl_welcome_wait_for_activation() {
 function tpl_login() {
     global $env;
     tpl_before("login");
-    tpl_item_before_form(array("action" => $env->url . "/login"), "", "", "login");
+    tpl_item_before_form(array("action" => tpl_url("login")), "", "", "login");
     ?>
-    <input type="text" name="name" title="Name" placeholder="Name" autocomplete="on"/><br/>
+    <input type="text" name="name" title="Name" placeholder="Name"/><br/>
     <input type="password" name="password" title="Passwort" placeholder="Passwort" autocomplete="on"/><br/>
     <?php
     tpl_infobox("", "Wenn sie noch nicht registriert sind, registrieren sich sich bitte <a href='register'>hier</a>.<br/>

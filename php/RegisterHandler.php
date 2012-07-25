@@ -52,6 +52,7 @@ class RegisterHandler extends ToroHandler {
                 register_user_in_wiki($user, $_POST["password"]);
             }
             tpl_welcome_wait_for_activation();
+            $env->sendAdminMail("Neuer Benutzer registriert. Wartet auf Aktivierung.", 'Benutzer "' . $user->getName() . '" hat sich registriert und wartet auf Aktivierung');
         } else {
             $this->get();
         }

@@ -25,12 +25,11 @@ class PiwikHelper {
     public static function setup() {
         global $store;
         if (!$store->piwik_lock) {
+            $store->piwik_lock = true;
             foreach (self::$goals as $goal) {
                 if (!self::addGoal($goal))
                     return false;
             }
-            $store->piwik_goals = json_encode($arr);
-            $store->piwik_lock = true;
         }
         return true;
     }
@@ -52,7 +51,11 @@ class PiwikHelper {
         $url .= "&allowMultipleConversionsPerVisit=1";
         $url .= "&idGoal=";
         $url .= "&token_auth=" . $env->piwik_token_auth;
-        $json = file_get_contents($url);
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        $json = curl_exec($ch);
+        curl_close($ch);
         $json = (array) json_decode($json);
         if (isset($json["result"]))
             return false;
@@ -62,18 +65,16 @@ class PiwikHelper {
 
     public static function echoJSTrackerCode() {
         global $env;
-        if ($env->has_piwik)
+        if ($env->has_piwik != null)
             tpl_piwik_js_tracker_code($env->piwik_site_id, $env->piwik_url, self::$lines);
     }
 
     public static function addTrackGoalJS($goal, $value = null) {
         $index = self::getIdOfGoal($goal);
-        if ($index > 1 && $index < 6) {
+        if (is_string($value)) {
             self::addTrackGoalJS("Item written");
-            if ($value != null) {
-                self::addTrackGoalJS("Characters type", strlen($value));
-                $value = null;
-            }
+            self::addTrackGoalJS("Characters type", strlen($value));
+            $value = null;
         }
         self::addJSTrackerCodeLine("piwikTracker.trackGoal(" . $index . ($value != null ? (", " . $value) : "") . ");");
     }

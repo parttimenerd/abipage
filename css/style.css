@@ -98,18 +98,27 @@ input[type="url"],
 input[type="search"],
 input[type="tel"],
 input[type="color"],*/
-.item input, textarea {
+.item input:not([type="checkbox"]), textarea {
     width: 100%;
+}
+.item input, textarea {
     resize: none;
     box-shadow: none;
     border: none;
     background-color: whiteSmoke;
     transition: background-color linear 0.3s;
 }
-.item input {
+.item input, .item label {
     font-size: 15px;
     line-height: 16px;
     height: 25px;
+}
+.item input[type="checkbox"] {
+    float: left;
+}
+.item label {
+    margin-left: 30px;
+    line-height: 30px;
 }
 .item input:hover, textarea:hover, .item input:focus, textarea:focus {
     box-shadow: none;
@@ -272,6 +281,64 @@ table {
     width: 50%;
 }
 
+.notified_as_bad .item-content, .notified_as_bad hr {
+    visibility: hidden;
+    display: none;
+}
+
+.notified_as_bad:hover .item-content, .notified_as_bad:hover hr {
+    visibility: visible;
+    display: block;
+}
+
+.write_comment textarea {
+    height: 50px;
+}
+
+.star {
+    color: gray;
+    cursor: pointer;
+}
+.stars .selected {
+    color: gold;
+}
+.item-footer ul {
+    list-style: none outside none;
+    margin-left: -60px;
+    margin-right: -50px;
+    width: 120%;
+}
+.item-footer li {
+    float: left;
+    margin-top: -12px;
+    vertical-align: middle;
+}
+.item-footer .time_span_li {
+    width: auto;
+} 
+.item-footer .rating_li {
+     margin-left: 5%;
+     width: 25%;
+     text-align: right;
+     margin-right: 5%;
+ }
+.item-footer .user_span_li {
+     width: 30%;
+}
+.item-footer .icon {
+    height: 0.75em;
+    margin-bottom: 0.35em;
+}
+.item-quote-send textarea, .item-rumor-send textarea {
+    height: 55px;
+    margin-bottom: -5px;
+}
+.content-item .item-content p {
+    font-size: 1.21em;
+}
+.content-item {
+    text-align: justify !important;
+}
 
 /* =============================================================================
    Media Queries

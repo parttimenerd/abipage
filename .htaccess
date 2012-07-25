@@ -541,10 +541,10 @@ RewriteEngine on
 
 RewriteBase /abipage/
 
-RewriteCond %{REQUEST_URI} !^(.*\.[a-z])
-#RewriteCond %{REQUEST_URI} !^(index\.php)
-#RewriteCond %{REQUEST_URI} !^(smf)
-#RewriteCond %{REQUEST_URI} !^(forum)
-#RewriteCond %{REQUEST_URI} !^(piwik)
-#RewriteCond %{REQUEST_URI} !^(mediawiki)
+RewriteCond %{REQUEST_URI} !^(.*\.[a-z]*)
+RewriteCond %{REQUEST_URI} !^(index\.php)
+RewriteCond %{REQUEST_URI} !^(.*smf.*)
+RewriteCond %{REQUEST_URI} !^(.*forum.*)
+RewriteCond %{REQUEST_URI} !^(.*piwik.*)
+RewriteCond %{REQUEST_URI} !^(.*mediawiki.*)
 RewriteRule ^(.*)$ index.php/$1 [L]

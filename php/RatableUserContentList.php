@@ -25,15 +25,17 @@ class RatableUserContentList {
     protected $where_app = "";
     protected $from_app = "";
     protected $items_per_page;
+    protected $response_allowed;
 
     /** $fromapp = ", table"; $where_app = "AND id=0" */
-    public function __construct($table, $from_app = "", $where_app = "") {
+    public function __construct($table, $response_allowed = false, $from_app = "", $where_app = "") {
         global $env, $db;
         $this->items_per_page = $env->items_per_page;
         $this->table = DB_PREFIX . $table;
         $this->db = $db;
         $this->where_app = $where_app;
         $this->from_app = $from_app;
+        $this->response_allowed = $response_allowed;
     }
 
     public function getCount() {
@@ -62,6 +64,7 @@ class RatableUserContentList {
             $user = Auth::getUser();
         }
         $arr = array();
+        $responses = array();
         if ($this->getCount() > 0) {
             if ($start > $this->getCount()) {
                 $start = ($this->getPageCount() * $this->items_per_page) - $this->items_per_page;
@@ -73,13 +76,27 @@ class RatableUserContentList {
                     $arr[] = $result;
                 }
             }
+            if ($this->response_allowed) {
+                $str = "";
+                foreach ($arr as $val)
+                    $str .= ($str != "" ? ", " : "") . $val["id"];
+                $res = $this->db->query("SELECT " . $this->table . ".*, (SELECT " . $this->table . "_ratings.rating FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id AND userid=" . $user->getID() . ") AS own_rating FROM " . $this->table . ", " . DB_PREFIX . "user u " . $this->from_app . " WHERE u.id = userid AND u.activated = 1 " . $this->where_app . " AND " . $this->table . ".response_to IN (" . $str . ") ORDER BY time ASC LIMIT 0, " . $this->items_per_page) or die($this->db->error);
+                if ($res != null) {
+                    while ($result = $res->fetch_array()) {
+                        $responses[] = $result;
+                    }
+                }
+            }
         }
-        return array("items" => $arr, "start" => $start, "page" => ($start / $this->items_per_page) + 1);
+        $retarr = array("items" => $arr, "start" => $start, "page" => ($start / $this->items_per_page) + 1);
+        if ($this->response_allowed)
+            $retarr = array_merge($retarr, array("responses" => $responses));
+        return $retarr;
     }
 
     public function updateRating($id) {
         $cid = intval($id);
-        $res = $db->query("SELECT AVG(rating) as avg FROM " . $this->table . "_rating WHERE itemid=" . $cid);
+        $res = $this->db->query("SELECT AVG(rating) as avg FROM " . $this->table . "_ratings WHERE itemid=" . $cid) or die($this->db->error);
         if ($res) {
             $arr = $res->fetch_array();
             $avg = $arr["avg"];
@@ -93,21 +110,30 @@ class RatableUserContentList {
     public function rate($id, $rating, $user = null) {
         $user = Auth::getUser();
         $cid = intval($id);
-        $res = $this->db("SELECT itemid " . $this->rating . "_ratings WHERE itemid=" . $cid);
-        if ($res->fetch_array()) {
-            $this->db("UPDATE " . $this->table . "_ratings SET rating=" . intval($rating) . " WHERE itemid=" . $cid);
+        $res = $this->db->query("SELECT itemid FROM " . $this->table . "_ratings WHERE itemid=" . $cid) or die($this->db->error);
+        if ($res != null && $res->fetch_array()) {
+            $this->db->query("UPDATE " . $this->table . "_ratings SET rating=" . intval($rating) . " WHERE itemid=" . $cid);
         } else {
-            $this->db("INSERT INTO " . $this->table . "_ratings(userid, itemid, rating) VALUES(" . $user->getID() . ", " . $id . ", " . intval($rating) . ")");
+            $this->db->query("INSERT INTO " . $this->table . "_ratings(userid, itemid, rating) VALUES(" . $user->getID() . ", " . $cid . ", " . intval($rating) . ")") or die($this->db->error);
         }
         return $this->updateRating($id);
     }
 
-    public function deleteItem($id) {
+    public function deleteItem($id, $trigger_action = true) {
         global $env;
         $cid = intval($id);
         $this->db->query("DELETE FROM " . $this->table . " WHERE id=" . $cid) or die($this->db->error);
-        $this->db->query("DELETE FROM " . $this->table . "_ratings WHERE itemid=" . $id) or die($this->db->error);
-        $env->addAction($id, Auth::getUserName(), "delete_" . str_replace(DB_PREFIX, "", $this->table));
+        $this->db->query("DELETE FROM " . $this->table . "_ratings WHERE itemid=" . $cid) or die($this->db->error);
+        if ($this->response_allowed) {
+            $res = $this->db->query("SELECT id FROM " . $this->table . " WHERE response_to=" . $cid) or die($this->db->error);
+            if ($res != null) {
+                while ($arr = $res->fetch_array())
+                    $this->deleteItem($arr["id"], true);
+            }
+        }
+        if (!$trigger_action) {
+            $env->addAction($id, Auth::getUserName(), "delete_" . str_replace(DB_PREFIX, "", $this->table));
+        }
         return true;
     }
 

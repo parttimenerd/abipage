@@ -60,13 +60,14 @@ class RatableUserContentHandler extends ToroHandler {
 
     public function post() {
         global $env;
-        if (isset($_POST["rating"])) {
-            echo $this->list->rate(intval($_POST["rating"]));
+        if (isset($_POST["rating"]) && isset($_POST["id"])) {
+            $rating = $this->list->rate(intval($_POST["id"]), intval($_POST["rating"]));
+            tpl_average($rating);
             PiwikHelper::addJSTrackerCodeLine("Item rated");
-            echo PiwikHelper::echoJSTrackerCode();
+            PiwikHelper::echoJSTrackerCode();
         } else if (isset($_POST["delete"]) && Auth::isModerator() && isset($_POST["id"])) {
             if ($this->list->deleteItem(intval($_POST["id"]))) {
-                PiwikHelper::addJSTrackerCodeLine("Item deleted");
+                PiwikHelper::addTrackGoalJS("Item deleted");
                 echo intval($_POST["id"]) . '|';
                 PiwikHelper::echoJSTrackerCode();
             }

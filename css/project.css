@@ -4812,7 +4812,7 @@ table.tablesorter thead tr .headerSortUp {
 }
 /* own-styles */
 @media (max-width: 980px) {
-  .sidebar_span {
+  .sidebar {
     display: none;
   }
 }

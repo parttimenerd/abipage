@@ -29,9 +29,9 @@ function tpl_infobox($strong_text, $message_text) {
 
 function tpl_usermode_combobox($name, $preset_modenum = User::NORMAL_MODE, $without_superadmin = false) {
     $arr = array(
-        User::MODERATOR_MODE => "Moderator",
+        User::NORMAL_MODE => "Normal",
         User::EDITOR_MODE => "Editor",
-        User::NORMAL_MODE => "Normal"
+        User::MODERATOR_MODE => "Moderator"
     );
     if (!$without_superadmin) {
         $arr = array_merge($arr, array(User::ADMIN_MODE => "Administrator"));
@@ -66,7 +66,7 @@ function tpl_get_user_subtitle($user) {
     if ($user->getMathTeacher() != "") {
         $html .= ($html != "" ? "; " : "") . "Mathelehrer: " . $user->getMathTeacher();
     }
-    if (Auth::isModerator()) {
+    if ($user->isEditor()) {
         $html .= ($html != "" ? "; " : "") . tpl_usermode_to_text($user->getMode());
     }
     return $html;
@@ -98,25 +98,35 @@ function tpl_user_span($user_id = -1, $with_icon = true) {
 }
 
 function tpl_url($relative_url) {
-    global $env;
-    return URL . '/' . $relative_url;
+    if (substr($relative_url, 0, 4) != "http"){
+        return URL . '/' . $relative_url;
+    } else {
+        return $relative_url;
+    }
 }
 
 $id_username_dic = array();
 
-function tpl_userlink($id_or_name) {
+function tpl_userlink($id_or_name, $last_name_first = false) {
+    global $id_username_dic, $env;
     if ($id_or_name != "") {
-        global $id_username_dic;
-        if (is_int($id_or_name)) {
+        if (is_numeric($id_or_name)) {
             if (empty($id_username_dic)) {
                 $id_username_dic = $env->getIDUsernameDictionary();
             }
-            $name = $id_username_dic[$id];
+            $name = $id_username_dic[$id_or_name];
         } else {
             $name = $id_or_name;
         }
+        $url = tpl_url('user/' . str_replace(" ", "_", $name));
+        if ($last_name_first) {
+            $namearr = User::splitName($name);
+            $namestr = $namearr[1] . ', ' . $namearr[0];
+        } else {
+            $namestr = $name;
+        }
         ?>
-        <a href="<?php echo tpl_url('user/' . str_replace(" ", "_", $name)) ?>" class="userlink"><?php echo $name ?></a> 
+        <a href="<?php echo $url ?>" class="userlink"><?php echo $namestr ?></a> 
         <?php
     }
 }
@@ -164,27 +174,6 @@ function tpl_color_selector($name, $default_value = "#ff0000", $js_onchange = ""
         });
     </script>
     <?php
-}
-
-function tpl_headerpic() {
-    global $env;
-    if ($env->has_headerpic) {
-        $headerpic_dir = $env->main_dir . '/' . $env->headerpic_path;
-        $arr = scandir($headerpic_dir);
-        $pic = "";
-        foreach (shuffle($arr) as $file) {
-            $path = $headerpic_dir . '/' . $file;
-            if (substr($file, strlen($file) - 5) != ".txt" && file_exists($path) && is_file($path)) {
-                $pic = $env->url . '/' . $env->headerpic_path . '/' . $file;
-                break;
-            }
-        }
-        if ($pic != "") {
-            ?>
-            <img src="<?php echo $pic ?>" width="940" height="198" alt=""/>
-            <?php
-        }
-    }
 }
 
 function tpl_icon($name, $title = "", $onclick = "", $format = "svg") {

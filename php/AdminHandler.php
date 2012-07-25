@@ -31,8 +31,9 @@ class AdminHandler extends ToroHandler {
     public function post() {
         if (Auth::isModerator()) {
             if (!empty($_POST)) {
-                if (isset($_POST["usermanagement"])) {
+                if (isset($_GET["usermanagement"])) {
                     $handler = new UserManagementHandler();
+                    ob_start();
                     $handler->post();
                     ob_clean();
                 } else {

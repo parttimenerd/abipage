@@ -63,7 +63,9 @@ function tpl_usermanagement($userarr, $as_page = true, $urlapp = "") {
         (mit E-Mail Benachrichtigung)
     </form>
     <script>
-        $(".usermanagement table").tablesorter();
+        $(".usermanagement table").ready(function(){
+            $(".usermanagement table").tablesorter();
+        });
     </script>
     <?
     if ($as_page) {
