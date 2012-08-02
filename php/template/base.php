@@ -22,7 +22,7 @@ $has_sidebar = false;
 function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null) {
     global $env, $store;
     $usermenu = null;
-    if (Auth::getUserMode() != User::NO_MODE || $env->open) {
+    if (Auth::getUserMode() != User::NO_MODE) {
         $menus = array(
             "images" => array("Bilder", $env->images_subtitle),
             "quotes" => array("Zitate", $env->quotes_subtitle),
@@ -60,10 +60,10 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null) {
             if (Auth::isAdmin()) {
                 $meta_dropdown["preferences"] = array("Einstellungen", $env->preferences_subtitle);
             }
-            if ($env->has_forum){
+            if ($env->has_forum) {
                 $meta_dropdown[$env->forum_url] = array("Forum", "");
             }
-            if ($env->has_wiki){
+            if ($env->has_wiki) {
                 $meta_dropdown[$env->wiki_url] = array("Wiki", "");
             }
             $meta_dropdown["terms_of_use"] = array("Nutzungsbedigungen", $env->terms_of_use_subtitle);
@@ -79,7 +79,9 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null) {
         $menus = array(
             "login" => array("Anmelden", ""),
             "register" => array("Registrieren", ""),
-            "terms_of_use" => array("Nutzungsbedigungen", $env->terms_of_use_subtitle)
+            "terms_of_use" => array("Nutzungsbedigungen", $env->terms_of_use_subtitle),
+            "impress" => array("Impressum", $env->impress_subtitle),
+            "humans.txt" => array("humans.txt", "")
         );
     }
     if ($class != "") {
@@ -166,7 +168,7 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null) {
                                             <?php endforeach ?>
                                             <?php if ($key == "user" && $env->results_viewable && Auth::isEditor()): ?>
                                                 <li>
-                                                    <input id="result_mode" type="checkbox" onclick="setResultMode($(this).is(':checked'))"<?= $store->result_mode_ud ? 'checked="checked"' : ""?>>Ergebnisse anzeigen</input>
+                                                    <input id="result_mode" type="checkbox" onclick="setResultMode($(this).is(':checked'))"<?= $store->result_mode_ud ? 'checked="checked"' : "" ?>>Ergebnisse anzeigen</input>
                                                 </li>
                                             <?php endif; ?>
                                         </ul>
@@ -181,8 +183,9 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null) {
             </div>
         </div><!-- navbar -->
         <div class="container">
-            <div id="h5p-message"></div> <script>window.h5please=function(a){ document.getElementById("h5p-message").innerHTML=a.html }</script> <script async src="http://api.html5please.com/boxshadow+svg-img+cssgradients+fontface+csstransforms.json?callback=h5please&texticon&html"></script>  
-            <!--[if lt IE 7]><p class=chromeframe>Your browser is <em>ancient!</em> <a href="http://browsehappy.com/">Upgrade to a different browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to experience this site.</p><![endif]-->
+            <? tpl_html5_please() ?>
+            <!--<div id="h5p-message"></div> <script>window.h5please=function(a){ document.getElementById("h5p-message").innerHTML=a.html }</script> <script async src="http://api.html5please.com/boxshadow+svg-img+cssgradients+fontface+csstransforms.json?callback=h5please&texticon&html"></script>-->  
+            <!--[if lt IE 10]><p class=chromeframe>Your browser is <em>ancient!</em> <a href="http://browsehappy.com/">Upgrade to a different browser</a>.</p><![endif]-->
             <header class="jumbotron subhead" id="overview">
                 <h1><?php echo $title ?></h1>
                 <p class="lead"><?php echo $subtitle ?></p>
@@ -191,7 +194,10 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null) {
                 if ($subnav != null && count($subnav) == 4) {
                     $has_sidebar = true;
                     tpl_subnav($subnav["url_part"], $subnav["page"], $subnav["pagecount"], $subnav["phrase"]);
-                } else {
+                } /* else if ($class == "user"){ //HACK
+                  $has_sidebar = true;
+                  tpl_no_subnav();
+                  } */ else {
                     $has_sidebar = $subnav == true;
                     tpl_no_subnav();
                 }
@@ -200,7 +206,7 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null) {
             function tpl_after() {
                 ?>         </div> <?php
             global $env, $js, $has_sidebar;
-            if (Auth::getUserMode() != User::NO_MODE && !$env->open && $has_sidebar) {
+            if (Auth::getUserMode() != User::NO_MODE && $has_sidebar) {
                 tpl_actions_sidebar();
             }
                 ?>
@@ -225,7 +231,11 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null) {
             var ajax_url = "<?php echo tpl_url("ajax") ?>";
         var has_sidebar = <?php echo $has_sidebar ? "true" : "false" ?>;
     <?php echo $js ?>
+    $(".tablesorter").ready(function(){
+        $(".tablesorter").tablesorter();
+    });
     </script>
+    <?= str_replace("&apos;", "'", str_replace("&quot;", '"', $env->footer_appendix)); ?>
     <script src="<?php echo tpl_url("js/libs/bootstrap.min.js") ?>"></script>
     <script src="<?php echo tpl_url("js/plugins.js") ?>"></script>
     <script src="<?php echo tpl_url("js/script.js") ?>"></script>
@@ -246,7 +256,7 @@ function tpl_no_subnav() {
         <hr class="no_subnav"/>
 
         <div class="row">
-            <div class="<?php echo (Auth::getUserMode() != User::NO_MODE && !$env->open && $has_sidebar != false) ? "span9" : "span12" ?> content">
+            <div class="<?php echo (Auth::getUserMode() != User::NO_MODE && $has_sidebar != false) ? "span9" : "span12" ?> content">
                 <?php
             }
 
@@ -261,7 +271,7 @@ function tpl_no_subnav() {
                 </header>
 
                 <div class="row">
-                    <div class="<?php echo (Auth::getUserMode() != User::NO_MODE && !$env->open && $has_sidebar) ? "span9 with_sidebar" : "span12 without_sidebar" ?> content">
+                    <div class="<?php echo (Auth::getUserMode() != User::NO_MODE && $has_sidebar) ? "span9 with_sidebar" : "span12 without_sidebar" ?> content">
                         <?php
                     }
 
@@ -290,10 +300,11 @@ function tpl_no_subnav() {
                         foreach ($actions as $action) {
                             echo '<li class="action_list_item" id="action_' . $action["id"] . '">';
                             tpl_timediff_span(time() - $action["time"]);
+                            echo " ";
                             switch ($action["type"]) {
                                 case "add_user_comment":
                                     echo "Kommentar bei ";
-                                    tpl_userlink(intval($action["person"]));
+                                    tpl_userlink($action["person"]);
                                     break;
                                 case "add_quote":
                                     echo '<a href="' . tpl_url('quotes') . '">Zitat</a> von ' . $action["person"];
@@ -317,45 +328,24 @@ function tpl_no_subnav() {
                                 case "delete_rumors":
                                     echo '<a href="' . tpl_url('rumors') . '">Stimmt es...</a> Beitrag gelöscht';
                                     break;
+                                case "register":
+                                    echo 'Neuer Benutzer registriert';
+                                    break;
                             }
                             echo "</li>\n";
                         }
                     }
 
-                    function tpl_timediff_span($timediff) {
-                        $text = "";
-                        $arr = array(
-                            60 => array("Sekunde", "n"),
-                            60 => array("Minute", "n"),
-                            24 => array("Stunde", "n"),
-                            30.4 => array("Tag", "en"),
-                            12 => array("Monat", "en"),
-                            1 => array("Jahr", "en")
-                        );
-
-                        $start = 1;
-                        $last = array("Sekunde", "n");
-                        foreach ($arr as $mul => $val) {
-                            //var_dump($timediff, $start * $mul, $val);
-                            if ($timediff < $start * $mul) {
-                                $t = round($timediff / $start, 0);
-                                $text = $t . ' ' . $last[0] . ($t > 1 ? $last[1] : '');
-                                break;
-                            }
-                            $last = $val;
-                            //var_dump($start * $mul);
-                            $start *= $mul;
-                        }
-                        ?>
-                        <span class="timediff">Vor <?php echo $text ?></span>
-                        <?php
-                    }
-
-                    function tpl_item_before($title = "", $icon = "", $classapp = "", $id = "") {
+                    function tpl_item_before($title = "", $icon = "", $classapp = "", $id = "", $link = "", $link_title = "") {
                         ?>
                         <div class="well item <?php echo $classapp ?>" id="<?php echo $id ?>">
                             <?php if ($title != ""): ?>
-                                <span class="item-header"><?php if ($icon != "") tpl_icon($icon) ?> <?php echo $title ?></span>
+                                <span class="item-header">
+                                    <? if ($icon != "") tpl_icon($icon) ?>
+                                    <? if ($link != "") echo "<a href=\"$link\"" . ($link_title != "" ? (" title='" . $link_title . "'") : "") . ">" ?>
+                                    <?= $title ?>
+                                    <? if ($link != "") echo "</a>" ?>
+                                </span>
                                 <hr/>
                             <?php endif ?>
                             <div class="item-content">
@@ -404,7 +394,7 @@ function tpl_no_subnav() {
                     <hr/>
                     <div class="item-footer">
                         <button class="btn" <?php echo $onclick1 == "" ? 'type="submit"' : "" ?> name="send" onclick="<?php echo $onclick1 ?>"><?php echo $title1 ?></button>
-                        <button class="btn" <?php echo $onclick2 == "" ? 'type="submit"' : "" ?> name="send_anonymous" onclick="<?php echo $onclick2 ?>"><?php echo $title2 ?></button>
+                        <button class="btn" <?php echo $onclick2 == "" ? 'type="submit"' : "" ?> name="send_anonymous" title="Wichtig: Für die Moderatoren und Admins ist der Name sichtbar" onclick="<?php echo $onclick2 ?>"><?php echo $title2 ?></button>
                     </div>
                     <?php echo ($onclick1 == "" && $onclick2 == "") ? "</form>" : "" ?>
                 </div>
@@ -424,3 +414,12 @@ function tpl_no_subnav() {
                 tpl_item_after();
                 tpl_after();
             }
+
+            function tpl_html5_please() {
+                ?>
+                <div id="h5p-message"></div>
+                <script async>
+                    Modernizr.html5please = function(opts){ var passes = true; var features = opts.features.split('+'); var feat; for (var i = -1, len = features.length; ++i < len; ){ feat = features[i]; if (Modernizr[feat] === undefined) window.console && console.warn('Modernizr.' + feat + ' test not found'); if (Modernizr[feat] === false) passes = false; } if (passes){ opts.yep && opts.yep(); return passes; } Modernizr.html5please.cb = opts.nope; var script = document.createElement('script'); var ref = document.getElementsByTagName('script')[0]; var url = 'http://api.html5please.com/' + features.join('+') + '.json?callback=Modernizr.html5please.cb' + (opts.options ? ('&' + opts.options) : '') + '&html'; script.src = url; ref.parentNode.insertBefore(script, ref); return false; }; Modernizr.html5please({ features: "svg-css+svg-img+css-transitions+fontface+form-validation+forms+datalist+filereader", options: "texticon", yep: function(){ /* put your own initApp() here */ }, // all tests pass. initialize app. nope: function(a){ document.getElementById("h5p-message").innerHTML=a.html; } })
+                </script>
+               <?
+        }

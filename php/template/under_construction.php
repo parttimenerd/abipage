@@ -33,8 +33,8 @@ function tpl_under_construction() {
         </head>
         <body>
             <div id="container">
-                <?php tpl_icon("pc_worker") ?>
-                The site is currently under construction, it will be accessable soon.
+                <?php tpl_icon("pc_worker") ?><br/>
+                The site is currently under construction, it will be accessible soon.
             </div>
         </body>
     </html>

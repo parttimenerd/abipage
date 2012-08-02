@@ -36,7 +36,7 @@ class QuotesHandler extends RatableUserContentHandler {
 
     public function processPhraseImpl($phrase) {
         $phrase = cleanInputText($phrase);
-        $this->list->appendToWhereApp(" AND (MATCH(person, text) AGAINST('" . $phrase . "') OR text LIKE '%" . $phrase . "%' OR person LIKE '%" . $phrase . "%')");
+        $this->list->appendToWhereApp(" AND (MATCH(person, text) AGAINST('" . $phrase . "') OR text LIKE '%" . $phrase . "%' OR person LIKE '%" . $phrase . "%') ");
     }
 
 }

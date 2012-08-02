@@ -539,7 +539,7 @@ Options -MultiViews
 
 RewriteEngine on
 
-RewriteBase /abipage/
+RewriteBase /abipage
 
 RewriteCond %{REQUEST_URI} !^(.*\.[a-z]*)
 RewriteCond %{REQUEST_URI} !^(index\.php)

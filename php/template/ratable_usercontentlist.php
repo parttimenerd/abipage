@@ -26,7 +26,7 @@ function tpl_image_list($images, $page, $pages, $sort_str = "", $phrase = "", $a
         tpl_image_upload_item();
     }
     foreach ($images as $img) {
-        tpl_image_item($img["id"] . '.' . $img["format"], $img["id"], $img["description"], $img["userid"], $img["time"], $img["own_rating"], $img["rating"], true);
+        tpl_image_item($img["id"] . '.' . $img["format"], $img["id"], $img["description"], $img["userid"], $img["time"], $img["own_rating"], $img["rating"], $img["rating_count"], true, $img["data"]);
     }
     ?>
     <script>
@@ -49,7 +49,7 @@ function tpl_image_list($images, $page, $pages, $sort_str = "", $phrase = "", $a
         <?php
         tpl_after();
     } else {
-        PiwikHelper::echoJSTrackerCode();
+        PiwikHelper::echoJSTrackerCode(false);
     }
 }
 
@@ -77,7 +77,7 @@ function tpl_image_upload_item($with_descr = true) {//"enctype" => "multipart/fo
 </div>");
 }
 
-function tpl_image_item($imgfile, $id, $descr, $senduser, $time, $own_rating, $average_rating, $show_name) {
+function tpl_image_item($imgfile, $id, $descr, $senduser, $time, $own_rating, $average_rating, $rating_count, $show_name, $data = array()) {
     global $env;
     tpl_item_before("", "", "content-item", $id);
     ?>
@@ -89,7 +89,7 @@ function tpl_image_item($imgfile, $id, $descr, $senduser, $time, $own_rating, $a
     echo str_replace('&lt;br/>', "", formatText($descr))
     ?>		
     <?php
-    tpl_item_after_ruc($id, $time, $senduser, $own_rating, $average_rating, $show_name);
+    tpl_item_after_ruc($id, $time, $senduser, $own_rating, $average_rating, $rating_count, $show_name, false, $data);
 }
 
 function tpl_quote_list($quotes, $page, $pages, $sort_str, $phrase, $as_page = true) {
@@ -101,7 +101,7 @@ function tpl_quote_list($quotes, $page, $pages, $sort_str, $phrase, $as_page = t
         tpl_write_quote_item();
     }
     foreach ($quotes as $quote) {
-        tpl_quote_item($quote["id"], $quote["person"], $quote["text"], $quote["userid"], $quote["time"], $quote["own_rating"], $quote["rating"], (!$quote["isanonymous"] || Auth::isModerator()));
+        tpl_quote_item($quote["id"], $quote["person"], $quote["text"], $quote["userid"], $quote["time"], $quote["own_rating"], $quote["rating"], $quote["rating_count"], (!$quote["isanonymous"] || Auth::isModerator()), true, $quote["data"]);
     }
     ?>
     <script>
@@ -115,29 +115,30 @@ function tpl_quote_list($quotes, $page, $pages, $sort_str, $phrase, $as_page = t
     if ($as_page) {
         tpl_after();
     } else {
-        PiwikHelper::echoJSTrackerCode();
+        PiwikHelper::echoJSTrackerCode(false);
     }
 }
 
 function tpl_write_quote_item() {
     tpl_item_before("Zitat hinzufügen", "pencil", "item-send item-quote-send");
     ?>
-    <input type="text" placeholder="Zitierter Lehrer" name="person" class="teacher_typeahead" required="on" pattern="([A-ZÄÖÜ.]([a-zßäöü.](-[a-zßäöüA-ZÄÖÜ.])?)+ ?){1,3}"/>
+    <input type="text" placeholder="Zitierter Lehrer" name="person" class="teacher_typeahead" list="teacher_datalist" required="on" pattern="([A-ZÄÖÜ.]([a-zßäöü.](-[a-zßäöüA-ZÄÖÜ.])?)+ ?){1,3}"/>
+    <? tpl_datalist("teacher_datalist", TeacherList::getTeacherNameList()) ?>
     <textarea name="text" placeholder="Zitat" require="on"></textarea>
     <?php
     tpl_item_after_send_anonymous("Hinzufügen", "Anonym hinzufügen", "sendQuote(false)", "sendQuote(true)");
-    tpl_add_js('var teacher_arr = ' . json_encode(TeacherList::getTeacherNameList()) . ';
-        $(".teacher_typeahead").ready(function(){
-            $(this).typeahead({source: teacher_arr});
-        });');
+//    tpl_add_js('var teacher_arr = ' . json_encode(TeacherList::getTeacherNameList()) . ';
+//        $(".teacher_typeahead").ready(function(){
+//            $(".teacher_typeahead").typeahead({source: teacher_arr});
+//        });');
     //tpl_item_after();
 }
 
-function tpl_quote_item($id, $person, $text, $senduser, $time, $own_rating, $average_rating, $show_name) {
+function tpl_quote_item($id, $person, $text, $senduser, $time, $own_rating, $average_rating, $rating_count, $show_name, $has_response_to, $data = array()) {
     //global $env;
-    tpl_item_before($person, "speech_bubbles", "content-item", $id);
+    tpl_item_before($person, "speech_bubbles", "content-item", $id, "javascript:search('$person')", 'Nach Zitaten von/mit "' . $person . '" suchen');
     echo formatText($text);
-    tpl_item_after_ruc($id, $time, $senduser, $own_rating, $average_rating, $show_name);
+    tpl_item_after_ruc($id, $time, $senduser, $own_rating, $average_rating, $rating_count, $show_name, $has_response_to, $data);
 }
 
 function tpl_rumor_list($rumors, $page, $pages, $sort_str, $phrase, $as_page = true) {
@@ -149,7 +150,7 @@ function tpl_rumor_list($rumors, $page, $pages, $sort_str, $phrase, $as_page = t
         tpl_write_rumor_item();
     }
     foreach ($rumors as $rumor) {
-        tpl_rumor_item($rumor["id"], $rumor["text"], $rumor["userid"], $rumor["time"], $rumor["own_rating"], $rumor["rating"], (!$rumor["isanonymous"] || Auth::isModerator()));
+        tpl_rumor_item($rumor["id"], $rumor["text"], $rumor["userid"], $rumor["time"], $rumor["own_rating"], $rumor["rating"], $rumor["rating_count"], (!$rumor["isanonymous"] || Auth::isModerator()), false, $rumor["data"]);
     }
     ?>
     <script>
@@ -163,34 +164,37 @@ function tpl_rumor_list($rumors, $page, $pages, $sort_str, $phrase, $as_page = t
     if ($as_page) {
         tpl_after();
     } else {
-        PiwikHelper::echoJSTrackerCode();
+        PiwikHelper::echoJSTrackerCode(false);
     }
 }
 
 function tpl_write_rumor_item() {
     tpl_item_before("Beitrag schreiben", "pencil", "item-rumor-send");
     ?>
-    <textarea name="text" placeholder="..., dass" require="on">..., dass</textarea>
+    <textarea name="text" placeholder="..., dass " require="on">..., dass </textarea>
     <?php
     tpl_item_after_send_anonymous("Absenden", "Anonym absenden", "sendRumor(false)", "sendRumor(true)");
 }
 
-function tpl_rumor_item($id, $text, $senduser, $time, $own_rating, $average_rating, $show_name) {
+function tpl_rumor_item($id, $text, $senduser, $time, $own_rating, $average_rating, $rating_count, $show_name, $has_response_to, $data = array()) {
 //    global $env;
     tpl_item_before("", "", "content-item", $id);
     echo formatText($text);
-    tpl_item_after_ruc($id, $time, $senduser, $own_rating, $average_rating, $show_name);
+    tpl_item_after_ruc($id, $time, $senduser, $own_rating, $average_rating, $rating_count, $show_name, $has_response_to, $data);
 }
 
-function tpl_item_after_ruc($id, $time, $user, $own_rating, $avrating, $show_name) {
+function tpl_item_after_ruc($id, $time, $user, $own_rating, $avrating, $rating_count, $show_name, $has_response_to, $data = array()) {
     ?>
     </div>
     <hr/>
     <div class="item-footer <?php echo Auth::isModerator() ? "deletable" : '' ?>">
         <ul>
             <li class="time_span_li"><?php tpl_time_span($time) ?>
-            <li class="rating_li"><?php tpl_rating($id, $own_rating, $user, $avrating) ?></li>
-            <li class="user_span_li"><?php tpl_user_span($show_name ? $user : null) ?></li>
+            <li class="rating_li"><?php tpl_rating($id, $own_rating, $user, $avrating, $rating_count, $data) ?></li>
+            <li class="user_span_li"><?php tpl_user_span($show_name ? $user : null, false, true) ?></li>
+            <? if ($has_response_to): ?>
+                <li class="response_to_span_li"><? tpl_item_response_to_span($id) ?></li>
+            <? endif ?>
             <? if (Auth::isModerator()): ?>
                 <li class="delete_span_li"><? tpl_item_delete_span($id) ?></li>
             <? endif ?>
@@ -200,13 +204,19 @@ function tpl_item_after_ruc($id, $time, $user, $own_rating, $avrating, $show_nam
     <?php
 }
 
+function tpl_item_response_to_span($id) {
+    ?>
+    <span class="response_to_item"><?php tpl_icon("speech_bubbles", "Antworten", "reponseToItem('" . $id . "')") ?></span>
+    <?
+}
+
 function tpl_item_delete_span($id) {
     ?>
     <span class="del_item"><?php tpl_icon("delete", "Löschen", "deleteItem('" . $id . "')") ?></span>
     <?php
 }
 
-function tpl_rating($id, $own, $senduser, $average_rating) {
+function tpl_rating($id, $own, $senduser, $average_rating, $rating_count, $data = array()) {
     $can_rate = (is_numeric($senduser) ? $senduser : $senduser->getID()) != Auth::getUserID();
     ?>
     <span id="<?php echo $id ?>rating" class="rating">
@@ -220,17 +230,19 @@ function tpl_rating($id, $own, $senduser, $average_rating) {
             </span>
             <?php
         }
-        if (!$can_rate || is_numeric($own))
-            tpl_average($own)
-            ?>
+        $show_av = !$can_rate || is_numeric($own);
+        tpl_average($show_av ? $average_rating : -1, $show_av ? $rating_count : -1, $data);
+        ?>
     </span>
     <?php
 }
 
-function tpl_average($rating) {
+function tpl_average($rating, $count = -1, $data = array()) {
     ?>
     <span class="average">
-        [<span class="num" title="Durschnittliche Bewertung"><?php echo round($rating, 2) ?></span>]
+        <? if ($rating != -1): ?>
+            [<span class="num" title="<? printf("Ø Bewertung: %1.3f; Bewertungen: %2.d", $rating, $count) ?>"><? printf("Ø%1.1f, x%2.d", $rating, $count) ?></span>]
+        <? endif; ?>
     </span>
     <?php
 }

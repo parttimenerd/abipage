@@ -44,7 +44,7 @@ function formatInputText($text /* , $allow_html = false */) {
     $text = strip_tags($text);
 //    }
     if (strlen($text < 20000)) {
-        return trim($text);
+        return $text;
     } else {
         return "";
     }
@@ -65,11 +65,22 @@ function cleanInputText($input, $db = null) {
     return $db->real_escape_string(formatInputText($input));
 }
 
-function formatText($text) {
+function cleanValue($var){
+    if (is_numeric($var)){
+        if (is_int($var) || is_float($var) || is_long($var))
+            return $var;
+        return floatval($var);
+    }
+    return cleanInputText($var);
+}
+
+function formatText($text, $markdown = true) {
     $arr = array("\'" => "&apos;", '\"' => "&quot;");
     foreach ($arr as $search => $replacement)
         $text = str_replace($search, $replacement, $text);
-    return Markdown($text);
+    if ($markdown)
+        $text = Markdown($text);
+    return $text;
 }
 
 function register_user_in_forum($user, $password) {

@@ -65,6 +65,22 @@ class Auth {
         return false;
     }
 
+    public static function updateLastVisitTime() {
+        if (Auth::getUser()) {
+            Auth::getUser()->updateLastVisitTime();
+            Auth::getUser()->updateDB();
+        }
+    }
+
+    public static function getLastVisitTime($id = -1) {
+        if ($id == -1){
+            if (Auth::getUser())
+                return Auth::getUser()->getLastVisitTime();
+        } else {
+            return User::getByID($id)->getLastVisitTime();
+        }
+    }
+
     public static function cryptCompare($pwd, $crypt_str) {
         if (strlen($pwd) > 0 && strlen($crypt_str) > 0) {
             $arr = explode('$', $crypt_str);
@@ -125,7 +141,7 @@ class Auth {
     public static function getUserID() {
         return self::getUser() != null ? self::$user->getID() : -1;
     }
-    
+
     public static function isEditor() {
         return self::getUser() != null ? (self::$user->getMode() >= User::EDITOR_MODE) : false;
     }
@@ -139,15 +155,15 @@ class Auth {
     }
 
     public static function isSameUser($user) {
-        $id = $user == null ? -2 : $user->getID();
+        $id = $user == null ? -2 : (is_numeric($user) ? intval($user) : $user->getID());
         return $id == self::getUserID();
     }
 
     public static function isNotActivated() {
         return self::$user_not_activated;
     }
-    
-    public static function isViewingResults(){
+
+    public static function isViewingResults() {
         global $env, $store;
         return $env->results_viewable && $store->result_mode_ud;
     }

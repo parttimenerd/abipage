@@ -134,31 +134,29 @@ function addLoadedItemsHTML(html, is_append){
 
 jQuery.fn.reverse = [].reverse;
 
-function search(_phrase){
-    if (!is_loading){
-        phrase = _phrase;
-        is_loading = true;
-        page = 1;
-        $.ajax({
-            type: "POST",
-            url: rating_url2,
-            data: $.param({
-                'page': "1", 
-                'sort': sort_str, 
-                'phrase': phrase
-            }),
-            success: function(html){
-                is_loading = false;
-                $(".content-item").remove();
-                addLoadedItemsHTML(html);
-            },
-            error: function(html){
-                is_loading = false;
-                $(".content-item").remove();
-                addLoadedItemsHTML(html.responseText);
-            }
-        });
-    }
+function search(_phrase){        
+    phrase = _phrase;
+    is_loading = true;
+    page = 1;
+    $.ajax({
+        type: "POST",
+        url: rating_url2,
+        data: $.param({
+            'page': "1", 
+            'sort': sort_str, 
+            'phrase': phrase
+        }),
+        success: function(html){
+            is_loading = false;
+            $(".content-item").remove();
+            addLoadedItemsHTML(html);
+        },
+        error: function(html){
+            is_loading = false;
+            $(".content-item").remove();
+            addLoadedItemsHTML(html.responseText);
+        }
+    });
 }
 
 if (window.max_page !== undefined){
@@ -432,16 +430,16 @@ function userCommentNotify(id){
         if (html != ""){
             var arr = html.split("|", 2);
             var id = arr[0];
-            if (arr[1] == "notified"){
+            if (arr[1] != "notified"){
                 $("#" + id).addClass("notified_as_bad");
-                $("#" + id + " .notify").html("+").attr("title", "Zeigen");
-            } else if (arr[1] == "unnotified"){
+                $("#" + id + " .notify").attr("title", "Positiv bewerten");
+            } else if (arr[1] != "unnotified"){
                 $("#" + id).removeClass("notified_as_bad");
-                $("#" + id + " .notify").html("-").attr("title", "Verstecken");
+                $("#" + id + " .notify").attr("title", "Negativ bewerten");
             }
         }
     }
-    var action = $("#" + id).hasClass("notified_as_bad") ? "notify" : "unnotify"; 
+    var action = $("#" + id).hasClass("notified_as_bad") ? "unnotify" : "notify"; 
     $.ajax({
         type: "POST",
         url: rating_url2,
@@ -465,6 +463,8 @@ function sendUserComment(is_anonymous){
     }
     var func = function(html){
         $(".write_comment textarea").val("");
+        if (html != "")
+            $(".write_comment").after(html);
         is_loading = false;
     }
     is_loading = true;
@@ -486,3 +486,32 @@ function setResultMode(view_results){
         })
     });
 }
+
+function updateTimespans(){
+    $(".timespan[time]").each(function(){
+        var ele = $(this);
+        ele.html(timespanText(ele.attr("time")));
+    });
+}
+
+function timespanText(timediff){
+    text = "";
+    arr = [
+    [1, 60, ["Sekunde", "n"]],
+    [60, 3600, ["Minute", "n"]],
+    [3600, 86400, ["Stunde", "n"]],
+    [86400, 2626560, ["Tag", "en"]],
+    [2626560, 31518720, ["Monat", "en"]],
+    [31518720, 1E10, ["Jahr", "en"]]
+    ];
+    for (var steparr in arr) {
+        if (steparr[1] > timediff) {
+            value = floor(timediff / steparr[0]);
+            text = value + " " + (value == 1 ? steparr[2][0] : steparr[2][0] . steparr[2][1]);
+            break;
+        }
+    }
+    return 'Vor ' + text;
+}
+
+window.setInterval("updateTimespans", 5000);

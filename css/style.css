@@ -285,10 +285,23 @@ table {
     visibility: hidden;
     display: none;
 }
-
 .notified_as_bad:hover .item-content, .notified_as_bad:hover hr {
     visibility: visible;
     display: block;
+}
+.item-footer .notify {
+    background-image: url(../img/icons/disapprove.svg);
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    height: 1.5em !important;
+    margin-left: 30px;
+    padding: 0.7em;
+    width: 0.9em !important;
+}
+.notified_as_bad .notify {
+    background-image: url(../img/icons/approve.svg);
+    background-size: cover;
 }
 
 .write_comment textarea {
@@ -304,7 +317,7 @@ table {
 }
 .item-footer ul {
     list-style: none outside none;
-    margin-left: -60px;
+    margin-left: -55px;
     margin-right: -50px;
     width: 120%;
 }
@@ -317,13 +330,13 @@ table {
     width: auto;
 } 
 .item-footer .rating_li {
-     margin-left: 5%;
-     width: 25%;
-     text-align: right;
-     margin-right: 5%;
- }
+    margin-left: 5%;
+    width: 25%;
+    text-align: right;
+    margin-right: 5%;
+}
 .item-footer .user_span_li {
-     width: 30%;
+    width: 25%;
 }
 .item-footer .icon {
     height: 0.75em;
@@ -339,6 +352,19 @@ table {
 .content-item {
     text-align: justify !important;
 }
+.content-item .item-header {
+    float: left;
+    margin-top: -15px;
+}
+
+.userlist {
+    list-style: none;
+}
+
+.correct_szlig {
+    font-style: italic;
+}
+
 
 /* =============================================================================
    Media Queries

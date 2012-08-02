@@ -115,7 +115,9 @@ Wenn ja, sollte piwik installiert sein und diese Website hinzugefügt worden sei
             "user_comments_editable" => array("default" => "true", "label" => "Können Benutzerkommentare geschrieben werden?", "type" => "checkbox"),
             "user_characteristics_editable" => array("default" => "false", "label" => "Kann der eigene Steckbrief bearbeitet werden?", "type" => "checkbox"),
             "user_polls_open" => array("default" => "false", "label" => "Ist die Umfragenseite sichtbar?", "type" => "checkbox"),
-        );
+            "system_mail_adress" => array("default" => "", "label" => "Mailadresse der Seite"),
+            "review_user_comments_automatically" => array("default" => "false", "label" => "Benutzerkommentare automatisch freischalten (nach maschineller Prüfung)", "type" => "checkbox")
+            );
     }
 
     public function getDefault($var) {
@@ -146,7 +148,7 @@ Wenn ja, sollte piwik installiert sein und diese Website hinzugefügt worden sei
                 if (isset($value["type"]) && $value["type"] == "checkbox") {
                     $this->pref_vals[$key]["default"] = isset($_POST[$key]) ? "true" : "false";
                 } else {
-                    $this->pref_vals[$key]["default"] = cleanInputText($_POST[$key]);
+                    $this->pref_vals[$key]["default"] = str_replace("\'", "&apos;", str_replace('\"', "&quot;", $_POST[$key]));
                 }
             }
             $this->fillDBWithDefaultValues();

@@ -22,34 +22,40 @@ function tpl_usermanagement($userarr, $as_page = true, $urlapp = "") {
         tpl_item_before();
     }
     ?>
-    <form method="post" <?php echo $urlapp != "" ? ('action="?' . $urlapp . '"') : "" ?>>
-        <table>
-            <tr>
-                <th>Auswählen</th>
-                <th>ID</th>
-                <th>Vorname</th>
-                <th>Nachname</th>
-                <th>Mailadresse</th>
-                <th>Mathekurs</th>
-                <th>Mathlehrer</th>
-                <th>Modus</th>
-                <th>Aktiviert</th>
-                <th>Link</th>
-            </tr>
-            <?php foreach ($userarr as $user): ?>
+    <form method="post" <?php echo $urlapp != "" ? ('action="?' . $urlapp . '"') : "" ?> class="usermanagement">
+        <table class="tablesorter">
+            <thead>
                 <tr>
-                    <td><input type="checkbox" value="true" name="<?php echo $user->getID() ?>"/></td>
-                    <td><?php echo $user->getID() ?></td>
-                    <td><?php echo $user->getFirstName() ?></td>
-                    <td><?php echo $user->getLastName() ?></td>
-                    <td><?php echo $user->getMailAdress() ?></td>
-                    <td><?php echo $user->getMathCourse() ?></td>
-                    <td><?php echo $user->getMathTeacher() ?></td>
-                    <td><?php echo tpl_usermode_to_text($user->getMode()) ?></td>
-                    <th><?php echo $user->isActivated() ? "Ja" : "Nein" ?></td>
-                    <th><?php tpl_userlink($user->getName()) ?></td>
+                    <th>Auswählen</th>
+                    <th>ID</th>
+                    <th>Vorname</th>
+                    <th>Nachname</th>
+                    <th>Mailadresse</th>
+                    <th>Mathekurs</th>
+                    <th>Mathlehrer</th>
+                    <th>Modus</th>
+                    <th>Aktiviert</th>
+                    <th>Link</th>
+                    <th>Einstellungen</th>
                 </tr>
-            <?php endforeach ?>
+            </thead>
+            <tbody>
+                <?php foreach ($userarr as $user): ?>
+                    <tr>
+                        <td><input type="checkbox" value="true" name="<?php echo $user->getID() ?>"/></td>
+                        <td><?php echo $user->getID() ?></td>
+                        <td><?php echo $user->getFirstName() ?></td>
+                        <td><?php echo $user->getLastName() ?></td>
+                        <td><a href="mailto:<?php echo $user->getMailAdress() ?>"><?php echo $user->getMailAdress() ?></a></td>
+                        <td><?php echo $user->getMathCourse() ?></td>
+                        <td><?php echo $user->getMathTeacher() ?></td>
+                        <td><?php echo tpl_usermode_to_text($user->getMode()) ?></td>
+                        <td><?php echo $user->isActivated() ? "Ja" : "Nein" ?></td>
+                        <td><a href="<?= tpl_url('user/' . $user->getName()) ?>">Link</a></td>
+                        <td><a href="<?= tpl_url('user/' . $user->getName() . '/preferences') ?>">Einstellungen</a></td>
+                    </tr>
+                <?php endforeach ?>
+            </tbody>
         </table>
         Ausgewählte Benutzer  
         <button class="btn" type="submit" name="activate">Aktivieren</button>
@@ -58,15 +64,10 @@ function tpl_usermanagement($userarr, $as_page = true, $urlapp = "") {
             Modus <?php tpl_usermode_combobox("mode") ?>
             <button class="btn" type="submit" name="setmode">setzen</button><br/>
         <?php endif ?>
-        <input type="password" style="width: 150px" placeholder="Neues Password"/>
+        <input type="password" name="password" style="width: 150px" placeholder="Neues Passwort"/>
         <button class="btn" type="submit" name="setpassword">Passwort setzen</button>
         (mit E-Mail Benachrichtigung)
     </form>
-    <script>
-        $(".usermanagement table").ready(function(){
-            $(".usermanagement table").tablesorter();
-        });
-    </script>
     <?
     if ($as_page) {
         tpl_item_after();

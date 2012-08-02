@@ -2,23 +2,22 @@
 
 class KeyValueStore {
 
-    private $__dic = array();
-    private $__dic_ud = array(); //values belong to the current user
-    private $__dic_set = array("norm" => array(), "ud" => array());
-    private $changed = false;
+    //ud = values belong to the current user
+    private $__dic = array("common" => array(), "ud" => array());
+    private $insertarr = array("common" => true, "ud" => true);
+    private $updatearr = array("common" => false, "ud" => false);
 
     public function __construct() {
         global $db;
-        $res = $db->query("SELECT `key`, value, userid FROM " . DB_PREFIX . "keyvaluestore WHERE userid=" . Auth::getUserID() . " OR userid=0") or die($db->error);
+        $res = $db->query("SELECT `key`, value, userid FROM " . DB_PREFIX . "keyvaluestore WHERE (userid=" . Auth::getUserID() . " AND `key`=" . Auth::getUserID() . ") OR (userid=0 AND `key`='common')") or die($db->error);
         if ($res != null) {
             while ($arr = $res->fetch_array()) {
-                $value = $arr["value"];
-                if (is_bool($value))
-                    $value = $value == "true";
-                if ($arr["userid"] != 0) {
-                    $this->__dic_ud[$arr["key"]] = $value;
+                if ($arr["key"] == "common") {
+                    $this->__dic["common"] = (array) json_decode($arr["value"]);
+                    $this->insertarr["common"] = false;
                 } else {
-                    $this->__dic[$arr["key"]] = $value;
+                    $this->__dic["ud"] = (array) json_decode($arr["value"]);
+                    $this->insertarr["ud"] = false;
                 }
             }
         }
@@ -26,28 +25,24 @@ class KeyValueStore {
 
     public function __get($var) {
         list($var, $ud) = $this->getRealVarName($var);
-        $arr = $ud ? $this->__dic_ud : $this->__dic;
-        if (array_key_exists($var, $arr)) {
-            return $arr[$var];
+        $key = $ud ? "ud" : "common";
+        if (array_key_exists($var, $this->__dic[$key])) {
+            return $this->__dic[$key][$var];
         }
         return null;
     }
 
     public function __set($var, $value) {
+        global $db;
         list($_var, $ud) = $this->getRealVarName($var);
-        $set_arr = $this->__dic_set[$var == $_var ? "norm" : "ud"];
-        if (isset($set_arr[$_var])) {
-            $this->__dic_set[$var == $_var ? "norm" : "ud"][$_var]["action"] = "update";
+        $key = !$ud ? "common" : "ud";
+        if (isset($this->__dic[$key][$_var])) {
+            $this->updatearr[$key] = true;
         } else {
-            $this->__dic_set[$var == $_var ? "norm" : "ud"][$_var] = array();
-            $this->__dic_set[$var == $_var ? "norm" : "ud"][$_var]["action"] = "insert";
+            $this->updatearr[$key] = true;
+            $this->insertarr[$key] = true;
         }
-        $this->changed = true;
-        if ($ud){
-            $this->__dic_ud[$_var] = cleanInputText($value);
-        } else {
-            $this->__dic[$_var] = cleanInputText($value);
-        }
+        $this->__dic[$key][$_var] = cleanValue($value);
     }
 
     private function getRealVarName($var) {
@@ -61,30 +56,14 @@ class KeyValueStore {
     }
 
     public function updateDB() {
-        if ($this->changed) {
-            $uid = Auth::getUserID();
-            $arr = $this->__dic_set["norm"];
-            foreach ($this->__dic as $key => $value) {
-                if (isset($arr[$key])){
-                    $this->writeValueIntoDB($key, $value, 0, $arr[$key]["action"] == "insert");
-                }
-            }
-            $arr = $this->__dic_set["ud"];
-            foreach ($this->__dic_ud as $key => $value) {
-                if (isset($arr[$key])){
-                    $this->writeValueIntoDB($key, $value, $uid, $arr[$key] == "insert");
-                }
-            }
-        }
-    }
-
-    private function writeValueIntoDB($key, $value, $userid = 0, $insert = true) {
         global $db;
-        //$res = $db->query("SELECT * FROM " . DB_PREFIX . "keyvaluestore WHERE `key`='" . $key . "' AND userid=" . intval($userid));
-        if (!$insert) {
-            $db->query("UPDATE " . DB_PREFIX . "keyvaluestore SET value='" . $db->real_escape_string($value["default"]) . "' WHERE `key`='" . $key . "' AND userid=" . intval($userid)) or die($db->error);
-        } else {
-            $db->query("INSERT INTO " . DB_PREFIX . "keyvaluestore(`key`, value, userid) VALUES('$key', '" . $db->real_escape_string($value["default"]) . "', " . intval($userid) . ")") or die($db->error);
+        $uid = Auth::getUserID();
+        foreach (array("common", "ud") as $key) {
+            if ($this->insertarr[$key]) {
+                $db->query("INSERT INTO " . DB_PREFIX . "keyvaluestore(`key`, value, userid) VALUES('" . ($key == "ud" ? $uid : "common") . "', '" . json_encode($this->__dic[$key]) . "', " . ($key == "ud" ? $uid : 0) . ")") or die($db->error);
+            } else if ($this->updatearr[$key]) {
+                $db->query("UPDATE " . DB_PREFIX . "keyvaluestore SET value='" . json_encode($this->__dic[$key]) . "' WHERE `key`='" . ($key == "ud" ? $uid : "common") . "' AND userid=" . ($key == "ud" ? $uid : 0)) or die($db->error);
+            }
         }
     }
 

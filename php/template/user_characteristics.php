@@ -17,8 +17,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class UserCharacteristicsHandler extends ToroHandler {
-	
-    
-    
-}
+/*user_characteristics(id INT AUTO_INCREMENT PRIMARY KEY, userid INT, type TINYINT, topic INT, text TEXT, FULLTEXT(text)) ENGINE = MYISAM") or die("Can't create user_characteristics table: " . self::$db->error);
+user_characteristics_topics(id INT AUTO_INCREMENT PRIMARY KEY, type TINYINT, text TEXT, position INT, FULLTEXT(text)) ENGINE = MYISAM") or die("Can't create user_characteristics_topics table: " . self::$db->error);*/
+
+
+?>

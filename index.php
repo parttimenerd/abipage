@@ -17,6 +17,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+define('DEBUG', isset($_REQUEST["debug"]));
+
+if (DEBUG)
+    define("BEGIN_TIME", microtime(true));
+
 require_once dirname(__FILE__) . '/php/bootloader.php';
 
 if (!defined('DB_NAME')) {
@@ -26,10 +31,18 @@ if (!defined('DB_NAME')) {
             ));
     $site->serve();
 } else {
+
+    define("TITLE", $env->title);
+
     if (!Auth::isAdmin() && $env->is_under_construction) {
         tpl_under_construction();
         exit;
     }
+
+    if (!Auth::isAdmin()) {
+        error_reporting(0);
+    }
+
     $admin_pages = array(
         array("preferences", "PreferencesHandler")
     );
@@ -84,8 +97,14 @@ if (!defined('DB_NAME')) {
         $site = new ToroApplication($no_pages);
     }
     $site->serve();
-    
-    if ($store) {
-        $store->updateDB();
+
+    Auth::updateLastVisitTime();
+
+    $store->updateDB();
+
+    if (DEBUG) {
+        if (Auth::isAdmin())
+            $db->printBuffer();
+        echo "Ausführdauer des Skripts: " . round((microtime(true) - BEGIN_TIME) * 1000, 1) . "ms";
     }
 }

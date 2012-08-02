@@ -38,8 +38,13 @@ class RatableUserContentHandler extends ToroHandler {
             $time_sort = $arr[0] == "time";
             $sort_desc = $arr[1] == "desc";
         }
-        if ($slug != null && preg_match("/\/[0-9]+/", $slug)) {
-            $start = $this->items_per_page * (intval(substr($slug, 1)) - 1);
+        if ($slug != null) {
+            if (preg_match("/\/[0-9]+/", $slug)) {
+                $start = $this->items_per_page * (intval(substr($slug, 1)) - 1);
+            } else {
+                //FIX
+                //$this->processPhrase(substr(str_replace('_', ' ', $slug), 1));
+            }
         } else if (isset($_GET["page"])) {
             $start = $this->items_per_page * (intval($_GET["page"]) - 1);
         } else if (empty($_GET) || !isset($_GET["start"]) || !is_int($_GET["start"])) {
@@ -61,15 +66,15 @@ class RatableUserContentHandler extends ToroHandler {
     public function post() {
         global $env;
         if (isset($_POST["rating"]) && isset($_POST["id"])) {
-            $rating = $this->list->rate(intval($_POST["id"]), intval($_POST["rating"]));
-            tpl_average($rating);
-            PiwikHelper::addJSTrackerCodeLine("Item rated");
-            PiwikHelper::echoJSTrackerCode();
+            $arr = $this->list->rate(intval($_POST["id"]), intval($_POST["rating"]));
+            tpl_average($arr[0], $arr[1], $arr[2]);
+            PiwikHelper::addTrackGoalJS("Item rated");
+            PiwikHelper::echoJSTrackerCode(false);
         } else if (isset($_POST["delete"]) && Auth::isModerator() && isset($_POST["id"])) {
             if ($this->list->deleteItem(intval($_POST["id"]))) {
                 PiwikHelper::addTrackGoalJS("Item deleted");
                 echo intval($_POST["id"]) . '|';
-                PiwikHelper::echoJSTrackerCode();
+                PiwikHelper::echoJSTrackerCode(false);
             }
         } else if (isset($_POST["send"]) || !empty($_FILES["uploaded_file"]) || isset($_POST["send_anonymous"])) {
             if ($this->post_impl()) {

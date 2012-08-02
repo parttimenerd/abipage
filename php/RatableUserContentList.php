@@ -70,7 +70,7 @@ class RatableUserContentList {
                 $start = ($this->getPageCount() * $this->items_per_page) - $this->items_per_page;
             }
             //$start = intval($start) - (intval($start) % $this->items_per_page);
-            $res = $this->db->query("SELECT " . $this->table . ".*, (SELECT " . $this->table . "_ratings.rating FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id AND userid=" . $user->getID() . ") AS own_rating FROM " . $this->table . ", " . DB_PREFIX . "user u " . $this->from_app . " WHERE u.id = userid AND u.activated = 1 " . $this->where_app . " ORDER BY " . ($time_sort ? "time" : "rating") . " " . ($desc ? "DESC" : "ASC") . " LIMIT " . $start . ", " . $this->items_per_page) or die($this->db->error);
+            $res = $this->db->query("SELECT " . $this->table . ".rating AS rating, " . $this->table . ".*, (SELECT " . $this->table . "_ratings.rating FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id AND userid=" . $user->getID() . ") AS own_rating, (SELECT COUNT(*) FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id) AS rating_count FROM " . $this->table . ", " . DB_PREFIX . "user u " . $this->from_app . " WHERE u.id = userid AND u.activated = 1 " . $this->where_app . " ORDER BY " . ($time_sort ? "time" : "rating") . " " . ($desc ? "DESC" : "ASC") . " LIMIT " . $start . ", " . $this->items_per_page) or die($this->db->error);
             if ($res != null) {
                 while ($result = $res->fetch_array()) {
                     $arr[] = $result;
@@ -80,7 +80,7 @@ class RatableUserContentList {
                 $str = "";
                 foreach ($arr as $val)
                     $str .= ($str != "" ? ", " : "") . $val["id"];
-                $res = $this->db->query("SELECT " . $this->table . ".*, (SELECT " . $this->table . "_ratings.rating FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id AND userid=" . $user->getID() . ") AS own_rating FROM " . $this->table . ", " . DB_PREFIX . "user u " . $this->from_app . " WHERE u.id = userid AND u.activated = 1 " . $this->where_app . " AND " . $this->table . ".response_to IN (" . $str . ") ORDER BY time ASC LIMIT 0, " . $this->items_per_page) or die($this->db->error);
+                $res = $this->db->query("SELECT " . $this->table . ".rating AS rating, " . $this->table . ".*, (SELECT " . $this->table . "_ratings.rating FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id AND userid=" . $user->getID() . ") AS own_rating, (SELECT COUNT(*) FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id) AS rating_count FROM " . $this->table . ", " . DB_PREFIX . "user u " . $this->from_app . " WHERE u.id = userid AND u.activated = 1 " . $this->where_app . " AND " . $this->table . ".response_to IN (" . $str . ") ORDER BY time ASC LIMIT 0, " . $this->items_per_page) or die($this->db->error);
                 if ($res != null) {
                     while ($result = $res->fetch_array()) {
                         $responses[] = $result;
@@ -96,23 +96,30 @@ class RatableUserContentList {
 
     public function updateRating($id) {
         $cid = intval($id);
-        $res = $this->db->query("SELECT AVG(rating) as avg FROM " . $this->table . "_ratings WHERE itemid=" . $cid) or die($this->db->error);
+        $res = $this->db->query("SELECT COUNT(*) as count, rating FROM " . $this->table . "_ratings WHERE itemid=" . $cid . " GROUP BY rating");
+        $data = array("rating");
+        $avg = 0;
+        $count = 0;
         if ($res) {
-            $arr = $res->fetch_array();
-            $avg = $arr["avg"];
-        } else {
-            $avg = 0;
+            while ($arr = $res->fetch_array()) {
+                $data["rating"][intval($arr["rating"])] = array("count" => $arr["count"]);
+                $count += $arr["count"];
+                $avg += $arr["rating"] * $arr["count"];
+            }
+            $avg /= $count;
+            for ($i = 1; $i <= 5; $i++)
+                $data["rating"][$i]["ratio"] = $data["rating"][$i]["count"] / $count;
         }
-        $this->db->query("UPDATE " . $this->table . " SET rating=" . $avg . " WHERE id=" . $cid);
-        return $avg;
+        $this->db->query("UPDATE " . $this->table . " SET rating=" . $avg . ", data='" . json_encode($data) . "' WHERE id=" . $cid) or die($this->db->error);
+        return array($avg, $count, $data);
     }
 
     public function rate($id, $rating, $user = null) {
         $user = Auth::getUser();
         $cid = intval($id);
-        $res = $this->db->query("SELECT itemid FROM " . $this->table . "_ratings WHERE itemid=" . $cid) or die($this->db->error);
-        if ($res != null && $res->fetch_array()) {
-            $this->db->query("UPDATE " . $this->table . "_ratings SET rating=" . intval($rating) . " WHERE itemid=" . $cid);
+        $res = $this->db->query("SELECT rating FROM " . $this->table . "_ratings WHERE itemid=" . $cid . " AND userid=" . Auth::getUserID()) or die($this->db->error);
+        if ($res && $res->fetch_array()) {
+            $this->db->query("UPDATE " . $this->table . "_ratings SET rating=" . intval($rating) . " WHERE itemid=" . $cid . " AND userid=" . Auth::getUserID());
         } else {
             $this->db->query("INSERT INTO " . $this->table . "_ratings(userid, itemid, rating) VALUES(" . $user->getID() . ", " . $cid . ", " . intval($rating) . ")") or die($this->db->error);
         }

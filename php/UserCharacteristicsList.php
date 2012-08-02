@@ -17,8 +17,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class UserCharacteristicsHandler extends ToroHandler {
-	
-    
-    
+/**
+ * Description of UserCharacteristicsList
+ *
+ * @author Johannes Bechberger
+ */
+class UserCharacteristicsList {
+    //put your code here
 }
+
+?>

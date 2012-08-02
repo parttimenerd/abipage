@@ -42,7 +42,7 @@ class RegisterHandler extends ToroHandler {
                 $_POST["password"] != "" &&
                 isset($_POST["password_repeat"]) &&
                 $_POST["password"] == $_POST["password_repeat"]) {
-            $user = User::create($_POST["name"], $_POST["math_course"], $_POST["math_teacher"], $_POST["mail_adress"], $_POST["password"]);
+            $user = User::create($_POST["name"], $_POST["math_course"], $_POST["math_teacher"], $_POST["mail_adress"], $_POST["password"], User::NORMAL_MODE);
             PiwikHelper::addTrackGoalJS("New user registrated");
             //Auth::login($_POST["first_name"] . " " . $_POST["last_name"], $_POST["password"]);
             if ($env->has_forum && isset($_POST["reg_in_forum"])) {
@@ -52,7 +52,8 @@ class RegisterHandler extends ToroHandler {
                 register_user_in_wiki($user, $_POST["password"]);
             }
             tpl_welcome_wait_for_activation();
-            $env->sendAdminMail("Neuer Benutzer registriert. Wartet auf Aktivierung.", 'Benutzer "' . $user->getName() . '" hat sich registriert und wartet auf Aktivierung');
+            $env->addAction($user->getID(), $user->getName(), "register");
+            User::getByMode(User::MODERATOR_MODE)->sendMail("Neuer Benutzer registriert. Wartet auf Aktivierung.", 'Benutzer "' . $user->getName() . '" hat sich registriert und wartet auf Aktivierung');
         } else {
             $this->get();
         }

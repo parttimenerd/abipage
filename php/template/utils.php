@@ -69,6 +69,7 @@ function tpl_get_user_subtitle($user) {
     if ($user->isEditor()) {
         $html .= ($html != "" ? "; " : "") . tpl_usermode_to_text($user->getMode());
     }
+    $html .= ($html != "" ? "; " : "") . tpl_user_last_visit($user->getID(), false);
     return $html;
 }
 
@@ -78,7 +79,7 @@ function tpl_time_span($time, $with_icon = true, $class = "time") {
     <?php
 }
 
-function tpl_user_span($user_id = -1, $with_icon = true) {
+function tpl_user_span($user_id = -1, $with_icon = true, $correct_font = false) {
     ?>
     <span class="user_span">
         <?php
@@ -90,7 +91,7 @@ function tpl_user_span($user_id = -1, $with_icon = true) {
         } else if ($user_id == Auth::getUserID()) {
             echo '<a href="' . tpl_url("user/me") . '">Me</a>';
         } else {
-            tpl_userlink($user_id);
+            tpl_userlink($user_id, false, $correct_font);
         }
         ?>
     </span>
@@ -98,8 +99,8 @@ function tpl_user_span($user_id = -1, $with_icon = true) {
 }
 
 function tpl_url($relative_url) {
-    if (substr($relative_url, 0, 4) != "http"){
-        return URL . '/' . $relative_url;
+    if (substr($relative_url, 0, 4) != "http") {
+        return URL . '/' . str_replace(' ', '_', $relative_url);
     } else {
         return $relative_url;
     }
@@ -107,7 +108,7 @@ function tpl_url($relative_url) {
 
 $id_username_dic = array();
 
-function tpl_userlink($id_or_name, $last_name_first = false) {
+function tpl_userlink($id_or_name, $last_name_first = false, $correct_font = false) {
     global $id_username_dic, $env;
     if ($id_or_name != "") {
         if (is_numeric($id_or_name)) {
@@ -125,9 +126,63 @@ function tpl_userlink($id_or_name, $last_name_first = false) {
         } else {
             $namestr = $name;
         }
+        if ($correct_font)
+            $namestr = str_replace('ß', '<span class="correct_szlig">ß</span>', $namestr);
         ?>
         <a href="<?php echo $url ?>" class="userlink"><?php echo $namestr ?></a> 
         <?php
+    }
+}
+
+function tpl_user_last_visit($name_or_id, $brackets = true, $does_echo = false) {
+    global $id_username_dic, $env;
+    if (is_numeric($name_or_id)) {
+        $id = intval($name_or_id);
+    } else {
+        if (empty($id_username_dic)) {
+            $id_username_dic = $env->getIDUsernameDictionary();
+        }
+        $id = array_search($name_or_id, $id_username_dic);
+    }
+    if ($id) {
+        $time = Auth::getLastVisitTime($id);
+        if ($time && $time > 0 && !Auth::isSameUser($id) && Auth::isModerator()) {
+            $timediff = time() - $time;
+            $str = '<span class="last_visit_time">' . ($brackets ? "[" : "") . 'Letzter Besuch:' . ($timediff > 60 ? tpl_timediff_span($timediff, false) : "Jetzt") . ($brackets ? "]" : "") . '</span>';
+            if ($does_echo){
+                echo $str;
+            } else {
+                return $str;
+            }
+        }
+    }
+}
+
+function tpl_timediff_span($timediff, $does_echo = true, $only_time = false) {
+    $text = "";
+    $arr = array(
+        array(1, 60, array("Sekunde", "n")),
+        array(60, 3600, array("Minute", "n")),
+        array(3600, 86400, array("Stunde", "n")),
+        array(86400, 2626560, array("Tag", "en")),
+        array(2626560, 31518720, array("Monat", "en")),
+        array(31518720, 1E10, array("Jahr", "en"))
+    );
+    $update_via_js = true;
+    foreach ($arr as $steparr) {
+        if ($steparr[1] > $timediff) {
+            $value = floor($timediff / $steparr[0]);
+            $text = ($value == 1 ? "einem" : $value) . " " . ($value == 1 ? $steparr[2][0] : $steparr[2][0] . $steparr[2][1]);
+            break;
+        }
+        if ($steparr[0] >= 3600)
+            $update_via_js = false;
+    }
+    $str = '<span class="timediff"' . ($update_via_js ? (' time="' . (time() + timediff) . '"') : '') . '>' . ($only_time ? '' : 'Vor ') . $text . '</span>';
+    if ($does_echo) {
+        echo $str;
+    } else {
+        return $str;
     }
 }
 
@@ -184,4 +239,14 @@ function tpl_popover($text, $title, $content, $class = "") {
     ?>
     <a href="#" rel="popover" data-content="<?php echo $content ?>" data-original-title="<?php echo $title ?>" class="<?php echo $class ?>"><?php echo $text ?></a>
     <?php
+}
+
+function tpl_datalist($id, $stringarr) {
+    ?>
+    <datalist id="<?= $id ?>">
+        <? foreach ($stringarr as $str): ?>
+            <option value="<?= formatText($str, false) ?>"></option>
+        <? endforeach; ?>
+    </datalist>
+    <?
 }

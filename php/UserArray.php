@@ -62,7 +62,7 @@ class UserArray implements ArrayAccess, Countable {
     public function __call($func, $args = null) {
         $retarr = array();
         foreach ($this->container as $key => $user) {
-            $res = $user->{$func}($args);
+            $res = call_user_func_array(array($user, $func), $args);
             if ($res != null)
                 $retarr[$key] = $res;
         }

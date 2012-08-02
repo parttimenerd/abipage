@@ -36,7 +36,7 @@ class User {
     private $visible;
     private $db;
 
-    public function __construct($id, $name, $math_course, $math_teacher, $mail_adress, $mode, $activated, $crypt_str, $visible = true) {
+    public function __construct($id, $name, $math_course, $math_teacher, $mail_adress, $mode, $activated, $crypt_str, $visible = true, $data = array()) {
         $db = Database::getConnection();
         $this->id = intval($id);
         $this->name = $db->real_escape_string($name);
@@ -47,6 +47,7 @@ class User {
         $this->activated = $activated;
         $this->crypt_str = $db->real_escape_string($crypt_str);
         $this->visible = $visible;
+        $this->data = !empty($data) ? $data : array();
         $this->db = Database::getConnection();
     }
 
@@ -57,7 +58,7 @@ class User {
         if (isset($array["first_name"]) && isset($array["last_name"])) {
             $array["name"] = $array["first_name"] . ' ' . $array["last_name"];
         }
-        return new User($array["id"], $array["name"], $array["math_course"], $array["math_teacher"], $array["mail_adress"], $array["mode"], $array["activated"], $array["crypt_str"]);
+        return new User($array["id"], $array["name"], $array["math_course"], $array["math_teacher"], $array["mail_adress"], $array["mode"], $array["activated"], $array["crypt_str"], $array["visible"], (array)$array["data"]);
     }
 
     public static function getFromMySQLResult($mysql_result) {
@@ -68,6 +69,7 @@ class User {
         if ($res == null) {
             return null;
         }
+        $res["data"] = json_decode($res["data"], false);
         return self::getFromArray($res);
     }
 
@@ -93,7 +95,7 @@ class User {
 
     public static function getByMode($mode) {
         global $db;
-        $res = $db->query("SELECT * FROM " . DB_PREFIX . "user WHERE mode=" . intval($mode));
+        $res = $db->query("SELECT * FROM " . DB_PREFIX . "user WHERE mode>=" . intval($mode));
         $retarr = array();
         while ($user = User::getFromMySQLResult($res)) {
             $retarr[] = $user;
@@ -109,10 +111,10 @@ class User {
      */
     public static function create($name, $math_course, $math_teacher, $mail_adress, $pwd, $mode = self::NORMAL_MODE, $activated = 0, $visible = 1) {
         global $db;
-        $name_arr = self::splitName($db->real_escape_string($name));
+        $name_arr = self::splitName($db->real_escape_string(trim($name)));
         $math_course = intval(is_numeric($math_course) ? $math_course : substr($math_course, 1));
-        $math_teacher = $db->real_escape_string($math_teacher);
-        $mail_adress = $db->real_escape_string($mail_adress);
+        $math_teacher = $db->real_escape_string(trim($math_teacher));
+        $mail_adress = $db->real_escape_string(trim($mail_adress));
         $crypt_str = Auth::crypt($pwd);
         $mode = intval($mode);
         $activated = intval($activated);
@@ -136,6 +138,7 @@ class User {
         $query .= ", mode=" . intval($this->getMode());
         $query .= ", activated=" . ($this->isActivated() ? 1 : 0);
         $query .= ", visible=" . ($this->isVisible() ? 1 : 0);
+        $query .= ", data='" . cleanValue(json_encode($this->data)) . "'";
         $query .= " WHERE id=" . intval($this->id);
         $this->db->query($query) or die($this->db->error);
     }
@@ -170,20 +173,23 @@ class User {
         if ($time == -1) {
             $time = time();
         }
+        $ctext = cleanInputText($text);
         $db = Database::getConnection();
+        $reviewed = $env->review_user_comments_automatically && ReviewText::checkText($text);
         $db->query("INSERT INTO " . DB_PREFIX . "user_comments(id, commented_userid, commenting_userid, text, time, notified_as_bad, reviewed, isanonymous)
-					VALUES(NULL, " . $this->id . ", " . intval($senduserid) . ", '" . cleanInputText($text) . "', " . intval($time) . ", 0, 0, " . intval($anonymous) . ")");
-        $env->addAction($this->db->insert_id, $this->getName(), "add_user_comment");
+					VALUES(NULL, " . $this->id . ", " . intval($senduserid) . ", '" . $ctext . "', " . intval($time) . ", 0, " . ($reviewed ? 1 : 0) . ", " . intval($anonymous) . ")");
+        $env->addAction($this->db->insert_id, $this->name, "add_user_comment");
+        return array("id" => $db->insert_id, "commented_userid" => $this->id, "commenting_userid" => intval($senduserid), "text" => $ctext, "time" => intval($time), "notified_as_bad" => 0, "reviewed" => ($reviewed ? 1 : 0), "anonymous" => intval($anonymous));
     }
 
     public static function reviewUserComment($id) {
         $db = Database::getConnection();
-        $db->query("UPDATE " . DB_PREFIX . "user_comments SET reviewed=1 WHERE id=" . intval($id));
+        $db->query("UPDATE " . DB_PREFIX . "user_comments SET reviewed=1 WHERE id=" . intval($id) . " AND commenting_userid!=" . Auth::getUserID());
     }
 
     public static function deleteUserComment($id) {
         $db = Database::getConnection();
-        $db->query("DELETE FROM " . DB_PREFIX . "user_comments WHERE id=" . intval($id)) or die($db->error);
+        $db->query("DELETE FROM " . DB_PREFIX . "user_comments WHERE id=" . intval($id) . " AND commenting_userid!=" . Auth::getUserID()) or die($db->error);
     }
 
     public function getID() {
@@ -203,13 +209,13 @@ class User {
         $arr = self::splitName($this->name);
         return $arr[1];
     }
-    
-    public static function splitName($name){
+
+    public static function splitName($name) {
         $name_arr = explode(' ', $name);
         $str = $name_arr[0];
         $last_name_prefix = false;
         for ($i = 1; $i < count($name_arr) - 1; $i++) {
-            if ($name_arr[$i] != "von"){
+            if ($name_arr[$i] != "von") {
                 $str .= " " . $name_arr[$i];
             } else {
                 $last_name_prefix = true;
@@ -235,7 +241,7 @@ class User {
     public function getMode() {
         return $this->mode;
     }
-    
+
     public function isEditor() {
         return $this->mode >= self::EDITOR_MODE;
     }
@@ -243,11 +249,11 @@ class User {
     public function isModerator() {
         return $this->mode >= self::MODERATOR_MODE;
     }
-    
+
     public function isAdmin() {
         return $this->mode == self::ADMIN_MODE;
     }
-    
+
     public function isActivated() {
         return $this->activated;
     }
@@ -314,6 +320,19 @@ class User {
 
     public function setVisible($visible) {
         $this->visible = $visible;
+    }
+
+    public function sendMail($topic, $text) {
+        global $env;
+        $env->sendMail($this->mail_adress, $topic, $text);
+    }
+
+    public function updateLastVisitTime() {
+        $this->data["last_visit_time"] = time();
+    }
+
+    public function getLastVisitTime() {
+        return isset($this->data["last_visit_time"]) ? $this->data["last_visit_time"] : -1;
     }
 
 }

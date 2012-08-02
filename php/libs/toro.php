@@ -106,7 +106,7 @@ class ToroApplication {
                 $request_method .= '_ipad';
             } else if ($this->mobile_request() && method_exists($discovered_handler, $request_method . '_mobile')) {
                 $request_method .= '_mobile';
-            } else if ($request_method == "get" && (($env->results_viewable && str_replace('/result', '', $method_arguments) != $method_arguments) || Auth::isViewingResults())){
+            } else if ($request_method == "get" && defined('DB_NAME') && (($env->results_viewable && str_replace('/result', '', $method_arguments) != $method_arguments) || Auth::isViewingResults())){
                 $method_arguments = str_replace('/result', '', $method_arguments);
                 $request_method .= "_result";
             }

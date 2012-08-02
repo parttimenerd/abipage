@@ -14,11 +14,11 @@
   Ulrich Stemmermann (stemmermann.info): for being the reason why I began to learn php and for bearing me the last two years in the computer science course
 
 /* SITE */
-  Last update: 2012/07/19
-  Standards: HTML5, CSS3, ECMAScript 5, PHP 5
-  Components: Twitter Bootstrap, HTML5 Boilerplate, Modernizr, PHP Markdown, ToroPHP, jQuery, TableSorter, Chocolat, Color picker, jQuery.bottom, Icon by The Noun Project
+  Last update: 2012/08/02
+  Standards: HTML5, CSS3, ECMAScript5, PHP5
+  Components: Twitter Bootstrap, HTML5 Boilerplate, Modernizr, PHP Markdown, ToroPHP, jQuery, TableSorter, Chocolat, Color picker, jQuery.bottom, Icons by The Noun Project
   Doctype: HTML5
-  Software: Notepad++, Netbeans, Firefox, XAMPP
+  Software: Notepad++, Netbeans, Firefox, Firebug, XAMPP
 
 
 

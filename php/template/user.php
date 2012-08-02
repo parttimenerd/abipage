@@ -22,7 +22,10 @@ function tpl_userlist($usernamearr) {
     ?>
     <ui>
         <?php foreach ($usernamearr as $namearr): ?>
-            <li><?php tpl_userlink($namearr["both"], true) ?></li>
+            <li>
+                <?php tpl_userlink($namearr["both"], true) ?>
+                <? if (Auth::isModerator()) tpl_user_last_visit($namearr["both"], true, true) ?>
+            </li>
         <?php endforeach ?>
     </ui>
     <?php
@@ -34,13 +37,13 @@ function tpl_user_prefs($user) {
     tpl_before("user/me/preferences");
     tpl_item_before_form(array(), "", "", "userprefs");
     ?>
-    <input type="text" title="Name" placeholder="Name ([Vorname] [Nachname])" name="name" value="<?php echo $user->getName() ?>" pattern="(((von )?[A-Z]([a-z](-[a-zA-Z])?)+ ?){2,3}"/><br/>
+    <input type="text" title="Name" placeholder="Name ([Vorname] [Nachname])" name="name" value="<?php echo $user->getName() ?>" pattern="((von )?[A-ZÄÖÜ]([a-zßäöü](-[a-zßäöüA-ZÄÖÜ])?)+ ?){2,3}"/><br/>
     <input type="email" title="E-Mail-Adresse" placeholder="E-Mail-Adresse" name="mail_adress" value="<?php echo $user->getMailAdress() ?>"<?php echo!Auth::isModerator() ? " readonly='readonly'" : "" ?>/><br/>
     <input type="password" title="Passwort" placeholder="Passwort" name="password" autocomplete="off"/><br/>
     <input type="password" title="Passwort wiederholen" placeholder="Passwort wiederholen" name="password_repeat"/><br/>
     <input type="password" title="Altes Passwort" placeholder="Altes Passwort" name="old_password"/><br/>
     <input type="number" name="math_course" title="Mathekursnummer" placeholder="Mathekursnummer" size="1" value="<?php echo $user->getMathCourse() ?>" min="1" max="20"/><br/>
-    <input type="text" name="math_teacher" title="Mathelehrer" placeholder="Mathelehrer" value="<?php echo $user->getMathTeacher() ?>" pattern="([A-Z]([a-z](-[a-zA-Z])?)+ ?){2,3}"/><br/>
+    <input type="text" name="math_teacher" title="Mathelehrer" placeholder="Mathelehrer" value="<?php echo $user->getMathTeacher() ?>" pattern="((von )?[A-ZÄÖÜ]([a-zßäöü](-[a-zßäöüA-ZÄÖÜ])?)+ ?){2,3}"/><br/>
     <?php
     tpl_item_after_send("Ändern");
     tpl_after();
@@ -63,11 +66,16 @@ function tpl_user($user) {
 }
 
 function tpl_user_write_comment() {
+    global $env;
     tpl_item_before("Kommentar schreiben", "pencil", "write_comment");
     ?>
     <textarea name="text" id="textarea" placeholder="Kommentar"></textarea>
     <?php
-    tpl_infobox("", "Die Kommentare müssen von einem Moderator freigeschalten werden.");
+    if ($env->review_user_comments_automatically)
+        tpl_infobox("", "Die Kommentare müssen maschinell, von einem " . (Auth::isModerator() ? "anderen " : "") . "Moderator oder Administrator freigeschalten werden.");
+    else
+        tpl_infobox("", "Die Kommentare müssen von einem " . (Auth::isModerator() ? "anderen " : "") . "Moderator oder Administrator freigeschalten werden.");
+
     tpl_item_after_send_anonymous("Absenden", "Anonym absenden", "sendUserComment(false)", "sendUserComment(true)");
 }
 
@@ -78,19 +86,27 @@ function tpl_user_comment($user, $comment) {
     </div>
     <hr/>
     <div class="item-footer">
-        <?php
-        tpl_time_span($comment["time"]);
-        tpl_user_span(Auth::isModerator() || !$comment["isanonymous"] ? $comment["commenting_userid"] : null);
-        if (Auth::isSameUser($user)):
-            ?>
-            <span class="notify_as_bad">
-                <?php if ($comment["notified_as_bad"]) { ?>
-                    <button class="btn sign-icon notify" onclick="userCommentNotify('<?php echo $comment["id"] ?>')">+</button>
-                <?php } else { ?>
-                    <button class="btn sign-icon notify" onclick="userCommentNotify('<?php echo $comment["id"] ?>')">-</button>
-                <?php } ?>
-            </span>
-        <?php endif ?>			
+        <ul>
+            <li><? tpl_time_span($comment["time"]) ?></li>
+            <li><? tpl_user_span((Auth::isModerator() && !Auth::isSameUser($user)) || !$comment["isanonymous"] ? $comment["commenting_userid"] : null) ?></li>
+            <li><? if (Auth::isSameUser($user)): ?>
+                    <span class="notify_as_bad">
+                        <?php if ($comment["notified_as_bad"]) { ?>
+                            <button class="btn icon notify" onclick="userCommentNotify('<?php echo $comment["id"] ?>')"></button>
+                        <?php } else { ?>
+                            <button class="btn icon notify" onclick="userCommentNotify('<?php echo $comment["id"] ?>')"></span>
+                    <?php } ?>
+                    </span>
+                <? elseif (Auth::isModerator()):
+                    $str = "";
+                    if ($comment["isanonymous"])
+                        $str = "Anonym abgesendet";
+                    if ($comment["notified_as_bad"])
+                        $str = ($str == "" ? "" : "; ") . "Als schlecht markiert";
+                    echo $str != "" ? ('<span class="mod_info">[' . $str . ']</span>') : "";
+                endif; ?>
+            </li>
+        </ul>
     </div>
     </div>
     <?php

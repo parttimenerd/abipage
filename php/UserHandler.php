@@ -24,7 +24,7 @@ class UserHandler extends ToroHandler {
         $arr = explode('/', substr($slug, 1));
         $user = $this->getUserFromSlug($slug);
         if (!$user) {
-            tpl_userlist($env->getUserNames());
+            tpl_userlist($env->getUserNames(false, isset($arr[1]) ? str_replace('_', ' ', $arr[1]) : ""));
         } else if (count($arr) == 2 && $arr[1] == "preferences" && ($user->getID() == Auth::getUserID() || Auth::isAdmin())) {
             tpl_user_prefs($user);
         } else {
@@ -52,6 +52,8 @@ class UserHandler extends ToroHandler {
             $slug = $arr[0];
             if ($slug == "me") {
                 return Auth::getUser();
+            } else if ($slug == "all"){
+                return null;
             } else if (is_int($slug)) {
                 return User::getByID(intval($slug));
             } else {
@@ -97,9 +99,11 @@ class UserHandler extends ToroHandler {
                 $user->unnotifyUserComment($_POST["id"]);
                 echo $_POST["id"] . "|notified";
             }
-        } else if (isset($_POST["text"]) && $_POST["text"] != "" &&
+        } else if (isset($_POST["text"]) && strlen($_POST["text"]) > 5 &&
                 $user->getID() != Auth::getUserID()) {
-            $user->postUserComment($_POST["text"], isset($_POST["send_anonymous"]));
+            $comment = $user->postUserComment($_POST["text"], isset($_POST["send_anonymous"]));
+            if ($comment)
+                tpl_user_comment($user, $comment);
             if (isset($_POST["send_anonymous"]))
                 PiwikHelper::addTrackGoalJS("Anonymous contribution");
             PiwikHelper::addTrackGoalJS("User commented", $_POST["text"]);

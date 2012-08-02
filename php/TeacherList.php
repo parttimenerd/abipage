@@ -45,12 +45,33 @@ class TeacherList {
 
     public static function getTeacherWithQuoteRatingAndCount() {
         global $db;
-        $res = $db->query("SELECT id, first_name, last_name, namestr, ismale, (SELECT count(*) AS quote_count, avg(rating) AS quote_rating FROM " . DB_PREFIX . "quotes q WHERE q.id = t.id) FROM " . DB_PREFIX . "teacher t ORDER BY quote_count DESC");
+        $res = $db->query("SELECT id, first_name, last_name, namestr, ismale, (SELECT count(*) FROM " . DB_PREFIX . "quotes q WHERE q.teacherid = t.id) AS quote_count, (SELECT avg(q2.rating) FROM " . DB_PREFIX . "quotes q2 WHERE q2.teacherid = t.id) AS quote_rating FROM " . DB_PREFIX . "teacher t ORDER BY quote_count DESC");
+        $arr = array();
+        $sum = 0;
+        if ($res != null) {
+            while ($tarr = $res->fetch_array()) {
+                $arr[] = $tarr;
+                $sum += $tarr["quote_count"];
+            }
+            $len = count($arr);
+            for ($i = 0; $i < $len; $i++)
+                $arr[$i]["perc"] = $arr[$i]["quote_count"] * 100.0 / $sum;
+        }
+        return $arr;
+    }
+
+    public static function getTeacherWithRumorRatingAndCount() {
+        global $db;
+        $res = $db->query("SELECT id, first_name, last_name, namestr, ismale, (SELECT count(*) FROM " . DB_PREFIX . "rumors r WHERE r.text LIKE CONCAT('%', last_name, '%') OR r.text LIKE CONCAT('%', namestr, '%')) AS rumor_count, (SELECT avg(r2.rating) FROM " . DB_PREFIX . "rumors r2 WHERE r2.text LIKE CONCAT('%', last_name, '%') OR r2.text LIKE CONCAT('%', namestr, '%')) AS rumor_rating FROM " . DB_PREFIX . "teacher t ORDER BY rumor_count DESC");
         $arr = array();
         if ($res != null) {
             while ($tarr = $res->fetch_array()) {
                 $arr[] = $tarr;
+                $sum += $tarr["rumor_count"];
             }
+            $len = count($arr);
+            for ($i = 0; $i < $len; $i++)
+                $arr[$i]["perc"] = $arr[$i]["rumor_count"] * 100.0 / $sum;
         }
         return $arr;
     }

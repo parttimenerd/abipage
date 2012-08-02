@@ -41,7 +41,7 @@ class UserManagementHandler extends ToroHandler {
                         } else if (isset($_POST["setmode"]) && isset($_POST["mode"]) &&
                                 (Auth::getUserMode() == User::ADMIN_MODE || Auth::getUserMode() > intval($_POST["mode"]))) {
                             $user->setMode(intval($_POST["mode"]));
-                        } else if (isset($_POST["setpassword"]) && isset($_POST["password"])) {
+                        } else if (isset($_POST["setpassword"]) && isset($_POST["password"]) && $_POST["password"] != "") {
                             $user->setPassword($_POST["password"], true);
                         }
                         $user->updateDB();

@@ -63,10 +63,10 @@ class PiwikHelper {
         return true;
     }
 
-    public static function echoJSTrackerCode() {
+    public static function echoJSTrackerCode($with_init = true) {
         global $env;
         if ($env->has_piwik != null)
-            tpl_piwik_js_tracker_code($env->piwik_site_id, $env->piwik_url, self::$lines);
+            tpl_piwik_js_tracker_code($env->piwik_site_id, $env->piwik_url, self::$lines, $with_init);
     }
 
     public static function addTrackGoalJS($goal, $value = null) {

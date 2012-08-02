@@ -63,28 +63,33 @@ class Environment {
     public function getUsers() {
         global $db;
         $arr = array();
-        $res = $db->query("SELECT * FROM " . DB_PREFIX . "user") or die($db->error);
+        $res = $db->query("SELECT * FROM " . DB_PREFIX . "user ORDER BY last_name ASC") or die($db->error);
         while ($user = User::getFromMySQLResult($res)) {
             $arr[] = $user;
         }
         return $arr;
     }
 
-    public function getUserNames($also_deactivated = false) {
-        $key = $also_deactivated ? "also_deactivated" : "activated";
-        if (!$also_deactivated) {
+    //HACK implement search
+    public function getUserNames($also_deactivated = false, $search_string = "") {
+        global $db;
+        //$key = $also_deactivated ? "also_deactivated" : "activated";
+        $app = "";
+        if (!$also_deactivated)
             $app = " WHERE activated=1";
+        if ($search_string != "") {
+            $search_string_c = str_replace(" ", "%", $db->real_escape_string($search_string));
+            $app .= ($app == "" ? " WHERE " : " AND ") . "(first_name LIKE \"%$search_string_c%\" OR last_name LIKE \"%$search_string_c%\") ";
         }
-        if ($this->__usernamesarr[$key] == null) {
-            global $db;
-            $arr = array();
-            $res = $db->query("SELECT * FROM " . DB_PREFIX . "user" . $app . " ORDER BY last_name ASC") or die($db->error);
-            while ($user = $res->fetch_array()) {
-                $arr[] = array("first" => $user['first_name'], "last" => $user['last_name'], "both" => $user['first_name'] . " " . $user['last_name']);
-            }
-            $this->__usernamesarr[$key] = $arr;
+        //if ($this->__usernamesarr[$key] == null) {
+        $arr = array();
+        $res = $db->query("SELECT first_name, last_name FROM " . DB_PREFIX . "user" . $app . " ORDER BY last_name ASC") or die($db->error);
+        while ($user = $res->fetch_array()) {
+            $arr[] = array("first" => $user['first_name'], "last" => $user['last_name'], "both" => $user['first_name'] . " " . $user['last_name']);
         }
-        return $this->__usernamesarr[$key];
+        //$this->__usernamesarr[$key] = $arr;
+        //}
+        return $arr; //$this->__usernamesarr[$key];
     }
 
     public function getNotActivatedUsers() {
@@ -168,17 +173,14 @@ class Environment {
     }
 
     function sendMail($to, $topic, $text) {
-        global $env;
         if (is_a($to, "User"))
-                $to = $to->getMailAdress();
-        @mail($to, Markdown($topic), Markdown($text), "From: " . $env->title . "<info@" . $_SERVER['HTTP_HOST'] . ">\r\n"
-                . "X-Mailer: PHP/" . phpversion());
+            $to = $to->getMailAdress();
+        mail($to, $topic, Markdown($text), "From: " . TITLE . "<" . ($this->system_mail_adress != "" ? $this->system_mail_adress : ("info@" . $_SERVER['HTTP_HOST'])) . ">\r\n"
+                . "X-Mailer: PHP/" . phpversion() . "MIME-Version: 1.0\r\nContent-Type: text/html; charset=ISO-8859-1\r\n");
     }
 
     function sendAdminMail($topic, $text) {
-        foreach (User::getByMode(User::ADMIN_MODE) as $user) {
-            $this->sendMail($user->getMailAdress(), $topic, $text);
-        }
+        User::getByMode(User::ADMIN_MODE)->sendMail($user->getMailAdress(), $topic, $text);
     }
 
 }

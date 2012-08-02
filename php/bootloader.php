@@ -67,9 +67,12 @@ if (!function_exists('require_dir')) {
         require_once('KeyValueStore.php');
         $store = new KeyValueStore();
         require_once('Environment.php');
+        /**
+         * @var Environment 
+         */
         $env = new Environment();
     }
-
+    
     function require_dir($dirpath) {
         foreach (scandir($dirpath) as $dir) {
             if ($dir != '.' && $dir != '..' && $dir != "htmlpurifier") {

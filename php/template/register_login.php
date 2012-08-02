@@ -21,13 +21,14 @@ function tpl_register() {
     global $env;
     tpl_before("register");
     tpl_item_before_form(array(), "", "", "register");
+    //TODO pattern - test Chrome
     ?>
     <input type="text" name="name" title="Name ([Vorname] [Nachname])" placeholder="Name ([Vorname] [Nachname])" autocomplete="on" required="on" pattern="((von )?[A-ZÄÖÜ]([a-zßäöü](-[a-zßäöüA-ZÄÖÜ])?)+ ?){2,3}"/><br/>
     <input type="email" name="mail_adress" title="E-Mail-Adresse" placeholder="E-Mail-Adresse" autocomplete="on" required="on"/><br/>
     <input type="password" name="password" title="Passwort" placeholder="Passwort" autocomplete="on" required="on"/><br/>
     <input type="password" name="password_repeat" title="Passwort wiederholen" placeholder="Passwort wiederholen" autocomplete="on" required="on"/><br/>
     <input type="number" name="math_course" title="Mathekursnummer, z.B.: 1" placeholder="Mathekursnummer, z.B.: 1" min="1" max="20" required="on"/><br/>
-    <input type="text" name="math_teacher" title='Mathelehrer, z.B. "Herr Müller"' placeholder='Mathelehrer, z.B. "Herr Müller"' required="on" pattern="(((von )?[A-ZÄÖÜ]([a-zßäöü](-[a-zßäöüA-ZÄÖÜ])?)+ ?){2,3}"/><br/>
+    <input type="text" name="math_teacher" title='Mathelehrer, z.B. "Herr Müller"' placeholder='Mathelehrer, z.B. "Herr Müller"' required="on"/><br/>
     <?php if ($env->has_forum): ?>
         <input type="checkbox" value="true" name="reg_in_forum" selected="selected"/> <label for="reg_in_forum">Automatisch auch im Forum registrieren</label><br/>
     <?php endif ?>
@@ -57,10 +58,10 @@ function tpl_login() {
     tpl_before("login");
     tpl_item_before_form(array("action" => tpl_url("login")), "", "", "login");
     ?>
-    <input type="text" name="name" title="Name" placeholder="Name"/><br/>
+    <input type="text" name="name" title="Name" placeholder="Name" pattern="((von )?[A-ZÄÖÜ]([a-zßäöü](-[a-zßäöüA-ZÄÖÜ])?)+ ?){2,3}"/><br/>
     <input type="password" name="password" title="Passwort" placeholder="Passwort" autocomplete="on"/><br/>
     <?php
-    tpl_infobox("", "Wenn sie noch nicht registriert sind, registrieren sich sich bitte <a href='register'>hier</a>.<br/>
+    tpl_infobox("", "Wenn sie noch nicht registriert sind, registrieren Sie sich bitte <a href='register'>hier</a>.<br/>
 			Wenn sie ihr Passwort vergessen haben, können sie ihr Passwort mir diesem <a href='forgot_password'>Link</a> zurücksetzen.
 			Es wird bei der Registrierung ein Cookie auf dem Computer gespeichert um die Anmeldung zu ermöglichen.");
     tpl_item_after_send("Anmelden", "login");
@@ -71,7 +72,7 @@ function tpl_forgot_password() {
     tpl_before("", "Passwort vergessen");
     tpl_item_before_form(array(), "", "", "forgot_password");
     ?>
-    <input type="text" name="name_or_email" title="Name oderE-Mail-Adresse" placeholder="Name oderE-Mail-Adresse"/><br/>
+    <input type="text" name="name_or_email" title="Name oder E-Mail-Adresse" placeholder="Name oder E-Mail-Adresse"/><br/>
     <?php
     tpl_item_after_send();
     tpl_after();

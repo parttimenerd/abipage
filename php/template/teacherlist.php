@@ -21,25 +21,29 @@ function tpl_teacherlist($teacherarr) {
     tpl_item_before_form(array());
     ?>
     <table>
-        <tr>
-            <th>Auswahl</th>
-            <th>Vorname</th>
-            <th>Nachname</th>
-            <th>Geschlecht</th>
-        </tr>
-        <?php
-        foreach ($teacherarr as $teacher) {
-            echo '<tr>';
-            echo '<td><input type="checkbox" name="' . $teacher["id"] . '" value="' . $teacher["id"] . '"/></td>';
-            echo '<td><input type="text" name="' . $teacher["id"] . 'first_name" value="' . $teacher["first_name"] . '"/></td>';
-            echo '<td><input type="text" name="' . $teacher["id"] . 'last_name" value="' . $teacher["last_name"] . '"/></td>';
-            echo '<td><select style="display: inline;" name="' . $teacher["id"] . 'sex">
+        <thead>
+            <tr>
+                <th>Auswahl</th>
+                <th>Vorname</th>
+                <th>Nachname</th>
+                <th>Geschlecht</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php
+            foreach ($teacherarr as $teacher) {
+                echo '<tr>';
+                echo '<td><input type="checkbox" name="' . $teacher["id"] . '" value="' . $teacher["id"] . '"/></td>';
+                echo '<td><input type="text" name="' . $teacher["id"] . 'first_name" value="' . $teacher["first_name"] . '"/></td>';
+                echo '<td><input type="text" name="' . $teacher["id"] . 'last_name" value="' . $teacher["last_name"] . '"/></td>';
+                echo '<td><select style="display: inline;" name="' . $teacher["id"] . 'sex">
                 <option value="1"' . ($teacher["ismale"] ? ' selected="selected"' : '') . '>männlich</option>
                 <option value="0"' . (!$teacher["ismale"] ? ' selected="selected"' : '') . '>weiblich</option>
             </select></td>';
-            echo '</tr>';
-        }
-        ?>
+                echo '</tr>';
+            }
+            ?>
+        </tbody>
     </table>
     </div>
     <hr/>

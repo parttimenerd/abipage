@@ -66,7 +66,7 @@ class ImageList extends RatableUserContentList {
             $user = Auth::getUser();
         }
         $descr = $this->db->real_escape_string(cleanInputText($descr));
-        $this->db->query("INSERT INTO " . $this->table . "(id, userid, description, format, time, rating) VALUES(NULL, " . $user->getID() . ", '" . $descr . "', '" . $env->pic_format . "', " . $time . ", 0)") or die($this->db->error);
+        $this->db->query("INSERT INTO " . $this->table . "(id, userid, description, format, time, rating, rating_count, data) VALUES(NULL, " . $user->getID() . ", '" . $descr . "', '" . $env->pic_format . "', " . $time . ", 0, 0, '')") or die($this->db->error);
         $id = $this->db->insert_id;
         $env->addAction($id, $user->getName(), "upload_image");
         return $id;
