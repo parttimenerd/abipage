@@ -86,10 +86,19 @@ class TeacherList {
             $namestr = ($is_male ? "Herr " : "Frau ") . $last_name;
             $db->query("INSERT INTO " . DB_PREFIX . "teacher(id, first_name, last_name, namestr, ismale) VALUES(NULL, '" . $first_name . "', '" . $last_name . "', '" . $namestr . "', " . $is_male . ")") or die($db->error);
             $id = $db->insert_id;
-            $db->query("UPDATE " . DB_PREFIX . "quotes SET teacherid=" . $id . " WHERE person LIKE '" . $namestr . "' AND teacherid=-1");
+            self::updateQuotes($id);
             return true;
         }
         return false;
+    }
+
+    public static function updateQuotes($teacher_id = -1) {
+        global $db;
+        if ($teacher_id != -1) {
+            $db->query("UPDATE " . DB_PREFIX . "quotes q, " . DB_PREFIX . "teacher t SET q.teacherid=" . intval($teacher_id) . " WHERE (q.person LIKE t.namestr OR (q.person LIKE CONCAT('%', first_name, '%', last_name))) AND q.teacherid = t.id");
+        } else {
+            $db->query("UPDATE " . DB_PREFIX . "quotes q, " . DB_PREFIX . "teacher t SET q.teacherid=t.id WHERE (q.person LIKE t.namestr OR (q.person LIKE CONCAT('%', first_name, '%', last_name))) AND q.teacherid = t.id");
+        }
     }
 
     public static function readTeacherListInput($text) {

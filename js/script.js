@@ -22,6 +22,7 @@ function rating(id, rating){
         if (typeof(html) != "string")
             html = html.responseText;
         $("#" + id + "rating .average").replaceWith(html);
+        rated_items.push(id);
     }
     $.ajax({
         type: "POST",
@@ -351,69 +352,110 @@ if ($("#drop_area").length != 0){
     }
 }
 
-if ($(".item-quote-send").length != 0){
-    function sendQuote(is_anonymous){
-        var func = function(html){
-            if (html == null)
-                return;
-            if (typeof(html) != "string")
-                html = html.responseText;
-            if (html != ""){
+function sendQuote(is_anonymous, response_to){
+    console.log(response_to);
+    var func = function(html){
+        if (html == null)
+            return;
+        if (typeof(html) != "string")
+            html = html.responseText;
+        if (html != ""){
+              if (response_to == -1){
                 $(".content .item-quote-send").after(html);
                 $(".item-quote-send textarea").val("");
                 $(".item-quote-send input").val("");
+            } else {
+                $("#responses_to_" + id + " .add_response_container").before(html);
+                $("#" + response_to + " .item-quote-send textarea").val("");
+                $("#" + response_to + " .item-quote-send input").val("");
             }
-            is_loading = false;
         }
-        var data = {
-            'person': $(".item-quote-send input").val(),
-            'text': $(".item-quote-send textarea").val(),
-        };
-        if (is_anonymous){
-            data['send_anonymous'] = '';
-        } else {
-            data['send'] = '';
-        }
-        is_loading = true;
-        $.ajax({
-            type: "POST",
-            url: rating_url2,
-            data: $.param(data),
-            success: func,
-            error: func
-        });
+        is_loading = false;
+    }, ele;
+    if (response_to)
+        ele = $("#responses_to_" + response_to + ".item-quote-send");
+    else
+        ele = $(".item-quote-send");
+    var data = {
+        'person': ele.children("input[name=person]").val(),
+        'text': ele.children("textarea").val(),
+        'response_to': ele.children("input[name=response_to]").val()
+    };
+    if (is_anonymous){
+        data['send_anonymous'] = '';
+    } else {
+        data['send'] = '';
     }
+    is_loading = true;
+    $.ajax({
+        type: "POST",
+        url: rating_url2,
+        data: $.param(data),
+        success: func,
+        error: func
+    });
 }
 
-if ($(".item-rumor-send").length != 0){
-    function sendRumor(is_anonymous){
-        var func = function(html){
-            if (html == null)
-                return;
-            if (typeof(html) != "string")
-                html = html.responseText;
-            if (html != ""){
-                $(".content .item-rumor-send").after(html);
-                $(".item-rumor-send textarea").val("..., dass");
+function sendRumor(is_anonymous){
+    var func = function(html){
+        if (html == null)
+            return;
+        if (typeof(html) != "string")
+            html = html.responseText;
+        if (html != ""){
+            $(".content .item-rumor-send").after(html);
+            $(".item-rumor-send textarea").val("..., dass");
+            piwikTracker.setDocumentTitle("ajax/write rumor");
+            piwikTracker.trackPageView(); 
+        }
+        is_loading = false;
+    }
+    var data = {
+        'text': $(".item-rumor-send textarea").val(),
+        'response_to': $(".item-rumor-send input[name=response_to]").val()
+    };
+    if (is_anonymous){
+        data['send_anonymous'] = '';
+    } else {
+        data['send'] = '';
+    }
+    is_loading = true;
+    $.ajax({
+        type: "POST",
+        url: rating_url2,
+        data: $.param(data),
+        success: func,
+        error: func
+    });
+}
+
+function responseToItem(id){
+    var container = $("#responses_to_" + id + " .add_response_container");
+    if (container){
+        if (window.item-response-template === undefined){
+            window.item_response_template = Handlebars.compile($("#item-response-template").html());
+        }
+        if (container.children(".item-send").length == 0){
+            var html = "";
+            var ele = $("#" + id);
+            if (ele.children("input[type=person]").length != 0){ // Send quote item
+                html = item_response_template({
+                    response_to: id, 
+                    teacher: ele.children("input[type=person]").val(), 
+                    button_answer_title: "Hinzufügen", 
+                    button_answer_ano_title: "Anonym hinzufügen"
+                });
+            } else {
+                html = item_response_template({
+                    response_to: id,
+                    button_answer_title: "Hinzufügen", 
+                    button_answer_ano_title: "Anonym hinzufügen"
+                });
             }
-            is_loading = false;
-        }
-        var data = {
-            'text': $(".item-rumor-send textarea").val(),
-        };
-        if (is_anonymous){
-            data['send_anonymous'] = '';
+            container.html(html);
         } else {
-            data['send'] = '';
+            container.html("");
         }
-        is_loading = true;
-        $.ajax({
-            type: "POST",
-            url: rating_url2,
-            data: $.param(data),
-            success: func,
-            error: func
-        });
     }
 }
 
@@ -513,5 +555,39 @@ function timespanText(timediff){
     }
     return 'Vor ' + text;
 }
+
+function deleteUserComment(id){
+    var func = function(html){
+        if (typeof(html) != "string")
+            html = html.responseText;
+        $("#" + html).remove();
+        is_loading = false;
+    }
+    is_loading = true;
+    $.ajax({
+        type: "POST",
+        url: "",
+        data: $.param({
+            "deleteComment": id
+        }),
+        success: func,
+        error: func
+    });
+}
+
+function markdown(markdown){
+    return (new Showdown.converter()).makeHtml(markdown);
+}
+
+//function markdownPreview(ele){
+//    var converter = new Showdown.converter();
+//    $(".write-news .preview").html(converter.makeHtml($(".write-news textarea[name=text]").val()));
+//}
+
+$("input[data-markdown-preview]").each(function (ele){
+    $(ele).keydown(function(){
+        $("#" + $(this).attr("data-markdown-preview")).html(markdown($(this).val()));
+    })
+});
 
 window.setInterval("updateTimespans", 5000);

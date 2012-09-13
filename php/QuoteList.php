@@ -53,7 +53,7 @@ class QuoteList extends RatableUserContentList {
                 }
             }
         }
-        $this->db->query("INSERT INTO " . $this->table . "(id, person, teacherid, text, userid, isanonymous, time, rating, rating_count, response_to, data) VALUES(NULL, '" . $person . "', " . $tid . ", '" . $text . "', " . $senduser->getID() . ", " . ($anonymous ? 1 : 0) . ", " . intval($time) . ", 0, 0, " . intval($response_to) . ", '')");
+        $this->db->query("INSERT INTO " . $this->table . "(id, person, teacherid, text, userid, isanonymous, time, rating, response_to, data) VALUES(NULL, '" . $person . "', " . $tid . ", '" . $text . "', " . $senduser->getID() . ", " . ($anonymous ? 1 : 0) . ", " . intval($time) . ", 0, " . intval($response_to) . ", '')");
         $env->addAction($this->db->insert_id, $name, "add_quote");
     }
 

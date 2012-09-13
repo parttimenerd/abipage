@@ -27,14 +27,16 @@ function tpl_infobox($strong_text, $message_text) {
     <?php
 }
 
-function tpl_usermode_combobox($name, $preset_modenum = User::NORMAL_MODE, $without_superadmin = false) {
+function tpl_usermode_combobox($name, $preset_modenum = User::NORMAL_MODE, $echo_all = false) {
     $arr = array(
         User::NORMAL_MODE => "Normal",
         User::EDITOR_MODE => "Editor",
-        User::MODERATOR_MODE => "Moderator"
     );
-    if (!$without_superadmin) {
-        $arr = array_merge($arr, array(User::ADMIN_MODE => "Administrator"));
+    if ($echo_all || Auth::isAdmin()) {
+        $arr = array_merge($arr, array(
+            User::MODERATOR_MODE => "Moderator",
+            User::ADMIN_MODE => "Administrator"
+                ));
     }
     ?>
     <select style="display: inline;" name="<?php echo $name ?>" class="user_mode_combobox">
@@ -69,7 +71,9 @@ function tpl_get_user_subtitle($user) {
     if ($user->isEditor()) {
         $html .= ($html != "" ? "; " : "") . tpl_usermode_to_text($user->getMode());
     }
-    $html .= ($html != "" ? "; " : "") . tpl_user_last_visit($user->getID(), false);
+    $last_visit = tpl_user_last_visit($user->getID(), false);
+    if ($last_visit)
+        $html .= ($html != "" ? "; " : "") . $last_visit;
     return $html;
 }
 
@@ -79,7 +83,7 @@ function tpl_time_span($time, $with_icon = true, $class = "time") {
     <?php
 }
 
-function tpl_user_span($user_id = -1, $with_icon = true, $correct_font = false) {
+function tpl_user_span($user_id = -1, $with_icon = true) {
     ?>
     <span class="user_span">
         <?php
@@ -91,7 +95,7 @@ function tpl_user_span($user_id = -1, $with_icon = true, $correct_font = false) 
         } else if ($user_id == Auth::getUserID()) {
             echo '<a href="' . tpl_url("user/me") . '">Me</a>';
         } else {
-            tpl_userlink($user_id, false, $correct_font);
+            tpl_userlink($user_id, false);
         }
         ?>
     </span>
@@ -108,7 +112,7 @@ function tpl_url($relative_url) {
 
 $id_username_dic = array();
 
-function tpl_userlink($id_or_name, $last_name_first = false, $correct_font = false) {
+function tpl_userlink($id_or_name, $last_name_first = false) {
     global $id_username_dic, $env;
     if ($id_or_name != "") {
         if (is_numeric($id_or_name)) {
@@ -126,8 +130,6 @@ function tpl_userlink($id_or_name, $last_name_first = false, $correct_font = fal
         } else {
             $namestr = $name;
         }
-        if ($correct_font)
-            $namestr = str_replace('ß', '<span class="correct_szlig">ß</span>', $namestr);
         ?>
         <a href="<?php echo $url ?>" class="userlink"><?php echo $namestr ?></a> 
         <?php
@@ -146,39 +148,40 @@ function tpl_user_last_visit($name_or_id, $brackets = true, $does_echo = false) 
     }
     if ($id) {
         $time = Auth::getLastVisitTime($id);
-        if ($time && $time > 0 && !Auth::isSameUser($id) && Auth::isModerator()) {
+        if ($time && $time > 0 && !Auth::isSameUser($id)) {
             $timediff = time() - $time;
             $str = '<span class="last_visit_time">' . ($brackets ? "[" : "") . 'Letzter Besuch:' . ($timediff > 60 ? tpl_timediff_span($timediff, false) : "Jetzt") . ($brackets ? "]" : "") . '</span>';
-            if ($does_echo){
+            if ($does_echo) {
                 echo $str;
             } else {
                 return $str;
             }
         }
     }
+    return false;
 }
 
 function tpl_timediff_span($timediff, $does_echo = true, $only_time = false) {
     $text = "";
     $arr = array(
-        array(1, 60, array("Sekunde", "n")),
-        array(60, 3600, array("Minute", "n")),
-        array(3600, 86400, array("Stunde", "n")),
-        array(86400, 2626560, array("Tag", "en")),
-        array(2626560, 31518720, array("Monat", "en")),
-        array(31518720, 1E10, array("Jahr", "en"))
+        array(1, 60, array("Sekunde", "n", "einer")),
+        array(60, 3600, array("Minute", "n", "einer")),
+        array(3600, 86400, array("Stunde", "n", "einer")),
+        array(86400, 2626560, array("Tag", "en", "einem")),
+        array(2626560, 31518720, array("Monat", "en", "einem")),
+        array(31518720, 1E10, array("Jahr", "en", "einem"))
     );
     $update_via_js = true;
     foreach ($arr as $steparr) {
         if ($steparr[1] > $timediff) {
             $value = floor($timediff / $steparr[0]);
-            $text = ($value == 1 ? "einem" : $value) . " " . ($value == 1 ? $steparr[2][0] : $steparr[2][0] . $steparr[2][1]);
+            $text = ($value == 1 ? $steparr[2][2] : $value) . " " . ($value == 1 ? $steparr[2][0] : $steparr[2][0] . $steparr[2][1]);
             break;
         }
         if ($steparr[0] >= 3600)
             $update_via_js = false;
     }
-    $str = '<span class="timediff"' . ($update_via_js ? (' time="' . (time() + timediff) . '"') : '') . '>' . ($only_time ? '' : 'Vor ') . $text . '</span>';
+    $str = '<span class="timediff"' . ($update_via_js ? (' time="' . (time() + $timediff) . '"') : '') . '>' . ($only_time ? '' : 'Vor ') . $text . '</span>';
     if ($does_echo) {
         echo $str;
     } else {
@@ -232,7 +235,7 @@ function tpl_color_selector($name, $default_value = "#ff0000", $js_onchange = ""
 }
 
 function tpl_icon($name, $title = "", $onclick = "", $format = "svg") {
-    echo '<img class="icon ' . $name . '" src="' . tpl_url("img/icons/" . $name . '.' . $format) . '" title="' . $title . '" onclick="' . $onclick . '"/>';
+    echo '<img class="icon ' . $name . '" src="' . tpl_url("img/icons/" . $name . '.' . $format) . '" ' . ($title != "" ? (' title="' . $title . '"') : "") . 'onclick="' . $onclick . '"/>';
 }
 
 function tpl_popover($text, $title, $content, $class = "") {

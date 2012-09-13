@@ -19,26 +19,23 @@
 
 class PiwikHelper {
 
-    private static $goals = array("New user registrated", "Rumor written", "Quote written", "Image uploaded", "User commented", "Item written", "Item deleted", "Item rated", "Characters typed");
+    private static $goals = array("New user registered", "Rumor written", "Quote written", "Image uploaded", "User commented", "Item written", "Item deleted", "Item rated", "Item rating edited", "Characters typed");
     private static $lines = array();
 
     public static function setup() {
         global $store;
-        if (!$store->piwik_lock) {
-            $store->piwik_lock = true;
-            foreach (self::$goals as $goal) {
-                if (!self::addGoal($goal))
-                    return false;
-            }
+        foreach (self::$goals as $goal) {
+            if (!self::addGoal($goal))
+                return false;
         }
         return true;
     }
 
     private static function addGoal($goal) {
         global $env, $store;
-        $arr = $store->piwik_goals ? (array) json_decode($store->piwik_goals) : array();
+        $arr = $store->piwik_goals ? (array) $store->piwik_goals : array();
         if (isset($arr[$goal]))
-            return true;
+            return false;
         $url = $env->piwik_url;
         $url .= "?module=API&method=Goals.addGoal&format=json";
         $url .= "&idSite=" . $env->piwik_site_id;
@@ -51,8 +48,8 @@ class PiwikHelper {
         $url .= "&allowMultipleConversionsPerVisit=1";
         $url .= "&idGoal=";
         $url .= "&token_auth=" . $env->piwik_token_auth;
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HEADER, 0);
         $json = curl_exec($ch);
         curl_close($ch);
@@ -60,13 +57,14 @@ class PiwikHelper {
         if (isset($json["result"]))
             return false;
         $arr[$goal] = $json["value"];
+        $store->piwik_goals = $arr;
         return true;
     }
 
-    public static function echoJSTrackerCode($with_init = true) {
+    public static function echoJSTrackerCode($with_init = true, $document_title = "") {
         global $env;
         if ($env->has_piwik != null)
-            tpl_piwik_js_tracker_code($env->piwik_site_id, $env->piwik_url, self::$lines, $with_init);
+            tpl_piwik_js_tracker_code($env->piwik_site_id, $env->piwik_url, self::$lines, $with_init, $document_title);
     }
 
     public static function addTrackGoalJS($goal, $value = null) {
@@ -82,7 +80,7 @@ class PiwikHelper {
     public static function getIdOfGoal($goal) {
         global $store;
         if ($store->piwik_goals) {
-            $json = (array) json_decode($store->piwik_goals);
+            $json = (array) $store->piwik_goals;
             if (isset($json[$goal]))
                 return $json[$goal];
         }

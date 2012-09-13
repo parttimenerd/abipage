@@ -34,7 +34,7 @@ if (!defined('DB_NAME')) {
 
     define("TITLE", $env->title);
 
-    if (!Auth::isAdmin() && $env->is_under_construction) {
+    if (!Auth::canVisitSiteWhenUnderConstruction() && $env->is_under_construction) {
         tpl_under_construction();
         exit;
     }

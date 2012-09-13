@@ -25,33 +25,36 @@ function tpl_pref_table($val_arr, $css_class = "") {
         <?php foreach ($val_arr as $key => $val): ?>
             <tr<?php if (isset($val["css_class"])) echo ' class="' . $val["css_class"] . '"' ?>>
                 <td class="left_column"><?php echo isset($val["label"]) ? $val["label"] : $key
-        ?></td>
+            ?></td>
                 <td class="right_column"><?php
-        $default = isset($val["default"]) ? $val["default"] : '';
-        $type = isset($val["type"]) ? $val["type"] : "inputfield";
-        switch ($type) {
-            case "textarea":
-                echo '<textarea name="' . $key . '">' . $default . '</textarea>';
-                break;
-            case "inputfield":
-                echo "<input type='text' name='" . $key . "' value='" . $default . "'/>";
-                break;
-            case "password":
-                echo '<input type="password" name="' . $key . '" value="' . $default . '"/>';
-                break;
-            case "checkbox":
-                echo '<input type="checkbox" name="' . $key . '" value="true"' . ($default == "true" ? ' checked="checked"' : '') . '/>';
-                break;
-            case "usermode":
-                tpl_usermode_combobox($key, $default == "" ? 0 : intval($default));
-                break;
-            case "color":
-                tpl_color_selector($key, $default, isset($val["js_onchange"]) ? $val["js_onchange"] : "");
-                break;
-            case "email":
-                echo '<input type="email" name="' . $key . '" value="' . $default . '"/>';
-                break;
-        }
+            $default = isset($val["default"]) ? $val["default"] : '';
+            $type = isset($val["type"]) ? $val["type"] : (is_numeric($val["type"]) ? "number" : "inputfield");
+            switch ($type) {
+                case "textarea":
+                    echo '<textarea name="' . $key . '">' . $default . '</textarea>';
+                    break;
+                case "number":
+                    echo "<input type='number' name='" . $key . "' value='" . $default . "'/>";
+                    break;
+                case "inputfield":
+                    echo "<input type='text' name='" . $key . "' value='" . $default . "'/>";
+                    break;
+                case "password":
+                    echo '<input type="password" name="' . $key . '" value="' . $default . '"/>';
+                    break;
+                case "checkbox":
+                    echo '<input type="checkbox" name="' . $key . '" value="true"' . ($default == "true" ? ' checked="checked"' : '') . '/>';
+                    break;
+                case "usermode":
+                    tpl_usermode_combobox($key, $default == "" ? 0 : intval($default));
+                    break;
+                case "color":
+                    tpl_color_selector($key, $default, isset($val["js_onchange"]) ? $val["js_onchange"] : "");
+                    break;
+                case "email":
+                    echo '<input type="email" name="' . $key . '" value="' . $default . '"/>';
+                    break;
+            }
             ?>
             </tr>
         <?php endforeach ?>		
@@ -76,10 +79,16 @@ function tpl_dbsetup($val_arr) {
 
 function tpl_preferences($val_arr) {
     tpl_before("preferences", "Einstellungen");
-    tpl_item_before_form(array("action" => tpl_url("preferences")));
+    if (Auth::canModifyPreferences())
+        tpl_item_before_form(array("action" => tpl_url("preferences")));
+    else
+        tpl_item_before();
     ?>
     <?php tpl_pref_table($val_arr) ?>
     <?php
-    tpl_item_after_send("Speichern");
+    if (Auth::canModifyPreferences())
+        tpl_item_after_send("Speichern");
+    else
+        tpl_item_after();
     tpl_after();
 }

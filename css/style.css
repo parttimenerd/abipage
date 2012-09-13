@@ -82,7 +82,7 @@ h1, h2, h3, h4, h5, h6, .navbar {
     font-family: 'Josefin Sans', Helvetica;
 }
 .item input, .item textarea, .alert-info, .item-content {
-    font-family: 'Voltaire'
+    font-family: 'PT Sans'
 }
 /*input[type="text"],
 input[type="password"],
@@ -186,7 +186,7 @@ table {
     background: none;
 }
 .item-content, .item-content select {
-    font-family: 'Voltaire';
+    font-family: 'PT Sans';
     font-size: 13px;
 }
 .icon {
@@ -215,7 +215,7 @@ table {
 
 .subhead input, .subhead input:focus {
     font-size: 23px;
-    font-family: 'Voltaire', 'Helvetica';
+    font-family: 'PT Sans', 'Helvetica';
     line-height: 27px;
     background: none;
     border: none;
@@ -226,7 +226,7 @@ table {
 
 .sidebar .well {
     /*padding: 0px;*/
-    font-family: 'Voltaire';
+    font-family: 'PT Sans';
 }
 .sidebar .well .nav-header {
     font-size: 20px;
@@ -331,12 +331,12 @@ table {
 } 
 .item-footer .rating_li {
     margin-left: 5%;
-    width: 25%;
+    width: 20%;
     text-align: right;
     margin-right: 5%;
 }
 .item-footer .user_span_li {
-    width: 25%;
+    width: 20%;
 }
 .item-footer .icon {
     height: 0.75em;
@@ -361,10 +361,15 @@ table {
     list-style: none;
 }
 
-.correct_szlig {
-    font-style: italic;
+.responses {
+    margin-left: 15%;
 }
-
+.responses input[name=person], .responses .item-header, .responses .item-quote-send hr {
+    display: none;
+}
+.response_to_item button {
+    margin-top: -6px;
+}
 
 /* =============================================================================
    Media Queries

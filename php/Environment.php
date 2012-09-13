@@ -56,8 +56,7 @@ class Environment {
         } else if ($this->__prefhandler->hasDefault($var)) {
             return $this->__prefhandler->getDefault($var);
         }
-//        var_dump("No: $var");
-        return $this->{$var};
+        //return $this->{$var};
     }
 
     public function getUsers() {
@@ -124,17 +123,15 @@ class Environment {
     }
 
     public function uploadImage($new_filename_wo_ext) {
-        $img_types = array("jpeg", "gif", "png", "bmp");
+        $img_types = array("jpeg", "gif", "png", "bmp", "jpg");
         if ((!empty($_FILES["uploaded_file"])) && ($_FILES['uploaded_file']['error'] == 0)) {
             $filename = basename($_FILES['uploaded_file']['name']);
             $ext = strtolower(substr($filename, strpos($filename, '.') + 1));
-            if ($ext == "jpg") {
-                $ext = "jpeg";
-            }
             //$arr = explode("/", $_FILES["uploaded_file"]["type"]);
             if (in_array($ext, $img_types) && ($_FILES["uploaded_file"]["size"] < 4000000)) {
                 $newname_wo_ext = $this->main_dir . '/' . $this->upload_path . '/' . $new_filename_wo_ext;
                 $newname = $newname_wo_ext . '.' . $ext;
+                var_dump($newname);
                 if (!file_exists($newname)) {
                     if ((move_uploaded_file($_FILES['uploaded_file']['tmp_name'], $newname))) {
                         resizeImage($this->pic_width, $newname, $newname_wo_ext . '.' . $this->pic_format);
@@ -180,7 +177,10 @@ class Environment {
     }
 
     function sendAdminMail($topic, $text) {
-        User::getByMode(User::ADMIN_MODE)->sendMail($user->getMailAdress(), $topic, $text);
+        User::getByMode(User::ADMIN_MODE)->sendMail($topic, $text);
     }
 
+    function sendModeratorMail($topic, $text) {
+        User::getByMode(User::MODERATOR_MODE)->sendMail($topic, $text);
+    }
 }

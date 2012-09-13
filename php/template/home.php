@@ -17,11 +17,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-function tpl_home() {
+function tpl_home($news = array()) {
     global $env;
     tpl_before("home", $env->title, $env->subtitle);
     tpl_item_before();
     echo formatText($env->mainpage_text);
     tpl_item_after();
+    if (!empty($news))
+        tpl_news_list($news, false);
     tpl_after();
 }

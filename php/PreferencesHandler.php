@@ -116,7 +116,9 @@ Wenn ja, sollte piwik installiert sein und diese Website hinzugefügt worden sei
             "user_characteristics_editable" => array("default" => "false", "label" => "Kann der eigene Steckbrief bearbeitet werden?", "type" => "checkbox"),
             "user_polls_open" => array("default" => "false", "label" => "Ist die Umfragenseite sichtbar?", "type" => "checkbox"),
             "system_mail_adress" => array("default" => "", "label" => "Mailadresse der Seite"),
-            "review_user_comments_automatically" => array("default" => "false", "label" => "Benutzerkommentare automatisch freischalten (nach maschineller Prüfung)", "type" => "checkbox")
+            "review_user_comments_automatically" => array("default" => "false", "label" => "Benutzerkommentare automatisch freischalten (nach maschineller Prüfung)", "type" => "checkbox"),
+            "response_allowed" => array("default" => "true", "label" => "Können Kommentare zu Stimmt es...-Beiträgen und Zitaten geschrieben werden?", "type" => "checkbox"),
+            "number_of_news_shown_at_the_home_page" => array("default" => "1", "label" => "Anzahl der Nachtichten, die auf der Hauptseite angezeigt werden", "type" => "number")
             );
     }
 
@@ -134,7 +136,7 @@ Wenn ja, sollte piwik installiert sein und diese Website hinzugefügt worden sei
 
     public function get() {
         global $env;
-        if (Auth::isAdmin() || $env == null) {
+        if (Auth::canViewPreferencesPage() || $env == null) {
             $this->loadDefaultVals();
             tpl_preferences($this->pref_vals);
         } else {
@@ -143,7 +145,7 @@ Wenn ja, sollte piwik installiert sein und diese Website hinzugefügt worden sei
     }
 
     public function post() {
-        if (Auth::isAdmin()) {
+        if (Auth::canModifyPreferences()) {
             foreach ($this->pref_vals as $key => $value) {
                 if (isset($value["type"]) && $value["type"] == "checkbox") {
                     $this->pref_vals[$key]["default"] = isset($_POST[$key]) ? "true" : "false";
@@ -180,7 +182,7 @@ Wenn ja, sollte piwik installiert sein und diese Website hinzugefügt worden sei
         $db = Database::getConnection();
         $res = $db->query("SELECT * FROM " . DB_PREFIX . "preferences");
         while ($arr = $res->fetch_array()) {
-            if ($arr["value"] != "") {
+            if ($arr["value"] != "" && isset($this->pref_vals[$arr["key"]])) {
                 if (isset($this->pref_vals[$arr["key"]]["type"]) && $this->pref_vals[$arr["key"]]["type"] == "checkbox"){
                     $this->pref_vals[$arr["key"]]["default"] = $arr["value"] == "true";
                 } else {

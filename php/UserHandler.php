@@ -19,23 +19,19 @@
 
 class UserHandler extends ToroHandler {
 
-     public function get($slug = "") {
+    public function get($slug = "") {
         global $env;
         $arr = explode('/', substr($slug, 1));
         $user = $this->getUserFromSlug($slug);
         if (!$user) {
             tpl_userlist($env->getUserNames(false, isset($arr[1]) ? str_replace('_', ' ', $arr[1]) : ""));
-        } else if (count($arr) == 2 && $arr[1] == "preferences" && ($user->getID() == Auth::getUserID() || Auth::isAdmin())) {
+        } else if (count($arr) == 2 && $arr[1] == "preferences" && Auth::canEditUser($user)) {
             tpl_user_prefs($user);
         } else {
-            if ($env->user_page_open) {
-                tpl_user_page($user);
-            } else {
-                tpl_user($user);
-            }
+            tpl_user($user);
         }
     }
-    
+
     public function get_result($slug = "") {
         global $env;
         $user = $this->getUserFromSlug($slug);
@@ -52,7 +48,7 @@ class UserHandler extends ToroHandler {
             $slug = $arr[0];
             if ($slug == "me") {
                 return Auth::getUser();
-            } else if ($slug == "all"){
+            } else if ($slug == "all") {
                 return null;
             } else if (is_int($slug)) {
                 return User::getByID(intval($slug));
@@ -66,8 +62,7 @@ class UserHandler extends ToroHandler {
     public function post($slug) {
         $arr = explode('/', substr($slug, 1));
         $user = $this->getUserFromSlug($slug);
-        if (count($arr) == 2 && $arr[1] == "preferences" && ($user->getID() == Auth::getUserID() || Auth::isAdmin()) &&
-                ($user->getID() == Auth::getUserID() || Auth::isAdmin())) {
+        if (count($arr) == 2 && $arr[1] == "preferences" && Auth::canEditUser($user)) {
             if (isset($_POST["name"]) && $_POST["name"] != "") {
                 $user->setName($_POST["name"]);
             }
@@ -88,6 +83,7 @@ class UserHandler extends ToroHandler {
                     Auth::cryptCompare($_POST["old_password"], $user->getCryptStr())) {
                 $user->setPassword($_POST["password"], !Auth::isSameUser($user));
             }
+            $user->sendEmailWhenBeingCommented(isset($_POST["send_email_when_being_commented"]));
             $user->updateDB();
             Auth::login($_POST["name"], $_POST["password"]);
             $this->get($slug);
@@ -99,7 +95,7 @@ class UserHandler extends ToroHandler {
                 $user->unnotifyUserComment($_POST["id"]);
                 echo $_POST["id"] . "|notified";
             }
-        } else if (isset($_POST["text"]) && strlen($_POST["text"]) > 5 &&
+        } else if (isset($_POST["text"]) && strlen($_POST["text"]) >= 5 &&
                 $user->getID() != Auth::getUserID()) {
             $comment = $user->postUserComment($_POST["text"], isset($_POST["send_anonymous"]));
             if ($comment)
@@ -107,6 +103,9 @@ class UserHandler extends ToroHandler {
             if (isset($_POST["send_anonymous"]))
                 PiwikHelper::addTrackGoalJS("Anonymous contribution");
             PiwikHelper::addTrackGoalJS("User commented", $_POST["text"]);
+        } else if (isset($_POST["deleteItem"]) && Auth::canDeleteUserComment()){
+            User::deleteUserComment(intval($_POST["deleteItem"]));
+            echo intval($_POST["deleteItem"]);
         }
     }
 

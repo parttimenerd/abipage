@@ -17,11 +17,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class MainHandler extends ToroHandler {
+class NewsListHandler extends ToroHandler {
 
-    public function get() {
-        global $env;
-        tpl_home(NewsList::getNews($env->number_of_news_shown_at_the_home_page));
+    public function get($slug = "") {
+        if ($slug == "/write")
+            tpl_news_list(NewsList::getNews());
+        elseif (strlen($slug) <= 1)
+            tpl_write_news();
+        else
+           tpl_news_list(NewsList::getNewsByPhrase(substr($slug, 1))); 
+    }
+
+    public function post($slug = "") {
+        if ($slug == "/write" && Auth::canWriteNews() && isset($_POST["title"]) && isset($_POST["text"]) && strlen($_POST["text"]) > 5 && strlen($_POST["title"]) > 3) {
+            NewsList::writeNews($_POST["title"], $_POST["text"], isset($_POST["write-email"]));
+        }
+        return $this->get();
     }
 
 }
+
+?>

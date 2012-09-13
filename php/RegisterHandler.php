@@ -43,7 +43,7 @@ class RegisterHandler extends ToroHandler {
                 isset($_POST["password_repeat"]) &&
                 $_POST["password"] == $_POST["password_repeat"]) {
             $user = User::create($_POST["name"], $_POST["math_course"], $_POST["math_teacher"], $_POST["mail_adress"], $_POST["password"], User::NORMAL_MODE);
-            PiwikHelper::addTrackGoalJS("New user registrated");
+            PiwikHelper::addTrackGoalJS("New user registered");
             //Auth::login($_POST["first_name"] . " " . $_POST["last_name"], $_POST["password"]);
             if ($env->has_forum && isset($_POST["reg_in_forum"])) {
                 register_user_in_forum($user, $_POST["password"]);

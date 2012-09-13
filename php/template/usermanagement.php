@@ -42,7 +42,11 @@ function tpl_usermanagement($userarr, $as_page = true, $urlapp = "") {
             <tbody>
                 <?php foreach ($userarr as $user): ?>
                     <tr>
-                        <td><input type="checkbox" value="true" name="<?php echo $user->getID() ?>"/></td>
+                        <td>
+                            <? if (!Auth::isSameUser($user) && Auth::canEditUser($user)): ?>
+                            <input type="checkbox" value="true" name="<?php echo $user->getID() ?>"/>
+                            <? endif; ?>
+                        </td>
                         <td><?php echo $user->getID() ?></td>
                         <td><?php echo $user->getFirstName() ?></td>
                         <td><?php echo $user->getLastName() ?></td>
@@ -60,13 +64,14 @@ function tpl_usermanagement($userarr, $as_page = true, $urlapp = "") {
         Ausgewählte Benutzer  
         <button class="btn" type="submit" name="activate">Aktivieren</button>
         <button class="btn" type="submit" name="deactivate">Deaktivieren</button><br/>
-        <?php if (Auth::getUserMode() == User::ADMIN_MODE): ?>
+        <?php if (Auth::canSetUserMode()): ?>
             Modus <?php tpl_usermode_combobox("mode") ?>
             <button class="btn" type="submit" name="setmode">setzen</button><br/>
-        <?php endif ?>
+            <button class="btn btn-danger" type="submit" name="delete">Benutzer löschen (Es werden dabei alle Beiträge der betreffenden Benutzer gelöscht!!!)</button><br/>
+                <?php endif ?>
         <input type="password" name="password" style="width: 150px" placeholder="Neues Passwort"/>
         <button class="btn" type="submit" name="setpassword">Passwort setzen</button>
-        (mit E-Mail Benachrichtigung)
+        (mit E-Mail Benachrichtigung der jeweiligen Benutzer)
     </form>
     <?
     if ($as_page) {

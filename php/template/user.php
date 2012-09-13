@@ -33,7 +33,7 @@ function tpl_userlist($usernamearr) {
     tpl_after();
 }
 
-function tpl_user_prefs($user) {
+function tpl_user_prefs(User $user) {
     tpl_before("user/me/preferences");
     tpl_item_before_form(array(), "", "", "userprefs");
     ?>
@@ -44,6 +44,7 @@ function tpl_user_prefs($user) {
     <input type="password" title="Altes Passwort" placeholder="Altes Passwort" name="old_password"/><br/>
     <input type="number" name="math_course" title="Mathekursnummer" placeholder="Mathekursnummer" size="1" value="<?php echo $user->getMathCourse() ?>" min="1" max="20"/><br/>
     <input type="text" name="math_teacher" title="Mathelehrer" placeholder="Mathelehrer" value="<?php echo $user->getMathTeacher() ?>" pattern="((von )?[A-ZÄÖÜ]([a-zßäöü](-[a-zßäöüA-ZÄÖÜ])?)+ ?){2,3}"/><br/>
+    <input type="checkbox" <?= $user->sendEmailWhenBeingCommented() ? "checked" : "" ?> value="true">Bei Kommentierung durch andere E-Mail senden?</input>
     <?php
     tpl_item_after_send("Ändern");
     tpl_after();
@@ -52,7 +53,7 @@ function tpl_user_prefs($user) {
 function tpl_user($user) {
     global $env;
     if (Auth::isSameUser($user))
-        tpl_before("user");
+        tpl_before("user/me");
     else
         tpl_before("user/" . str_replace(' ', '_', $user->getName()), $user->getName(), tpl_get_user_subtitle($user));
     if ($user->getID() != Auth::getUserID() && $env->user_comments_editable)
@@ -104,7 +105,13 @@ function tpl_user_comment($user, $comment) {
                     if ($comment["notified_as_bad"])
                         $str = ($str == "" ? "" : "; ") . "Als schlecht markiert";
                     echo $str != "" ? ('<span class="mod_info">[' . $str . ']</span>') : "";
-                endif; ?>
+                endif;
+                ?>
+            </li>
+            <? if (Auth::canDeleteUserComment()): ?>
+                <li class="delete_span_li"> 
+                    <span class="del_item"><?php tpl_icon("delete", "Löschen", "deleteUserComment('" . $comment["id"] . "')") ?></span>
+                <? endif; ?>
             </li>
         </ul>
     </div>

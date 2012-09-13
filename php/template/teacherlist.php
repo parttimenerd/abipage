@@ -50,7 +50,7 @@ function tpl_teacherlist($teacherarr) {
     <div class="item-footer">
         Ausgewählte Lehrer 
         <button class="btn" type="submit" name="edit">Ändern</button>
-        <?php if (Auth::isAdmin()): ?>
+        <?php if (Auth::canDeleteTeacher()): ?>
             <button class="btn" type="submit" name="delete">Löschen</button>
         <?php endif ?>
     </div>
@@ -59,8 +59,7 @@ function tpl_teacherlist($teacherarr) {
     <?php tpl_item_before_form(array(), "Lehrer hinzufügen") ?>
     <textarea name="input"></textarea>
     <?php tpl_infobox("", "Bitte geben sie die einzelnen Lehrer Zeile für Zeile ein, je ein Lehrer pro Zeile.
-			Das Format der Eingabe sollte folgende sein: '[Vorname], [Nachname], [m|w]' (m für männlich, w für weiblich, 
-			'[Vorname], ' ist optional)") ?>
+			Das Format der Eingabe sollte folgende sein: '[Herr|Frau] [Vorname] [Nachname]' ([Vorname] ist optional)") ?>
     <?php
     tpl_item_after_send("Lehrer hinzufügen", "add");
     tpl_after();

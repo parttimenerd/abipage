@@ -64,7 +64,6 @@ class RatableUserContentList {
             $user = Auth::getUser();
         }
         $arr = array();
-        $responses = array();
         if ($this->getCount() > 0) {
             if ($start > $this->getCount()) {
                 $start = ($this->getPageCount() * $this->items_per_page) - $this->items_per_page;
@@ -73,24 +72,22 @@ class RatableUserContentList {
             $res = $this->db->query("SELECT " . $this->table . ".rating AS rating, " . $this->table . ".*, (SELECT " . $this->table . "_ratings.rating FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id AND userid=" . $user->getID() . ") AS own_rating, (SELECT COUNT(*) FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id) AS rating_count FROM " . $this->table . ", " . DB_PREFIX . "user u " . $this->from_app . " WHERE u.id = userid AND u.activated = 1 " . $this->where_app . " ORDER BY " . ($time_sort ? "time" : "rating") . " " . ($desc ? "DESC" : "ASC") . " LIMIT " . $start . ", " . $this->items_per_page) or die($this->db->error);
             if ($res != null) {
                 while ($result = $res->fetch_array()) {
-                    $arr[] = $result;
+                    $arr[] = new RatableUserContentItem($result);
                 }
             }
             if ($this->response_allowed) {
                 $str = "";
-                foreach ($arr as $val)
-                    $str .= ($str != "" ? ", " : "") . $val["id"];
+                foreach ($arr as $ruci)
+                    $str .= ($str != "" ? ", " : "") . $ruci->id;
                 $res = $this->db->query("SELECT " . $this->table . ".rating AS rating, " . $this->table . ".*, (SELECT " . $this->table . "_ratings.rating FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id AND userid=" . $user->getID() . ") AS own_rating, (SELECT COUNT(*) FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id) AS rating_count FROM " . $this->table . ", " . DB_PREFIX . "user u " . $this->from_app . " WHERE u.id = userid AND u.activated = 1 " . $this->where_app . " AND " . $this->table . ".response_to IN (" . $str . ") ORDER BY time ASC LIMIT 0, " . $this->items_per_page) or die($this->db->error);
                 if ($res != null) {
                     while ($result = $res->fetch_array()) {
-                        $responses[] = $result;
+                        $arr[$result["response_to"]]->responses[] = new RatableUserContentItem($result);
                     }
                 }
             }
         }
         $retarr = array("items" => $arr, "start" => $start, "page" => ($start / $this->items_per_page) + 1);
-        if ($this->response_allowed)
-            $retarr = array_merge($retarr, array("responses" => $responses));
         return $retarr;
     }
 
@@ -119,11 +116,13 @@ class RatableUserContentList {
         $cid = intval($id);
         $res = $this->db->query("SELECT rating FROM " . $this->table . "_ratings WHERE itemid=" . $cid . " AND userid=" . Auth::getUserID()) or die($this->db->error);
         if ($res && $res->fetch_array()) {
+            $edit = true;
             $this->db->query("UPDATE " . $this->table . "_ratings SET rating=" . intval($rating) . " WHERE itemid=" . $cid . " AND userid=" . Auth::getUserID());
         } else {
+            $edit = false;
             $this->db->query("INSERT INTO " . $this->table . "_ratings(userid, itemid, rating) VALUES(" . $user->getID() . ", " . $cid . ", " . intval($rating) . ")") or die($this->db->error);
         }
-        return $this->updateRating($id);
+        return array("rating" => $this->updateRating($id), "edit" => $edit);
     }
 
     public function deleteItem($id, $trigger_action = true) {

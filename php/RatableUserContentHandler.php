@@ -39,11 +39,10 @@ class RatableUserContentHandler extends ToroHandler {
             $sort_desc = $arr[1] == "desc";
         }
         if ($slug != null) {
-            if (preg_match("/\/[0-9]+/", $slug)) {
+            if (preg_match("/\/[0-9]+$/", $slug)) {
                 $start = $this->items_per_page * (intval(substr($slug, 1)) - 1);
             } else {
-                //FIX
-                //$this->processPhrase(substr(str_replace('_', ' ', $slug), 1));
+                $this->processPhrase(substr(str_replace('_', ' ', $slug), 1));
             }
         } else if (isset($_GET["page"])) {
             $start = $this->items_per_page * (intval($_GET["page"]) - 1);
@@ -67,8 +66,12 @@ class RatableUserContentHandler extends ToroHandler {
         global $env;
         if (isset($_POST["rating"]) && isset($_POST["id"])) {
             $arr = $this->list->rate(intval($_POST["id"]), intval($_POST["rating"]));
-            tpl_average($arr[0], $arr[1], $arr[2]);
-            PiwikHelper::addTrackGoalJS("Item rated");
+            tpl_average($arr["rating"][0], $arr["rating"][1], $arr["rating"][2]);
+            if ($arr["edited"]){
+                PiwikHelper::addTrackGoalJS("Item rating edited");
+            } else {
+                PiwikHelper::addTrackGoalJS("Item rated");
+            }
             PiwikHelper::echoJSTrackerCode(false);
         } else if (isset($_POST["delete"]) && Auth::isModerator() && isset($_POST["id"])) {
             if ($this->list->deleteItem(intval($_POST["id"]))) {

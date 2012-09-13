@@ -65,8 +65,8 @@ function cleanInputText($input, $db = null) {
     return $db->real_escape_string(formatInputText($input));
 }
 
-function cleanValue($var){
-    if (is_numeric($var)){
+function cleanValue($var) {
+    if (is_numeric($var)) {
         if (is_int($var) || is_float($var) || is_long($var))
             return $var;
         return floatval($var);
@@ -189,7 +189,7 @@ function issetAndNotEmptyArr($keyarr, $arr) {
 
 function resizeImage($newWidth, $originalFile, $targetFile = "") {
     global $env;
-    $exts = array("jpeg", "bmp", "png", "gif");
+    $exts = array("jpeg", "bmp", "png", "gif", "jpg");
     if (empty($newWidth) || empty($originalFile) || !in_array(pathinfo($originalFile, PATHINFO_EXTENSION), $exts)) {
         return false;
     }
@@ -198,7 +198,8 @@ function resizeImage($newWidth, $originalFile, $targetFile = "") {
     } else if (!in_array(pathinfo($targetFile, PATHINFO_EXTENSION), $exts)) {
         return false;
     }
-    $func = "imagecreatefrom" . pathinfo($originalFile, PATHINFO_EXTENSION);
+    $ext = pathinfo($originalFile, PATHINFO_EXTENSION);
+    $func = "imagecreatefrom" . ($ext == "jpg" ? "jpeg" : $ext);
     $src = $func($originalFile);
     list($width, $height) = getimagesize($originalFile);
     $newHeight = ($height / $width) * $newWidth;
@@ -208,7 +209,19 @@ function resizeImage($newWidth, $originalFile, $targetFile = "") {
         unlink($targetFile);
     }
     $ext_target = pathinfo($targetFile, PATHINFO_EXTENSION);
-    $func = "image" . $ext_target;
-    $func($tmp, $targetFile, $ext_target != "png" ? $env->pic_quality : floor((100 - $env->pic_quality) / 10));
+    $func = "image" . ($ext_target == "jpg" ? "jpeg" : $ext_target);
+    if ($ext_target != "bmp")
+        $func($tmp, $targetFile, $ext_target != "png" ? $env->pic_quality : floor((100 - $env->pic_quality) / 10));
+    else
+        $func($tmp, $targetFile);
     return true;
+}
+
+function mysqliResultToArr($result) {
+    $ret_arr = array();
+    if ($result != null) {
+        while ($arr = $result->fetch_array)
+            $ret_arr[] = $arr;
+    }
+    return $ret_arr;
 }
