@@ -30,14 +30,13 @@ function tpl_register() {
     <input type="number" name="math_course" title="Mathekursnummer, z.B.: 1" placeholder="Mathekursnummer, z.B.: 1" min="1" max="20" required="on"/><br/>
     <input type="text" name="math_teacher" title='Mathelehrer, z.B. "Herr Müller"' placeholder='Mathelehrer, z.B. "Herr Müller"' required="on"/><br/>
     <?php if ($env->has_forum): ?>
-        <input type="checkbox" value="true" name="reg_in_forum" selected="selected"/> <label for="reg_in_forum">Automatisch auch im Forum registrieren</label><br/>
+        <input type="checkbox" value="true" name="reg_in_forum" checked/> <label for="reg_in_forum">Automatisch auch im Forum registrieren</label><br/>
     <?php endif ?>
     <?php if ($env->has_wiki): ?>
-        <input type="checkbox" value="true" name="reg_in_wiki" selected="selected"/> <label for="reg_in_wiki">Automatisch auch im Wiki registrieren</label><br/>
+        <input type="checkbox" value="true" name="reg_in_wiki" checked/> <label for="reg_in_wiki">Automatisch auch im Wiki registrieren</label><br/>
     <?php endif ?>
     <?php
-    tpl_infobox("", 'Sie stimmen mit der Registrierung den <a href="terms_of_use" target="_blank">Nutzungsbedingungen</a> zu.<br/>
-                Außerdem werden <a href="https://de.wikipedia.org/wiki/Cookie" target="_blank">Cookies</a> auf ihrem Computer zwecks Anmeldung und Statistik gespeichert.');
+    tpl_infobox("", 'Sie stimmen mit der Registrierung den <a href="' . tpl_url("terms_of_use") . '" target="_blank">Nutzungsbedingungen</a> und der <a href="' . tpl_url("privacy") . '" target="_blank">Datenschutzrichtlinie</a> zu.');
     tpl_item_after_send("Registrieren", "register");
     tpl_after();
 }
@@ -54,16 +53,20 @@ function tpl_welcome_wait_for_activation() {
 }
 
 function tpl_login() {
-    global $env;
+    $id = Auth::getCookieID();
+    $namestr = "";
+    if ($id != -1){
+        $user = User::getByID($id);
+        if ($user != null)
+            $namestr = $user->getName();
+    }
     tpl_before("login");
     tpl_item_before_form(array("action" => tpl_url("login")), "", "", "login");
     ?>
-    <input type="text" name="name" title="Name" placeholder="Name" pattern="((von )?[A-ZÄÖÜ]([a-zßäöü](-[a-zßäöüA-ZÄÖÜ])?)+ ?){2,3}"/><br/>
+    <input type="text" name="name" title="Name" placeholder="Name" pattern="((von )?[A-ZÄÖÜ]([a-zßäöü](-[a-zßäöüA-ZÄÖÜ])?)+ ?){2,3}"<?= $namestr != "" ? (' value="' . $namestr . '"') : '' ?>><br/>
     <input type="password" name="password" title="Passwort" placeholder="Passwort" autocomplete="on"/><br/>
     <?php
-    tpl_infobox("", "Wenn sie noch nicht registriert sind, registrieren Sie sich bitte <a href='register'>hier</a>.<br/>
-			Wenn sie ihr Passwort vergessen haben, können sie ihr Passwort mir diesem <a href='forgot_password'>Link</a> zurücksetzen.
-			Es wird bei der Registrierung ein Cookie auf dem Computer gespeichert um die Anmeldung zu ermöglichen.");
+    tpl_infobox("Passwort vergessen?", "", tpl_url("forgot_password"));
     tpl_item_after_send("Anmelden", "login");
     tpl_after();
 }

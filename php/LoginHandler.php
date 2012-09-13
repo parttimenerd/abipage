@@ -20,17 +20,16 @@
 class LoginHandler extends ToroHandler {
 
     public function get($slug = "") {
-        if ($slug == "/logout") {
-            Auth::logout();
-        }
         tpl_login();
     }
 
     public function post() {
+        global $env;
         if (isset($_POST['name']) &&
                 isset($_POST['password']) &&
                 isset($_POST['login']) &&
-                Auth::login($_POST['name'], $_POST['password'])) {
+                Auth::login($_POST['name'], $_POST['password']) &&
+                (Auth::canVisitSiteWhenUnderConstruction() || !$env->is_under_construction)) {
             $handler = new MainHandler();
             $handler->get();
         } else {

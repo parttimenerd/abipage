@@ -4781,12 +4781,16 @@ table.tablesorter thead tr .headerSortDown,table.tablesorter thead tr .headerSor
 
 /* own-styles */
 @media (max-width: 767px) {
-    .sidebar {
-        display: none;
-    }
+
 }
 @media (max-width: 979px) {
     body {
         margin-top: 0px !important;
+    }
+    .sidebar {
+        display: none;
+    }
+    .with_sidebar {
+        width: 97.5%
     }
 }

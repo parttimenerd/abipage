@@ -54,18 +54,23 @@ class DBSetupHandler extends ToroHandler {
                 foreach (self::$db_setup_vals as $key => $value) {
                     if (!preg_match("/root.*/", $key)) {
                         $val = $_POST[$key];
-                        if ($key == "URL" && substr($val, strlen($val) - 1) == "/"){
+                        if ($key == "URL" && substr($val, strlen($val) - 1) == "/") {
                             $val = substr($val, 0, strlen($val) - 1);
                         }
                         $str .= "\ndefine(\"" . $key . '", "' . $val . '");';
                     }
                 }
                 //For debug purposes...
-               /*define("DB_HOST", "localhost");
+                /* define("DB_HOST", "localhost");
                   define("DB_NAME", "db");
                   define("DB_USER", "root");
                   define("DB_PASSWORD", "");
-                  define("DB_PREFIX", "abipage_" . time() . "_");*/
+                  define("DB_PREFIX", "abipage_" . time() . "_"); */
+                $err = $this->testPOSTParameters();
+                if ($err != "") {
+                    tpl_dbsetup(self::$db_setup_vals, $err);
+                    return;
+                }
                 file_put_contents(dirname(__FILE__) . '/db_config.php', $str);
                 $uploads_dir = dirname(dirname(__FILE__)) . '/uploads';
                 if (!is_dir($uploads_dir)) {
@@ -79,6 +84,7 @@ class DBSetupHandler extends ToroHandler {
                 $uri = str_replace($_SERVER["SERVER_NAME"], "", str_replace('http://', "", $_POST["URL"]));
                 file_put_contents($htaccess_file, str_replace("/abipage/", $uri, $htaccess));
                 require dirname(__FILE__) . '/bootloader.php';
+                var_dump("setup");
                 Database::setup();
                 global $db;
                 $db = Database::getConnection();
@@ -99,6 +105,15 @@ class DBSetupHandler extends ToroHandler {
         } else {
             tpl_404();
         }
+    }
+
+    public function testPOSTParameters() {
+        //($host, $user, $password, $database, $port, $socket)
+        $db = @new mysqli($_POST["DB_HOST"], $_POST["DB_USER"], $_POST["DB_PASSWORD"], $_POST["DB_NAME"]);
+        if ($db != null && $db->connect_errno)
+            return $db->connect_error;
+        $db->close();
+        return "";
     }
 
 }

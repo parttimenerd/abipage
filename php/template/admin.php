@@ -48,6 +48,7 @@ function tpl_admin($userarr, $comments) {
     tpl_item_before("Nicht freigeschaltete Kommentare", "", "management");
     ?>
     <form method="post" class="tablesorter">
+        <input type="hidden" name="access_key" value="<?= Auth::getAccessKey() ?>"/>
         <table>
             <thead>
                 <tr>

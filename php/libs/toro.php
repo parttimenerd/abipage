@@ -1,7 +1,9 @@
 <?php
 
 /* ToroPHP by Anand Kunal
-  https://github.com/anandkunal/ToroPHP */
+  https://github.com/anandkunal/ToroPHP
+
+  Slightly adapted by Johannes Bechberger */
 
 class InvalidRouteType extends Exception {
     
@@ -95,27 +97,31 @@ class ToroApplication {
                 $method_arguments = $regex_matches;
             }
 
-            // XHR (must come first), iPad, mobile catch all
-            if ($this->xhr_request() && method_exists($discovered_handler, $request_method . '_xhr')) {
-                header('Content-type: application/json');
-                header('Pragma: no-cache');
-                header('Cache-Control: no-cache, must-revalidate');
-                header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
-                $request_method .= '_xhr';
-            } else if ($this->ipad_request() && method_exists($discovered_handler, $request_method . '_ipad')) {
-                $request_method .= '_ipad';
-            } else if ($this->mobile_request() && method_exists($discovered_handler, $request_method . '_mobile')) {
-                $request_method .= '_mobile';
-            } else if ($request_method == "get" && defined('DB_NAME') && (($env->results_viewable && str_replace('/result', '', $method_arguments) != $method_arguments) || Auth::isViewingResults())){
-                $method_arguments = str_replace('/result', '', $method_arguments);
-                $request_method .= "_result";
+            if (defined("DB_NAME")) {
+                // XHR (must come first), iPad, mobile catch all
+                if ($this->xhr_request() && method_exists($discovered_handler, $request_method . '_xhr')) {
+                    header('Content-type: application/json');
+                    header('Pragma: no-cache');
+                    header('Cache-Control: no-cache, must-revalidate');
+                    header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+                    $request_method .= '_xhr';
+                } else if ($this->ipad_request() && method_exists($discovered_handler, $request_method . '_ipad')) {
+                    $request_method .= '_ipad';
+                } else if ($this->mobile_request() && method_exists($discovered_handler, $request_method . '_mobile')) {
+                    $request_method .= '_mobile';
+                } else if ($request_method == "get" && defined('DB_NAME') && (($env->results_viewable && str_replace('/result', '', $method_arguments) != $method_arguments) || Auth::isViewingResults()) && method_exists($handler_instance, $request_method . "_result")) {
+                    $method_arguments = str_replace('/result', '', $method_arguments);
+                    $request_method .= "_result";
+                }
+                if (!empty($_POST) && !Auth::hasAccess() && strpos($path_info, '/login')) {
+                    tpl_500();
+                    exit;
+                }
             }
-
             ToroHook::fire('before_handler');
             call_user_func_array(array($handler_instance, $request_method), $method_arguments);
             ToroHook::fire('after_handler');
         } else {
-            header('HTTP/1.0 404 Not Found');
             tpl_404();
             exit;
         }
@@ -151,7 +157,6 @@ class ToroHandler {
     }
 
     public function __call($name, $arguments) {
-        header('HTTP/1.0 404 Not Found');
         tpl_404();
         exit;
     }

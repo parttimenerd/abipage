@@ -48,16 +48,15 @@ class Environment {
     }
 
     public function __get($var) {
-        if (array_key_exists($var, $this->__vars)) {
+        if ($var == "url") {
+            return URL;
+        } else if (array_key_exists($var, $this->__vars)) {
 //            var_dump($var, $this->__vars[$var]);
             return $this->__vars[$var];
-        } else if ($var == "url") {
-            return URL;
         } else if ($this->__prefhandler->hasDefault($var)) {
             return $this->__prefhandler->getDefault($var);
         }
-//        var_dump("No: $var");
-        return $this->{$var};
+        //return $this->{$var};
     }
 
     public function getUsers() {
@@ -124,13 +123,10 @@ class Environment {
     }
 
     public function uploadImage($new_filename_wo_ext) {
-        $img_types = array("jpeg", "gif", "png", "bmp");
+        $img_types = array("jpeg", "gif", "png", "bmp", "jpg");
         if ((!empty($_FILES["uploaded_file"])) && ($_FILES['uploaded_file']['error'] == 0)) {
             $filename = basename($_FILES['uploaded_file']['name']);
             $ext = strtolower(substr($filename, strpos($filename, '.') + 1));
-            if ($ext == "jpg") {
-                $ext = "jpeg";
-            }
             //$arr = explode("/", $_FILES["uploaded_file"]["type"]);
             if (in_array($ext, $img_types) && ($_FILES["uploaded_file"]["size"] < 4000000)) {
                 $newname_wo_ext = $this->main_dir . '/' . $this->upload_path . '/' . $new_filename_wo_ext;
@@ -147,40 +143,18 @@ class Environment {
         return false;
     }
 
-    public function getLastActions($last_action_id = -1) {
-        global $db;
-        $actions = array();
-        $res = $db->query("SELECT * FROM " . DB_PREFIX . "actions WHERE id > " . intval($last_action_id) . " ORDER BY time DESC LIMIT 0, " . $this->showed_actions) or die($db->error);
-        while ($action = $res->fetch_array()) {
-            $actions[] = $action;
-        }
-        return $actions;
-    }
-
-    public function addAction($itemid, $person, $type, $time = -1, $user = null) {
-        global $db, $store;
-        if ($user == null) {
-            $user = Auth::getUser();
-        }
-        if ($time == -1) {
-            $time = time();
-        }
-        $person = $db->real_escape_string($person);
-        $type = $db->real_escape_string($type);
-        $db->query("INSERT INTO " . DB_PREFIX . "actions(id, userid, itemid, person, type, time) VALUES(NULL, " . $user->getID() . ", " . intval($itemid) . ", '" . $person . "', '" . $type . "', " . $time . ")") or die($db->error);
-        $store->last_action_id = $db->insert_id;
-        $store->updateDB();
-    }
-
     function sendMail($to, $topic, $text) {
         if (is_a($to, "User"))
             $to = $to->getMailAdress();
         mail($to, $topic, Markdown($text), "From: " . TITLE . "<" . ($this->system_mail_adress != "" ? $this->system_mail_adress : ("info@" . $_SERVER['HTTP_HOST'])) . ">\r\n"
-                . "X-Mailer: PHP/" . phpversion() . "MIME-Version: 1.0\r\nContent-Type: text/html; charset=ISO-8859-1\r\n");
+                . "X-Mailer: PHP/" . phpversion() . "\r\nMIME-Version: 1.0\r\nContent-Type: text/html; charset=ISO-8859-1\r\n");
     }
 
     function sendAdminMail($topic, $text) {
-        User::getByMode(User::ADMIN_MODE)->sendMail($user->getMailAdress(), $topic, $text);
+        User::getByMode(User::ADMIN_MODE)->sendMail($topic, $text);
     }
 
+    function sendModeratorMail($topic, $text) {
+        User::getByMode(User::MODERATOR_MODE)->sendMail($topic, $text);
+    }
 }

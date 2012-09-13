@@ -79,6 +79,10 @@ class UserArray implements ArrayAccess, Countable {
         return empty($retarr) ? $this : $retarr;
     }
 
+    public function singleMail($topic, $text) {
+        $this->container[rand(0, $this->count() - 1)]->sendMail($topic, $text);
+    }
+
     public function offsetSet($offset, $container) {
         if (is_array($container))
             $container = new self($container);

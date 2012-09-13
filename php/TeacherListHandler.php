@@ -23,20 +23,21 @@ class TeacherListHandler extends ToroHandler {
         tpl_teacherlist(TeacherList::getTeacher());
     }
 
-    public function post() {
-        if (isset($_POST["edit"]) || isset($_POST["delete"])) {
+    public function post() {          
+        if ((isset($_POST["edit"]) || isset($_POST["delete"])) && (Auth::canEditTeacher() || Auth::canDeleteTeacher())) {
             foreach ($_POST as $key => $value) {
                 if (preg_match("/^[0-9]+$/", $key)) {
                     if (isset($_POST["edit"]) && isset($_POST[$key . "last_name"]) &&
                             isset($_POST[$key . "first_name"]) && isset($_POST[$key . "sex"])) {
                         TeacherList::edit($_POST[$key], $_POST[$key . "last_name"], $_POST[$key . "sex"], $_POST[$key . "first_name"]);
-                    } else if (isset($_POST["delete"]) && Auth::isModerator()) {
+                    } else if (isset($_POST["delete"]) && Auth::canDeleteTeacher()) {
                         TeacherList::delete($key);
                     }
                 }
             }
+            TeacherList::updateQuotes();
         }
-        if (isset($_POST["add"]) && isset($_POST["input"])) {
+        if (isset($_POST["add"]) && isset($_POST["input"]) && Auth::canAddTeacher()) {
             TeacherList::readTeacherListInput(cleanInputText($_POST["input"]));
         }
         return $this->get();

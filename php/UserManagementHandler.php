@@ -25,11 +25,13 @@ class UserManagementHandler extends ToroHandler {
     }
 
     public function post() {
-        if (Auth::getUserMode() >= User::MODERATOR_MODE) {
+        if (Auth::isModerator()) {
             if (!empty($_POST)) {
                 foreach ($_POST as $key => $value) {
                     if (preg_match("/^[0-9]+/", $key)) {
                         $user = User::getByID(intval($key));
+                        if (Auth::isSameUser($user) && !Auth::canEditUser($user))
+                            continue;
                         if (isset($_POST["activate"])) {
                             $user->activate();
                             if ($user->getMode() == User::NO_MODE){
@@ -43,6 +45,8 @@ class UserManagementHandler extends ToroHandler {
                             $user->setMode(intval($_POST["mode"]));
                         } else if (isset($_POST["setpassword"]) && isset($_POST["password"]) && $_POST["password"] != "") {
                             $user->setPassword($_POST["password"], true);
+                        } else if (isset($_POST["delete"]) && Auth::canDeleteUser()) {
+                            $user->delete();
                         }
                         $user->updateDB();
                     }

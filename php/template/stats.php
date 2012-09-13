@@ -26,7 +26,7 @@ function tpl_stats_page($teacher_with_quote_rating_and_count, $teacher_with_rumo
         <a href="teacherlist">Liste verändern</a><br/>
     <?php endif ?>
     <h2>Zitate</h2>
-    <table class="stats teacher_table tablesorter">
+    <table class="table table-striped stats teacher_table tablesorter">
         <thead>
             <tr>
                 <th></th>
@@ -53,7 +53,7 @@ function tpl_stats_page($teacher_with_quote_rating_and_count, $teacher_with_rumo
         </tbody>
     </table>
     <h2>Stimm es...-Beiträge mit Lehrername im Text</h2>
-    <table class="stats teacher_table tablesorter">
+    <table class="table table-striped stats teacher_table tablesorter">
         <thead>
             <tr>
                 <th></th>

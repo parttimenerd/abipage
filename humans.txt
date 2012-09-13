@@ -6,19 +6,21 @@
   Developer: Johannes Bechberger
   Site:
   Twitter: @parttimen3rd
+  E-Mail: johannes.bechberger@online.de
   Location: Germany
 
 /* THANKS */
   The Noun Project (thenounproject.com): for their awesome icons
   Julian Quast (julianquast.de): for the idea to build this project
   Ulrich Stemmermann (stemmermann.info): for being the reason why I began to learn php and for bearing me the last two years in the computer science course
+  Patrick Haar: for new ideas and bug reports
 
 /* SITE */
-  Last update: 2012/08/02
+  Last update: 2012/09/13
   Standards: HTML5, CSS3, ECMAScript5, PHP5
-  Components: Twitter Bootstrap, HTML5 Boilerplate, Modernizr, PHP Markdown, ToroPHP, jQuery, TableSorter, Chocolat, Color picker, jQuery.bottom, Icons by The Noun Project
+  Components: Twitter Bootstrap, HTML5 Boilerplate, Modernizr, PHP Markdown, ToroPHP, jQuery, TableSorter, Chocolat, Color picker, jQuery.bottom, Icons by The Noun Project, jQuery wysiwyg, handlebars.js, Swag handlebars.js helpers
   Doctype: HTML5
-  Software: Notepad++, Netbeans, Firefox, Firebug, XAMPP
+  Software: Notepad++, Netbeans, Firefox, Firebug, XAMPP, XDebug
 
 
 

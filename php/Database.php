@@ -31,6 +31,7 @@ class Database {
             if (defined('DEBUG')){
                 self::$db = new DebugDBWrapper(self::$db);
             }
+            return self::$db;
         }
     }
 
@@ -59,7 +60,7 @@ class Database {
         self::$db->query('CREATE TABLE IF NOT EXISTS ' . DB_PREFIX . "images(id INT AUTO_INCREMENT PRIMARY KEY, userid INT, description TEXT, format VARCHAR(5), time BIGINT, rating FLOAT NOT NULL, rating_count INT NOT NULL, data TEXT, FULLTEXT(description)) ENGINE = MYISAM") or die("Can't create pictures table: " . self::$db->error);
         self::$db->query('CREATE TABLE IF NOT EXISTS ' . DB_PREFIX . "images_ratings(userid INT, itemid INT, rating TINYINT)") or die("Can't create picture_ratings table: " . self::$db->error);
         self::$db->query('CREATE TABLE IF NOT EXISTS ' . DB_PREFIX . "teacher(id INT AUTO_INCREMENT PRIMARY KEY, first_name VARCHAR(30), last_name VARCHAR(30), namestr VARCHAR(35), ismale TINYINT, FULLTEXT(namestr)) ENGINE = MYISAM") or die("Can't create teacher table: " . self::$db->error);
-        self::$db->query('CREATE TABLE IF NOT EXISTS ' . DB_PREFIX . "news(id INT AUTO_INCREMENT PRIMARY KEY, title VARCHAR(100), content TEXT, time BIGINT, FULLTEXT(title, content)) ENGINE = MYISAM") or die("Can't create news table: " . self::$db->error);
+        self::$db->query('CREATE TABLE IF NOT EXISTS ' . DB_PREFIX . "news(id INT AUTO_INCREMENT PRIMARY KEY, title VARCHAR(100), content TEXT, time BIGINT, userid INT, FULLTEXT(title, content)) ENGINE = MYISAM") or die("Can't create news table: " . self::$db->error);
         self::$db->query('CREATE TABLE IF NOT EXISTS ' . DB_PREFIX . "actions(id INT AUTO_INCREMENT PRIMARY KEY, userid INT, itemid INT, person VARCHAR(50), type VARCHAR(20), time BIGINT)") or die("Can't create news table: " . self::$db->error);
     }
 

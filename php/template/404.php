@@ -19,10 +19,11 @@
 
 function tpl_404() {
     global $env;
-    tpl_before(null, "Seite nicht gefunden", $env->fourofour_subtitle);
+    header('HTTP/1.0 404 Not Found');
+    tpl_before("fourofour", "Seite nicht gefunden", $env->fourofour_subtitle, false, null, "owl");
     tpl_item_before("", "", "container");
     ?>
-    <p>Entschuldigung, aber die Seite die sie versucht haben anzuschauen existiert nicht.</p>
+    <p>Entschuldigung, aber die Seite die sie versuchen anzuschauen existiert nicht.</p>
     <p>Es scheint, das dass ein Ergebnis von einem der folgenden Punkte ist:</p>
     <ul>
         <li>eine falsch eingegebene Adresse</li>

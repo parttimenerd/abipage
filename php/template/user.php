@@ -33,7 +33,7 @@ function tpl_userlist($usernamearr) {
     tpl_after();
 }
 
-function tpl_user_prefs($user) {
+function tpl_user_prefs(User $user) {
     tpl_before("user/me/preferences");
     tpl_item_before_form(array(), "", "", "userprefs");
     ?>
@@ -44,6 +44,7 @@ function tpl_user_prefs($user) {
     <input type="password" title="Altes Passwort" placeholder="Altes Passwort" name="old_password"/><br/>
     <input type="number" name="math_course" title="Mathekursnummer" placeholder="Mathekursnummer" size="1" value="<?php echo $user->getMathCourse() ?>" min="1" max="20"/><br/>
     <input type="text" name="math_teacher" title="Mathelehrer" placeholder="Mathelehrer" value="<?php echo $user->getMathTeacher() ?>" pattern="((von )?[A-ZÄÖÜ]([a-zßäöü](-[a-zßäöüA-ZÄÖÜ])?)+ ?){2,3}"/><br/>
+    <input type="checkbox" <?= $user->sendEmailWhenBeingCommented() ? "checked" : "" ?> value="true"/><label>Bei Kommentierung durch andere E-Mail senden?</label>
     <?php
     tpl_item_after_send("Ändern");
     tpl_after();
@@ -51,10 +52,14 @@ function tpl_user_prefs($user) {
 
 function tpl_user($user) {
     global $env;
-    if (Auth::isSameUser($user))
-        tpl_before("user");
-    else
+    if (Auth::isSameUser($user)) {
+        tpl_before("user/me");
+        tpl_infobox("", "Einstellungen verändern", tpl_url("user/me/preferences"));
+        if ($env->user_characteristics_editable)
+            tpl_infobox("", "Steckbrief editieren", tpl_url("user_characteristics"));
+    } else {
         tpl_before("user/" . str_replace(' ', '_', $user->getName()), $user->getName(), tpl_get_user_subtitle($user));
+    }
     if ($user->getID() != Auth::getUserID() && $env->user_comments_editable)
         tpl_user_write_comment();
     foreach ($user->getUserComments($user->getID() == Auth::getUserID() || Auth::isModerator()) as $comment)
@@ -88,7 +93,7 @@ function tpl_user_comment($user, $comment) {
     <div class="item-footer">
         <ul>
             <li><? tpl_time_span($comment["time"]) ?></li>
-            <li><? tpl_user_span((Auth::isModerator() && !Auth::isSameUser($user)) || !$comment["isanonymous"] ? $comment["commenting_userid"] : null) ?></li>
+            <li><? tpl_user_span((Auth::isModerator() && !Auth::isSameUser($user)) || !$comment["isanonymous"] ? $comment["commenting_userid"] : -1) ?></li>
             <li><? if (Auth::isSameUser($user)): ?>
                     <span class="notify_as_bad">
                         <?php if ($comment["notified_as_bad"]) { ?>
@@ -98,13 +103,19 @@ function tpl_user_comment($user, $comment) {
                     <?php } ?>
                     </span>
                 <? elseif (Auth::isModerator()):
-                    $str = "";
+                    $apps = array();
                     if ($comment["isanonymous"])
-                        $str = "Anonym abgesendet";
+                       $apps[] = "Anonym abgesendet";
                     if ($comment["notified_as_bad"])
-                        $str = ($str == "" ? "" : "; ") . "Als schlecht markiert";
-                    echo $str != "" ? ('<span class="mod_info">[' . $str . ']</span>') : "";
-                endif; ?>
+                       $apps[] = "Als schlecht markiert";
+                    echo !empty($apps) ? ('<span class="mod_info">[' . join("; ", $apps) . ']</span>') : "";
+                endif;
+                ?>
+            </li>
+            <? if (Auth::canDeleteUserComment() && !Auth::isSameUser($user) && !Auth::isSameUser(!$comment["isanonymous"] ? $comment["commenting_userid"] : -1)): ?>
+                <li class="delete_span_li"> 
+                    <span class="del_item"><?php tpl_icon("delete", "Löschen", "deleteUserComment('" . $comment["id"] . "')") ?></span>
+                <? endif; ?>
             </li>
         </ul>
     </div>

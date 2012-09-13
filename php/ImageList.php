@@ -23,7 +23,7 @@ class ImageList extends RatableUserContentList {
 
     public function __construct() {
         global $env;
-        parent::__construct("images");
+        parent::__construct("images", false, true);
         $this->items_per_page = $env->images_per_page;
     }
 
@@ -54,7 +54,7 @@ class ImageList extends RatableUserContentList {
 
     public function addImage($descr = "", $time = -1, $user = null) {
         global $env;
-        if (get_upload_dir_size_mib() + 3 > $env->max_uploads_size){
+        if (get_upload_dir_size_mib() + 3 > $env->max_uploads_size) {
             $env->sendAdminMail("Upload-Ordner ist voll", "Es können keine Bilder mehr hochgeladen werden, da der Upload-Ordner voll ist, bitte löschen sie entweder Bilder oder vergrößern sie die Größe des Upload-Ordners in den <a href='" . tpl_url("preferences") . "'>Seiteneinstellungen</a>.");
             return;
         }
@@ -66,10 +66,14 @@ class ImageList extends RatableUserContentList {
             $user = Auth::getUser();
         }
         $descr = $this->db->real_escape_string(cleanInputText($descr));
-        $this->db->query("INSERT INTO " . $this->table . "(id, userid, description, format, time, rating, rating_count, data) VALUES(NULL, " . $user->getID() . ", '" . $descr . "', '" . $env->pic_format . "', " . $time . ", 0, 0, '')") or die($this->db->error);
+        $this->db->query("INSERT INTO " . $this->table . "(id, userid, description, format, time, rating, data) VALUES(NULL, " . $user->getID() . ", '" . $descr . "', '" . $env->pic_format . "', " . $time . ", 0, '')") or die($this->db->error);
         $id = $this->db->insert_id;
-        $env->addAction($id, $user->getName(), "upload_image");
+        Actions::addAction($id, $user->getName(), "upload_image");
         return $id;
+    }
+
+    protected function appendSearchAfterPhraseImpl($cphrase) {
+        $this->appendToWhereApp(" AND (MATCH(description) AGAINST('" . $cphrase . "') OR description LIKE '%" . $cphrase . "%')");
     }
 
 }

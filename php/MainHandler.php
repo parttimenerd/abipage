@@ -20,7 +20,12 @@
 class MainHandler extends ToroHandler {
 
     public function get() {
-        tpl_home();
+        global $env;
+        if (Auth::getUserMode() != User::NO_MODE){
+            tpl_home(NewsList::getNews($env->number_of_news_shown_at_the_home_page));
+        } else {
+            tpl_home_no_user();
+        }
     }
 
 }

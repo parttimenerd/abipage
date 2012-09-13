@@ -36,9 +36,4 @@ class ImagesHandler extends RatableUserContentHandler {
         return false;
     }
 
-    public function processPhraseImpl($phrase) {
-        $phrase = cleanInputText($phrase);
-        $this->list->appendToWhereApp(" AND (MATCH(description) AGAINST('" . $phrase . "') OR description LIKE '%" . $phrase . "%')");
-    }
-
 }

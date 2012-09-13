@@ -42,7 +42,7 @@ class KeyValueStore {
             $this->updatearr[$key] = true;
             $this->insertarr[$key] = true;
         }
-        $this->__dic[$key][$_var] = cleanValue($value);
+        $this->__dic[$key][$_var] = $value;
     }
 
     private function getRealVarName($var) {

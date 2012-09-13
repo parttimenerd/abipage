@@ -24,9 +24,11 @@ class User {
     const EDITOR_MODE = 1;
     const NORMAL_MODE = 0;
     const NO_MODE = -1;
+    const ACCESS_KEY_LENGTH = 10;
 
     private $id;
-    private $name;
+    private $last_name;
+    private $first_name;
     private $math_course;
     private $math_teacher;
     private $mail_adress;
@@ -35,19 +37,26 @@ class User {
     private $crypt_str;
     private $visible;
     private $db;
+    private $_has_new_access_key;
 
-    public function __construct($id, $name, $math_course, $math_teacher, $mail_adress, $mode, $activated, $crypt_str, $visible = true, $data = array()) {
+    public function __construct($id, $first_name, $last_name, $math_course, $math_teacher, $mail_adress, $mode, $activated, $crypt_str, $visible = true, $data = array()) {
         $db = Database::getConnection();
         $this->id = intval($id);
-        $this->name = $db->real_escape_string($name);
-        $this->math_course = $db->real_escape_string($math_course);
-        $this->math_teacher = $db->real_escape_string($math_teacher);
-        $this->mail_adress = $db->real_escape_string($mail_adress);
+        $this->first_name = $first_name;
+        $this->last_name = $last_name;
+        $this->math_course = $math_course;
+        $this->math_teacher = $math_teacher;
+        $this->mail_adress = $mail_adress;
         $this->mode = !$activated ? self::NO_MODE : intval($mode);
         $this->activated = $activated;
-        $this->crypt_str = $db->real_escape_string($crypt_str);
+        $this->crypt_str = $crypt_str;
         $this->visible = $visible;
         $this->data = !empty($data) ? $data : array();
+        if (!isset($this->data["access_key"])) {
+            $this->updateAccessKey();
+        } else {
+            $this->_has_new_access_key = false;
+        }
         $this->db = Database::getConnection();
     }
 
@@ -55,10 +64,12 @@ class User {
         if ($array == null || !isset($array["id"]) || $array["id"] == "") {
             return null;
         }
-        if (isset($array["first_name"]) && isset($array["last_name"])) {
-            $array["name"] = $array["first_name"] . ' ' . $array["last_name"];
+        if (isset($array["name"])) {
+            $namearr = User::splitName($array["name"]);
+            $array["first_name"] = $namearr[0];
+            $array["last_name"] = $namearr[1];
         }
-        return new User($array["id"], $array["name"], $array["math_course"], $array["math_teacher"], $array["mail_adress"], $array["mode"], $array["activated"], $array["crypt_str"], $array["visible"], (array)$array["data"]);
+        return new User($array["id"], $array["first_name"], $array["last_name"], $array["math_course"], $array["math_teacher"], $array["mail_adress"], $array["mode"], $array["activated"], $array["crypt_str"], $array["visible"], (array) $array["data"]);
     }
 
     public static function getFromMySQLResult($mysql_result) {
@@ -75,14 +86,16 @@ class User {
 
     public static function getByName($name) {
         global $db;
-        $arr = explode(" ", $db->real_escape_string($name));
-        $str = $arr[0];
-        for ($i = 1; $i < count($arr) - 1; $i++) {
-            $str .= " " . $arr[$i];
-        }
-        return User::getFromMySQLResult($db->query("SELECT * FROM " . DB_PREFIX . "user WHERE first_name='" . $str . "' AND last_name='" . $arr[count($arr) - 1] . "'"));
+        $namearr = User::splitName(cleanInputText($name));
+        return User::getFromMySQLResult($db->query("SELECT * FROM " . DB_PREFIX . "user WHERE first_name='" . $namearr[0] . "' AND last_name='" . $namearr[1] . "'"));
     }
 
+    public static function getByNameLike($name) {
+        global $db;
+        $namearr = User::splitName(cleanInputText($name));
+        return User::getFromMySQLResult($db->query("SELECT * FROM " . DB_PREFIX . "user WHERE first_name LIKE '%" . $namearr[0] . "%' OR last_name LIKE '%" . $namearr[1] . "%'"));
+    }
+    
     public static function getByID($id) {
         global $db;
         return User::getFromMySQLResult($db->query("SELECT * FROM " . DB_PREFIX . "user WHERE id=" . intval($id)));
@@ -101,6 +114,10 @@ class User {
             $retarr[] = $user;
         }
         return new UserArray($retarr);
+    }
+
+    public static function getAll() {
+        return new UserArray(mysqliResultToArr($this->db->query("SELECT * FROM " . DB_PREFIX . "user")));
     }
 
     /**
@@ -128,6 +145,8 @@ class User {
     }
 
     public function updateDB() {
+        if ($this->mode == User::NO_MODE)
+            return;
         $query = "UPDATE " . DB_PREFIX . "user SET";
         $query .= " first_name='" . $this->db->real_escape_string($this->getFirstName()) . "'";
         $query .= ", last_name='" . $this->db->real_escape_string($this->getLastName()) . "'";
@@ -141,6 +160,24 @@ class User {
         $query .= ", data='" . cleanValue(json_encode($this->data)) . "'";
         $query .= " WHERE id=" . intval($this->id);
         $this->db->query($query) or die($this->db->error);
+        /*   $query = "UPDATE " . DB_PREFIX . "user SET";
+          $query_part = "";
+          foreach ($this->last_stored_props as $var => $value)
+          if ($value != $this->{$var} && $var != "last_stored_props" && $var != "db")
+          $query_part .= ($query != "" ? "," : "") . " $var='" . ($var == "data" ? cleanValue(json_encode($this->data)) : cleanInputText($this->{$var})) . "' ";
+          //        $query .= ", last_name='" . $this->db->real_escape_string($this->getLastName()) . "'";
+          //        $query .= ", math_course=" . intval($this->getMathCourse());
+          //        $query .= ", math_teacher='" . $this->db->real_escape_string($this->getMathTeacher()) . "'";
+          //        $query .= ", mail_adress='" . $this->db->real_escape_string($this->getMailAdress()) . "'";
+          //        $query .= ", crypt_str='" . $this->db->real_escape_string($this->getCryptStr()) . "' ";
+          //        $query .= ", mode=" . intval($this->getMode());
+          //        $query .= ", activated=" . ($this->isActivated() ? 1 : 0);
+          //        $query .= ", visible=" . ($this->isVisible() ? 1 : 0);
+          //        $query .= ", data='" . cleanValue(json_encode($this->data)) . "'";
+          if ($query_part == "")
+          return false;
+          $this->db->query($query_part . " WHERE id=" . intval($this->id)) or die($this->db->error);
+          $this->last_stored_props = get_object_vars($this); */
     }
 
     public function getUserComments($with_notified_as_bad = false) {
@@ -153,6 +190,14 @@ class User {
             $arr[] = $comment;
         }
         return $arr;
+    }
+
+    public function getUserComment($id) {
+        return $this->db->query("SELECT * FROM " . DB_PREFIX . "user_comments WHERE id=" . inval($id));
+    }
+
+    public static function getUserCommentStatic($id) {
+        return $this->db->query("SELECT * FROM " . DB_PREFIX . "user_comments WHERE id=" . inval($id));
     }
 
     public function notifyUserComment($id) {
@@ -176,20 +221,43 @@ class User {
         $ctext = cleanInputText($text);
         $db = Database::getConnection();
         $reviewed = $env->review_user_comments_automatically && ReviewText::checkText($text);
+
         $db->query("INSERT INTO " . DB_PREFIX . "user_comments(id, commented_userid, commenting_userid, text, time, notified_as_bad, reviewed, isanonymous)
 					VALUES(NULL, " . $this->id . ", " . intval($senduserid) . ", '" . $ctext . "', " . intval($time) . ", 0, " . ($reviewed ? 1 : 0) . ", " . intval($anonymous) . ")");
-        $env->addAction($this->db->insert_id, $this->name, "add_user_comment");
+        if ($reviewed) {
+            if ($this->sendEmailWhenBeingCommented()) {
+                $this->sendUserCommentedMail($anonymous ? null : $senduserid, $text);
+            }
+        } else {
+            $env->sendModeratorMail("Kommentar von " . self::getStringRep($senduserid) . ($anonymous ? " [Anonym] " : "") . " bei " . $this->getName() . " wartet auf Freischaltung", "Kommentar:\n" . $text);
+        }
+        Actions::addAction($this->db->insert_id, $this->name, "add_user_comment");
         return array("id" => $db->insert_id, "commented_userid" => $this->id, "commenting_userid" => intval($senduserid), "text" => $ctext, "time" => intval($time), "notified_as_bad" => 0, "reviewed" => ($reviewed ? 1 : 0), "anonymous" => intval($anonymous));
     }
 
     public static function reviewUserComment($id) {
-        $db = Database::getConnection();
+        global $db;
         $db->query("UPDATE " . DB_PREFIX . "user_comments SET reviewed=1 WHERE id=" . intval($id) . " AND commenting_userid!=" . Auth::getUserID());
+        $comment = self::getUserCommentStatic($id);
+        $user = User::getByID($comment["commented_userid"]);
+        if ($user->sendEmailWhenBeingCommented())
+            $user->sendUserCommentedMail($comment["isanonymous"] ? null : $comment["commenting_user"], $comment["text"]);
+    }
+
+    public function sendUserCommentedMail($commenting_user, $text) {
+        $user_str = self::getStringRep($commenting_user);
+        $this->sendMail("Kommentar von " . $user_str, $user_str . " schrieb folgenden Kommentar: \n" . $text);
+    }
+
+    public static function getStringRep($user) {
+        $user = $user != null ? (is_numeric($commenting_user) ? User::getByID($commenting_user) : $commenting_user) : null;
+        return $user != null ? $user->getName() : "Anonym";
     }
 
     public static function deleteUserComment($id) {
         $db = Database::getConnection();
         $db->query("DELETE FROM " . DB_PREFIX . "user_comments WHERE id=" . intval($id) . " AND commenting_userid!=" . Auth::getUserID()) or die($db->error);
+        Actions::addAction($this->db->insert_id, $this->name, "delete_user_comment");
     }
 
     public function getID() {
@@ -197,17 +265,15 @@ class User {
     }
 
     public function getName() {
-        return $this->name;
+        return $this->first_name . " " . $this->last_name;
     }
 
     public function getFirstName() {
-        $arr = self::splitName($this->name);
-        return $arr[0];
+        return $this->first_name;
     }
 
     public function getLastName() {
-        $arr = self::splitName($this->name);
-        return $arr[1];
+        return $this->last_name;
     }
 
     public static function splitName($name) {
@@ -260,6 +326,11 @@ class User {
 
     public function getCryptStr() {
         return $this->crypt_str;
+    }
+
+    public function getCryptSalt() {
+        $arr = explode("$", $this->crypt_str);
+        return $arr[1];
     }
 
     public function setName($first_name, $last_name = "") {
@@ -333,6 +404,55 @@ class User {
 
     public function getLastVisitTime() {
         return isset($this->data["last_visit_time"]) ? $this->data["last_visit_time"] : -1;
+    }
+
+    public function sendEmailWhenBeingCommented($send = -1) {
+        if ($send != -1) {
+            $this->data["send_email_when_being_commented"] = cleanValue($send);
+        }
+        return isset($this->data["send_email_when_being_commented"]) ? $this->data["send_email_when_beingCommented"] : false;
+    }
+
+    public function delete($also_delete_ruc_items = true) {
+        if (!Auth::canDeleteUserComment() && !Auth::isSameUser($this))
+            return false;
+        $arr = array(
+            "user" => "id",
+            "keyvaluestore" => "userid",
+            "user_characteristics" => "userid",
+            "user_comments" => "commented_userid",
+            "user_comments" => "commenting_userid",
+            "poll_answers" => "userid",
+            "quotes_ratings" => "userid",
+            "rumors_ratings" => "userid",
+            "images_ratings" => "userid",
+            "actions" => "userid"
+        );
+        $arr_ruc = array(
+            "quotes" => "userid",
+            "rumors" => "userid",
+            "images" => "userid"
+        );
+        if ($also_delete_ruc_items)
+            $arr = array_merge($arr, $arr_ruc);
+        foreach ($arr as $table => $field)
+            $this->db->query("DELETE FROM " . DB_PREFIX . $table . " WHERE $field=$this->id");
+        $this->mode = User::NO_MODE;
+        if ($this->mode > User::NO_MODE)
+            $this->sendMail("Account wurde gelöscht", "Ihr Benutzeraccount wurde gelöscht\n\nIhr \"" . $env->title . "\"-Team");
+    }
+
+    public function getAccessKey() {
+        return $this->data["access_key"];
+    }
+
+    public function compareAccessKey($access_key) {
+        return $this->_has_new_access_key || $this->getAccessKey() == $access_key;
+    }
+
+    public function updateAccessKey() {
+        $this->data["access_key"] = Auth::random_string(self::ACCESS_KEY_LENGTH);
+        $this->_has_new_access_key = true;
     }
 
 }

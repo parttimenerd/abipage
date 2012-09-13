@@ -18,93 +18,35 @@
  */
 
 define('DEBUG', isset($_REQUEST["debug"]));
-
-if (DEBUG)
-    define("BEGIN_TIME", microtime(true));
+define('SHOW_LOGS_TO_ADMIN', true);
+define("BASE_DIR", __DIR__);
+define("BEGIN_TIME", microtime(true));
 
 require_once dirname(__FILE__) . '/php/bootloader.php';
 
 if (!defined('DB_NAME')) {
-
     $site = new ToroApplication(array(
                 array(".*", "DBSetupHandler")
             ));
     $site->serve();
 } else {
 
-    define("TITLE", $env->title);
-
-    if (!Auth::isAdmin() && $env->is_under_construction) {
+    define("TITLE", $env->title);  
+    
+    if (!Auth::canVisitSiteWhenUnderConstruction() && $env->is_under_construction) {
         tpl_under_construction();
+        $site = new ToroApplication('login', 'LoginHandler');
+        $site->serve();
         exit;
     }
-
-    if (!Auth::isAdmin()) {
+    
+    if (!Auth::canSeeDebugOutput() && !Auth::canViewLogs()) {
         error_reporting(0);
     }
-
-    $admin_pages = array(
-        array("preferences", "PreferencesHandler")
-    );
-    $moderator_pages = array(
-        array("usermanagement", "UserManagementHandler"),
-        array('admin', 'AdminHandler'),
-        array('teacherlist', 'TeacherListHandler'),
-        array('uc_management', 'UserCharacteristicsManagementHandler'),
-        array('up_management', 'UserPollsManagementHandler')
-    );
-    $normal_pages = array(
-        array('(/|(login)|(register))?', 'MainHandler'),
-        array('impress', 'ImpressHandler'),
-        array('user(/.*)?', 'UserHandler'),
-        array('images(/.*)?', 'ImagesHandler'),
-        array('quotes(/.*)?', 'QuotesHandler'),
-        array('rumors(/.*)?', 'RumorsHandler'),
-        array('impress', 'ImpressHandler'),
-        array('logout', 'LogoutHandler'),
-        array('ajax(/.*)?', 'AjaxHandler'),
-        array('terms_of_use', 'TermsOfUseHandler'),
-    );
-    if ($env->user_characteristics_editable) {
-        $pages = array_unshift($normal_pages, array('user_characteristics', 'UserCharacteristicsHandler'));
-    }
-    if ($env->user_polls_open) {
-        $pages = array_unshift($normal_pages, array('userpolls', 'UserPollsHandler'));
-    }
-    if ($env->stats_open || Auth::isModerator()) {
-        $pages = array_unshift($normal_pages, array('stats', 'StatsHandler'));
-    }
-    //array_merge($env->stats_open ? $normal_pages : $admin_pages, array('stats(\/.*)?', 'StatsHandler'));
-    $no_pages = array(
-        array('register', 'RegisterHandler'),
-        array('forgot_password(/.*)?', 'ForgotPasswordHandler'),
-        array('impress', 'ImpressHandler'),
-        array('terms_of_use', 'TermsOfUseHandler'),
-        array('.*', 'LoginHandler'),
-    );
-    $pages = $normal_pages;
-    switch (Auth::getUserMode()) {
-        case User::ADMIN_MODE:
-            $pages = array_merge($pages, $admin_pages);
-        case User::MODERATOR_MODE:
-            $pages = array_merge($pages, $moderator_pages);
-    }
-    if (Auth::getUserMode() != User::NO_MODE) {
-        $site = new ToroApplication($pages);
-    } else if (Auth::isNotActivated()) {
-        $site = new ToroApplication('.*', 'WaitForActivationHandler');
-    } else {
-        $site = new ToroApplication($no_pages);
-    }
-    $site->serve();
+    PageManager::serve();
 
     Auth::updateLastVisitTime();
 
     $store->updateDB();
 
-    if (DEBUG) {
-        if (Auth::isAdmin())
-            $db->printBuffer();
-        echo "Ausführdauer des Skripts: " . round((microtime(true) - BEGIN_TIME) * 1000, 1) . "ms";
-    }
 }

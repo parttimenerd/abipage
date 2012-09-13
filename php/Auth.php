@@ -43,11 +43,11 @@ class Auth {
         return $res;
     }
 
-    public static function crypt($pwd, $salt = null) {
+    public static function crypt($pwd, $salt = null, $rounds = self::HASH_ROUNDS) {
         if ($salt == null) {
             $salt = self::random_string();
         }
-        return self::hash($pwd, $salt) . '$' . $salt;
+        return self::hash($pwd, $salt, $rounds) . '$' . $salt;
     }
 
     public static function verify($id, $pwd) {
@@ -73,7 +73,7 @@ class Auth {
     }
 
     public static function getLastVisitTime($id = -1) {
-        if ($id == -1){
+        if ($id == -1) {
             if (Auth::getUser())
                 return Auth::getUser()->getLastVisitTime();
         } else {
@@ -84,7 +84,10 @@ class Auth {
     public static function cryptCompare($pwd, $crypt_str) {
         if (strlen($pwd) > 0 && strlen($crypt_str) > 0) {
             $arr = explode('$', $crypt_str);
-            if ($crypt_str == self::crypt($pwd, $arr[1])) {
+            $hashed = self::hash($pwd, $arr[1], self::HASH_ROUNDS - 1);
+            if ($arr[0] == $hashed) {
+                return true;
+            } else if ($arr[0] == self::hash($hashed, $arr[1], 1)) {
                 return true;
             }
         }
@@ -93,15 +96,21 @@ class Auth {
 
     public static function verifyByCookie() {
         if (isset($_COOKIE["abipage_id"]) && isset($_COOKIE["abipage_pwd"])) {
-            return self::verify(intval($_COOKIE["abipage_id"]), $_COOKIE["abipage_pwd"]);
+            if (self::verify(intval($_COOKIE["abipage_id"]), $_COOKIE["abipage_pwd"])) {
+                return true;
+            }
         }
         return false;
     }
 
-    public static function setCookie($id, $pwd) {
+    public static function setCookie($id, $pwd, $salt) {
         ob_end_clean();
         setcookie("abipage_id", $id, time() + self::COOKIE_EXPIRE_DAYS * 86400);
-        setcookie("abipage_pwd", $pwd, time() + self::COOKIE_EXPIRE_DAYS * 86400);
+        setcookie("abipage_pwd", self::hash($pwd, $salt, 1), time() + self::COOKIE_EXPIRE_DAYS * 86400);
+    }
+
+    public static function getCookieID() {
+        return isset($_COOKIE["abipage_id"]) ? intval($_COOKIE["abipage_id"]) : $_COOKIE["abipage_id"];
     }
 
     public static function login($name, $pwd) {
@@ -109,7 +118,7 @@ class Auth {
         if ($user != null) {
             if (self::cryptCompare($pwd, $user->getCryptStr())) {
                 self::$user = $user;
-                self::setCookie($user->getID(), $pwd);
+                self::setCookie($user->getID(), $pwd, $user->getCryptSalt());
                 return true;
             }
         }
@@ -117,7 +126,10 @@ class Auth {
     }
 
     public static function logout() {
-        self::setCookie("a b", " ");
+        if (Auth::getUser() == null)
+            return;
+        Auth::getUser()->updateAccessKey();
+        self::setCookie(Auth::getUserID(), Auth::random_string(), Auth::random_string());
         self::$user = null;
     }
 
@@ -128,6 +140,14 @@ class Auth {
             }
         }
         return self::$user;
+    }
+    
+    public static function getAccessKey(){
+        return self::getUser() != null ? self::$user->getAccessKey() : '';
+    }
+    
+    public static function hasAccess() {
+        return self::getUser() ? self::getUser()->compareAccessKey(isset($_REQUEST["access_key"]) ? $_REQUEST["access_key"] : "") : false;
     }
 
     public static function getUserMode() {
@@ -154,9 +174,19 @@ class Auth {
         return self::getUser() != null ? (self::$user->getMode() == User::ADMIN_MODE) : false;
     }
 
+    public static function isFirstAdmin(){
+        return self::getUserID() == 1;
+    }
+
     public static function isSameUser($user) {
         $id = $user == null ? -2 : (is_numeric($user) ? intval($user) : $user->getID());
         return $id == self::getUserID();
+    }
+
+    public static function canEditUser($user) {
+        if (is_numeric($user))
+            $user = User::getByID(intval($user));
+        return $user != null && (Auth::isSameUser($user) || Auth::isAdmin() || (Auth::getUserMode() > $user->getMode() && Auth::getUserMode() < User::EDITOR_MODE));
     }
 
     public static function isNotActivated() {
@@ -168,4 +198,60 @@ class Auth {
         return $env->results_viewable && $store->result_mode_ud;
     }
 
+    public static function canViewLogs() {
+        global $env;
+        return ($env->show_logs || SHOW_LOGS_TO_ADMIN) && Auth::isAdmin();
+    }
+
+    public static function canWriteNews() {
+        return Auth::isModerator();
+    }
+
+    public static function canVisitSiteWhenUnderConstruction() {
+        return Auth::isAdmin();
+    }
+
+    public static function canViewPreferencesPage() {
+        return Auth::isAdmin();
+    }
+
+    public static function canModifyPreferences() {
+        return Auth::isAdmin();
+    }
+
+    public static function canSeeNameWhenSentAnonymous() {
+        return Auth::isModerator();
+    }
+
+    public static function canDeleteRucItem() {
+        return Auth::isModerator();
+    }
+
+    public static function canDeleteUserComment() {
+        return Auth::isModerator();
+    }
+
+    public static function canDeleteUser() {
+        return Auth::isAdmin();
+    }
+
+    public static function canAddTeacher() {
+        return Auth::isModerator();
+    }
+
+    public static function canEditTeacher() {
+        return Auth::isModerator();
+    }
+
+    public static function canDeleteTeacher() {
+        return Auth::isModerator();
+    }
+
+    public static function canSetUserMode() {
+        return Auth::isModerator();
+    }
+
+    public static function canSeeDebugOutput() {
+        return Auth::isAdmin();
+    }
 }
