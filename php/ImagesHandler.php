@@ -31,6 +31,7 @@ class ImagesHandler extends RatableUserContentHandler {
             if (isset($_POST["send_anonymous"]))
                 PiwikHelper::addTrackGoalJS("Anonymous contribution");
             PiwikHelper::addTrackGoalJS("Image uploaded", $_POST["description"]);
+            jsonAjaxResponse();
             return true;
         }
         return false;

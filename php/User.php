@@ -197,7 +197,8 @@ class User {
     }
 
     public static function getUserCommentStatic($id) {
-        return $this->db->query("SELECT * FROM " . DB_PREFIX . "user_comments WHERE id=" . inval($id));
+        global $db;
+        return $db->query("SELECT * FROM " . DB_PREFIX . "user_comments WHERE id=" . inval($id));
     }
 
     public function notifyUserComment($id) {

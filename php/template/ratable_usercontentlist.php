@@ -53,7 +53,7 @@ function tpl_image_list($rucis, $page, $pages, $phrase = "", $as_page = true) {
 
 function tpl_image_upload_item($with_descr = true) {//"enctype" => "multipart/form-data"
     //tpl_item_before_form(array("id" => "file_upload", "enctype" => "multipart/form-data"), "Bild hochladen", "camera", "item-send");
-    tpl_item_before("Bild hochladen", "upload_image", "item-send");
+    tpl_item_before("Bild hochladen", "camera", "item-send");
     ?>     
     <div id="drop_area">
         <p><span>Bild hier ablegen.</span><br/>
@@ -207,7 +207,7 @@ function tpl_item_after_ruc(RatableUserContentItem $ruci) {
         <ul>
             <li class="time_span_li"><?php tpl_time_span($ruci->time) ?></li>
             <li class="rating_li"><?php tpl_rating($ruci->id, $ruci->own_rating, $ruci->userid, $ruci->rating, $ruci->rating_count, $ruci->data) ?></li>
-            <li class="user_span_li"><?php tpl_user_span($ruci->isAnonymous() ? $ruci->userid : -1, true) ?></li>
+            <li class="user_span_li"><?php tpl_user_span($ruci->isAnonymous() ? -1 : $ruci->userid, true) ?></li>
             <? if ($ruci->canHaveResponses()): ?>
                 <li class="response_to_span_li"><? tpl_item_response_to_span($ruci) ?></li>
             <? endif ?>

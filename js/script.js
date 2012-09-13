@@ -155,7 +155,6 @@ function updateActionsSidebar(){
             'id': last_action_id
         },
         func: function(data){
-            console.log(data["html"]);
             $(".action_list_container .action_list_item:first").before(data["html"]);
             if (data["last_action_id"] !== undefined)
                 last_action_id = data["last_action_id"];
@@ -280,7 +279,7 @@ if ($("#drop_area").length != 0){
             xhr.upload.onprogress = function(e) {
                 if (e.lengthComputable) {
                     percent = Math.round((e.loaded * 100) / e.total); 
-                    progressbar.attr("style", "width: " + percent + "%");
+                    progressbar.attr("style", "width: " + percent + "%; visibility: visible");
                     if (percent < 100){
                         progressbar.html(byteToMiB(e.loaded, 2) + "MiB von " + byteToMiB(e.total, 2) + "MiB hochgeladen");
                     } else {
@@ -307,13 +306,13 @@ if ($("#drop_area").length != 0){
             xhr.send(fd);
 
             xhr.onreadystatechange = function(){
-                if (xhr.readyState == 4 && xhr.status == 200){
-                    var json = JSON.parse(xhr.responseText);
-                    if (json != null)
-                        return;
-                    if (json["logs"] !== undefined)
-                        add_log_object(json["logs"]);
-                    if (json["data"] !== undefined && json["data"]["html"] !== undefined){
+                if (xhr.status == 200){
+//                    var json = JSON.parse(xhr.responseText);
+//                    if (json != null)
+//                        return;
+//                    if (json["logs"] !== undefined)
+//                        add_log_object(json["logs"]);
+//                    if (json["data"] !== undefined && json["data"]["html"] !== undefined){
                         $(".item-send").after(json["data"]["html"]);
                         $(".item-send .descr").val("");
                         $("#drop_area").html(droparea_html);
@@ -321,7 +320,7 @@ if ($("#drop_area").length != 0){
                         progressbar.attr("style", "width: 0%");
                         file = null;
                         file_content = ""; 
-                    }
+//                    }
                 }
             };
         }
@@ -512,7 +511,7 @@ function timespanText(timediff){
     return 'Vor ' + text;
 }
 
-window.setInterval("updateTimespans()", 5000);
+//window.setInterval("updateTimespans()", 5000);
 
 function deleteUserComment(id){
     ajax({

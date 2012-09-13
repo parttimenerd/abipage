@@ -24,7 +24,7 @@ class UserHandler extends ToroHandler {
         $arr = explode('/', substr($slug, 1));
         $user = $this->getUserFromSlug($slug);
         if (!$user) {
-            tpl_userlist($env->getUserNames(false, isset($arr[1]) ? str_replace('_', ' ', $arr[1]) : ""));
+            tpl_userlist($env->getUserNames(false, isset($arr[1]) ? str_replace('_', ' ', $arr[1]) : "", false));
         } else if (count($arr) == 2 && $arr[1] == "preferences" && Auth::canEditUser($user)) {
             tpl_user_prefs($user);
         } else {

@@ -254,4 +254,8 @@ class Auth {
     public static function canSeeDebugOutput() {
         return Auth::isAdmin();
     }
+    
+    public static function canSetUserVisibility(){
+        return Auth::isAdmin();
+    }
 }

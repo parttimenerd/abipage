@@ -185,12 +185,11 @@ abstract class RatableUserContentList {
 
     public function setOrderBy($order_by) {
         foreach ($this->order_by_dic as $key => $value) {
-            if ((is_int($key) && $value == $order_by) || $key == $order_by) {
-                $order_by = $value;
+            if ((is_int($key) && $value === $order_by) || $key === $order_by) {
+                $this->order_by = $value;
                 break;
             }
         }
-        $this->order_by = $order_by;
         return $this;
     }
 
@@ -243,10 +242,11 @@ abstract class RatableUserContentList {
         return $this;
     }
 
-    public function setStart($start){
+    public function setStart($start) {
         $start = intval($start);
         if ($start > 0)
             $this->start = $start;
         return $this;
     }
+
 }

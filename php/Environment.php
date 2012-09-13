@@ -70,7 +70,7 @@ class Environment {
     }
 
     //HACK implement search
-    public function getUserNames($also_deactivated = false, $search_string = "") {
+    public function getUserNames($also_deactivated = false, $search_string = "", $also_unvisible = true) {
         global $db;
         //$key = $also_deactivated ? "also_deactivated" : "activated";
         $app = "";
@@ -79,6 +79,9 @@ class Environment {
         if ($search_string != "") {
             $search_string_c = str_replace(" ", "%", $db->real_escape_string($search_string));
             $app .= ($app == "" ? " WHERE " : " AND ") . "(first_name LIKE \"%$search_string_c%\" OR last_name LIKE \"%$search_string_c%\") ";
+        }
+        if (!$also_unvisible){
+                       $app .= ($app == "" ? " WHERE " : " AND ") . " visible=" . 1;
         }
         //if ($this->__usernamesarr[$key] == null) {
         $arr = array();

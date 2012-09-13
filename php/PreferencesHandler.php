@@ -94,7 +94,10 @@ Das Copyright an den Beiträgen geht mit dem Hochladen bzw. Schreiben auf dieser
                         "type" => "textarea"
                     ),
                     "privacy_policy" => array(
-                        "default" => "",
+                        "default" => "<p>Diese Seite speichert die persönlichen Daten welche bei der Registrierung angegeben wurden. Diese Daten werden nicht an Dritte weitergegeben, sofern diese Dritten nicht einen Schülerausschuss repräsentieren. Es werden außerdem noch die Seitenaufrufe zu statistischen Zwecken mit der Software Piwik protokolliert, hierbei wird durch ihren Browser, die benutzte Browserversion, das verwendete Betriebssystem,
+                            die Referrer URL (die zuvor besuchte Seite), der Hostname des zugreifenden Rechners (IP Adresse) und Uhrzeit der Serveranfrage an uns übermittelt. Die Seitenaufrufstatistiken können nicht mit ihren anderen Daten verknüft werden, dies ist nur bis auf die Ebene eines Mathekurses und des Benutzerranges möglich. Außerdem werden ihre Aktionen zu dem angegeben Zweck protokolliert. Desweiteren wird bei jedem Benutzer direkt noch der Zeitpunkt des letzten Zugriffs gespeichert.</p>
+<p>Zur Anmeldung werden Cookies gespeichert, dies ist für die Funktionalität der Seite unbendingt notwendig. Cookies sind kleine Textdateien, die auf Ihrem Rechner abgelegt werden  und die Ihr Browser speichert. Cookies richten auf Ihrem Rechner keinen  Schaden an und enthalten keine Viren. Cookies können es auch ermöglichen, sie nach Verlassen der Website wiederzuerkennen um Sie ohne Passworteingabe gleich auf die Webseite weiterleiten.</p>
+<p>Wenn Sie zu den Daten, die auf dieser Seite von ihnen gepseichert Auskunft erhalten möchten oder allgemein Fragen zum Datenschutz dieser Seite haben, kontaktieren sie bitte die im Impressum genannte Adresse.</p>",
                         "label" => "Datenschutz-Seitentext",
                         "type" => "textarea"
                 ))),

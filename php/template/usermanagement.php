@@ -73,6 +73,10 @@ function tpl_usermanagement($userarr, $as_page = true, $urlapp = "") {
         <input type="password" name="password" style="width: 150px" placeholder="Neues Passwort"/>
         <button class="btn" type="submit" name="setpassword">Passwort setzen</button>
         (mit E-Mail Benachrichtigung der jeweiligen Benutzer)
+        <? if (Auth::canSetUserVisibility()): ?>
+        <input type="checkbox" checked="checked" name="visible"/>
+        <button class="btn" name="setvisible">Sichtbar?</button>
+        <? endif ?>
     </form>
     <?
     if ($as_page) {
