@@ -18,7 +18,7 @@
  */
 
 define('DEBUG', isset($_REQUEST["debug"]));
-define('SHOW_LOGS_TO_ADMIN', true);
+//define('SHOW_LOGS_TO_ADMIN', true);
 define("BASE_DIR", __DIR__);
 define("BEGIN_TIME", microtime(true));
 

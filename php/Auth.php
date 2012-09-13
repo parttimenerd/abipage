@@ -200,7 +200,7 @@ class Auth {
 
     public static function canViewLogs() {
         global $env;
-        return ($env->show_logs || SHOW_LOGS_TO_ADMIN) && Auth::isAdmin();
+        return ($env->show_logs || defined(SHOW_LOGS_TO_ADMIN)) && Auth::isAdmin();
     }
 
     public static function canWriteNews() {
