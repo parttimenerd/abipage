@@ -42,7 +42,7 @@ class NewsList {
         $ctitle = cleanInputText($title);
         $ccontent = cleanInputText($content);
         $db->query("INSERT INTO " . DB_PREFIX . "news(id, title, content, time, userid) VALUES(NULL, '$ctitle', '$ccontent', " . time() . ", " . Auth::getUserID() . ")");
-        Actions::addAction($this->db->insert_id, Auth::getUserName(), "write_news");
+        Actions::addAction($db->insert_id, Auth::getUserName(), "write_news");
         if ($send_emails)
             User::getAll()->sendMail($title, $content);
     }
