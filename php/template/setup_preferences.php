@@ -66,7 +66,7 @@ function tpl_dbsetup($val_arr) {
     //tpl_before("", "Setup");
     ?>
     <h1>Installieren der Seite</h1>
-    <form action="setup" method="POST">
+    <form method="POST">
         <?php tpl_pref_table($val_arr) ?>
         <button type="submit" class="btn">Installieren</button>
     </form>
