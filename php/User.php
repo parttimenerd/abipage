@@ -258,7 +258,7 @@ class User {
     public static function deleteUserComment($id) {
         $db = Database::getConnection();
         $db->query("DELETE FROM " . DB_PREFIX . "user_comments WHERE id=" . intval($id) . " AND commenting_userid!=" . Auth::getUserID()) or die($db->error);
-        Actions::addAction($this->db->insert_id, $this->name, "delete_user_comment");
+        Actions::addAction($db->insert_id, $this->name, "delete_user_comment");
     }
 
     public function getID() {
