@@ -44,7 +44,7 @@ function tpl_user_prefs(User $user) {
     <input type="password" title="Altes Passwort" placeholder="Altes Passwort" name="old_password"/><br/>
     <input type="number" name="math_course" title="Mathekursnummer" placeholder="Mathekursnummer" size="1" value="<?php echo $user->getMathCourse() ?>" min="1" max="20"/><br/>
     <input type="text" name="math_teacher" title="Mathelehrer" placeholder="Mathelehrer" value="<?php echo $user->getMathTeacher() ?>" pattern="((von )?[A-ZÄÖÜ]([a-zßäöü](-[a-zßäöüA-ZÄÖÜ])?)+ ?){2,3}"/><br/>
-    <input type="checkbox" <?= $user->sendEmailWhenBeingCommented() ? "checked" : "" ?> value="true"/><label>Bei Kommentierung durch andere E-Mail senden?</label>
+    <input type="checkbox" <?= $user->sendEmailWhenBeingCommented() ? "checked" : "" ?> value="true" name="send_email_when_being_commented"/><label>Bei Kommentierung durch andere E-Mail senden?</label>
     <?php
     tpl_item_after_send("Ändern");
     tpl_after();

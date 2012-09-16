@@ -95,7 +95,7 @@ class User {
         $namearr = User::splitName(cleanInputText($name));
         return User::getFromMySQLResult($db->query("SELECT * FROM " . DB_PREFIX . "user WHERE first_name LIKE '%" . $namearr[0] . "%' OR last_name LIKE '%" . $namearr[1] . "%'"));
     }
-    
+
     public static function getByID($id) {
         global $db;
         return User::getFromMySQLResult($db->query("SELECT * FROM " . DB_PREFIX . "user WHERE id=" . intval($id)));
@@ -251,7 +251,10 @@ class User {
     }
 
     public static function getStringRep($user) {
-        $user = $user != null ? (is_numeric($commenting_user) ? User::getByID($commenting_user) : $commenting_user) : null;
+        if ($user == $this->id || $user->getID() == $this->id) {
+            return "Me";
+        }
+        $user = $user != null ? (is_numeric($user) ? User::getByID($user) : $user) : null;
         return $user != null ? $user->getName() : "Anonym";
     }
 
@@ -407,11 +410,12 @@ class User {
         return isset($this->data["last_visit_time"]) ? $this->data["last_visit_time"] : -1;
     }
 
-    public function sendEmailWhenBeingCommented($send = -1) {
-        if ($send != -1) {
-            $this->data["send_email_when_being_commented"] = cleanValue($send);
-        }
-        return isset($this->data["send_email_when_being_commented"]) ? $this->data["send_email_when_beingCommented"] : false;
+    public function sendEmailWhenBeingCommented() {
+        return isset($this->data["send_email_when_being_commented"]) ? $this->data["send_email_when_being_commented"] : false;
+    }
+
+    public function setSendEmailWhenBeingCommented($send) {
+        $this->data["send_email_when_being_commented"] = $send == true;
     }
 
     public function delete($also_delete_ruc_items = true) {

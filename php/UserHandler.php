@@ -87,7 +87,7 @@ class UserHandler extends ToroHandler {
                     Auth::cryptCompare($_POST["old_password"], $user->getCryptStr())) {
                 $user->setPassword($_POST["password"], !Auth::isSameUser($user));
             }
-            $user->sendEmailWhenBeingCommented(isset($_POST["send_email_when_being_commented"]));
+            $user->setSendEmailWhenBeingCommented(isset($_POST["send_email_when_being_commented"]));
             $user->updateDB();
             Auth::login($_POST["name"], $_POST["password"]);
             $this->get($slug);

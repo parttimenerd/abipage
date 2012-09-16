@@ -84,7 +84,7 @@ class RatableUserContentHandler extends ToroHandler {
         $this->get($slug);
     }
 
-    public function post() {
+    public function post($slug = "") {
         if (isset($_POST["rating"]) && isset($_POST["id"])) {
             $arr = $this->list->rate(intval($_POST["id"]), intval($_POST["rating"]));
             jsonAjaxResponseStart();
@@ -104,11 +104,12 @@ class RatableUserContentHandler extends ToroHandler {
                 jsonAjaxResponseEndSend(array("id" => intval($_POST["id"])));
             }
         } else if (isset($_POST["send"]) || !empty($_FILES["uploaded_file"]) || isset($_POST["send_anonymous"])) {
-            if ($this->post_impl()) {
-                $arr = $this->list->getItems(0);
-                if (count($arr["items"]) != 0) {
+            $id = $this->post_impl();
+            if ($id !== false) {
+                $item = $this->list->getItemByID($id);
+                if ($item != null) {
                     jsonAjaxResponseStart();
-                    call_user_func($this->tpl_list_func_name, array($arr["items"][0]), $arr["page"], $this->list->getPageCount(), "", "", false);
+                    call_user_func($item->getTplFunctionName(), $item);
                     jsonAjaxResponseEndSend();
                 }
             }

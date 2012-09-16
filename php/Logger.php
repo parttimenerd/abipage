@@ -38,7 +38,11 @@ class Logger {
         $arr = self::errTypeToStrArr($type);
         if (!is_string($msg))
             $msg = json_encode($msg);
-        self::$buffer[] = array("msg" => $msg, "backtrace" => self::debug_backtrace(), "type" => $type, "type_str" => $arr["type"], "parent_type" => $arr["parent_type"], "time" => round(microtime(true) - BEGIN_TIME, 6));
+        $arr = array("msg" => $msg, "backtrace" => self::debug_backtrace(), "type" => $type, "type_str" => $arr["type"], "parent_type" => $arr["parent_type"], "time" => round(microtime(true) - BEGIN_TIME, 6));
+        if (DEBUG){
+            var_dump($arr);
+        }
+        self::$buffer[] = $arr;
     }
 
     public static function getLogs() {

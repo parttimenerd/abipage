@@ -20,6 +20,7 @@
 abstract class RatableUserContentList {
 
     protected $table = "";
+    protected $type = "";
     protected $db = "";
     private $count = -1;
     protected $where_app = "";
@@ -43,6 +44,7 @@ abstract class RatableUserContentList {
         global $env, $db;
         $this->items_per_page = $env->items_per_page;
         $this->table = DB_PREFIX . $table;
+        $this->type = substr($table, strlen($table) - 1) == "s" ? substr($table, 0, strlen($table) - 1) : $table;
         $this->db = $db;
         $this->where_app = $where_app;
         $this->from_app = $from_app;
@@ -86,19 +88,22 @@ abstract class RatableUserContentList {
             }
             $ano_app = !Auth::canSeeNameWhenSentAnonymous() ? ', userid = 0' : '';
             //$start = intval($start) - (intval($start) % $this->items_per_page);
-            $res = $this->db->query("SELECT " . $this->table . ".rating AS rating, " . $this->table . ".*" . $ano_app . ", (SELECT " . $this->table . "_ratings.rating FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id AND userid=" . $user->getID() . ") AS own_rating, (SELECT COUNT(*) FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id) AS rating_count FROM " . $this->table . ", " . DB_PREFIX . "user u " . $this->from_app . " WHERE u.id = userid AND u.activated = 1 " . $this->where_app . " ORDER BY " . $this->order_by . " " . $this->order_direction . " LIMIT " . $start . ", " . $this->items_per_page) or die($this->db->error);
+            $res = $this->db->query("SELECT " . $this->table . ".rating AS rating, " . $this->table . ".*" . $ano_app . ", (SELECT " . $this->table . "_ratings.rating FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id AND userid=" . $user->getID() . ") AS own_rating, (SELECT COUNT(*) FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id) AS rating_count FROM " . $this->table . ", " . DB_PREFIX . "user u " . $this->from_app . " WHERE u.id = userid AND u.activated = 1 AND " . $this->table . ".response_to = -1" . $this->where_app . " ORDER BY " . $this->order_by . " " . $this->order_direction . " LIMIT " . $start . ", " . $this->items_per_page) or die($this->db->error);
             if ($res != null) {
                 while ($result = $res->fetch_array()) {
-                    $arr[] = new RatableUserContentItem($result);
+                    $result["response_to"] = -1;
+                    $result["type"] = $this->type;
+                    $arr[$result["id"]] = new RatableUserContentItem($result);
                 }
             }
             if ($this->response_allowed && !empty($arr)) {
                 $str = "";
                 foreach ($arr as $ruci)
                     $str .= ($str != "" ? ", " : "") . $ruci->id;
-                $res = $this->db->query("SELECT " . $this->table . ".rating AS rating, " . $this->table . ".*, (SELECT " . $this->table . "_ratings.rating FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id AND userid=" . $user->getID() . ") AS own_rating, (SELECT COUNT(*) FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id) AS rating_count FROM " . $this->table . ", " . DB_PREFIX . "user u " . $this->from_app . " WHERE u.id = userid AND u.activated = 1 " . $this->where_app . " AND " . $this->table . ".response_to IN (" . $str . ") ORDER BY time ASC LIMIT 0, " . $this->items_per_page) or die($this->db->error);
+                $res = $this->db->query("SELECT " . $this->table . ".rating AS rating, " . $this->table . ".*, (SELECT " . $this->table . "_ratings.rating FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id AND userid=" . $user->getID() . ") AS own_rating, (SELECT COUNT(*) FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id) AS rating_count FROM " . $this->table . ", " . DB_PREFIX . "user u " . $this->from_app . " WHERE u.id = userid AND u.activated = 1 " . $this->where_app . " AND " . $this->table . ".response_to IN (" . $str . ") ORDER BY " . $this->table . ".time ASC") or die($this->db->error);
                 if ($res != null) {
                     while ($result = $res->fetch_array()) {
+                        $result["type"] = $this->type;
                         $arr[$result["response_to"]]->responses[] = new RatableUserContentItem($result);
                     }
                 }
@@ -111,21 +116,21 @@ abstract class RatableUserContentList {
     public function getItemByID($id) {
         $cid = intval($id);
         $user = Auth::getUser();
-        if ($this->getCount() > 0) {
-            $res = $this->db->query("SELECT " . $this->table . ".rating AS rating, " . $this->table . ".*, (SELECT " . $this->table . "_ratings.rating FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id AND userid=" . $user->getID() . ") AS own_rating, (SELECT COUNT(*) FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id) AS rating_count FROM " . $this->table . ", " . DB_PREFIX . "user u " . $this->from_app . " WHERE u.id = userid AND u.activated = 1 AND " . $this->table . ".rating = " . $cid) or die($this->db->error);
-            $ruci = null;
-            if ($res != null) {
-                $result = $res->fetch_array();
-                if ($result != null) {
-                    $ruci = new RatableUserContentItem($result);
-                }
+        $res = $this->db->query("SELECT " . $this->table . ".rating AS rating, " . $this->table . ".*, (SELECT " . $this->table . "_ratings.rating FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id AND userid=" . $user->getID() . ") AS own_rating, (SELECT COUNT(*) FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id) AS rating_count FROM " . $this->table . ", " . DB_PREFIX . "user u " . $this->from_app . " WHERE u.id = userid AND u.activated = 1 AND " . $this->table . ".id = " . $cid) or die($this->db->error);
+        $ruci = null;
+        if ($res != null) {
+            $result = $res->fetch_array();
+            if ($result != null) {
+                $result["type"] = $this->type;
+                $ruci = new RatableUserContentItem($result);
             }
-            if ($this->response_allowed) {
-                $res = $this->db->query("SELECT " . $this->table . ".rating AS rating, " . $this->table . ".*, (SELECT " . $this->table . "_ratings.rating FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id AND userid=" . $user->getID() . ") AS own_rating, (SELECT COUNT(*) FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id) AS rating_count FROM " . $this->table . ", " . DB_PREFIX . "user u " . $this->from_app . " WHERE u.id = userid AND u.activated = 1 " . $this->where_app . " AND " . $this->table . ".response_to = " . $cid) or die($this->db->error);
-                if ($res != null) {
-                    while ($result = $res->fetch_array()) {
-                        $ruci->responses[] = new RatableUserContentItem($result);
-                    }
+        }
+        if ($this->response_allowed && $ruci && $ruci->canHaveResponses()) {
+            $res = $this->db->query("SELECT " . $this->table . ".rating AS rating, " . $this->table . ".*, (SELECT " . $this->table . "_ratings.rating FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id AND userid=" . $user->getID() . ") AS own_rating, (SELECT COUNT(*) FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id) AS rating_count FROM " . $this->table . ", " . DB_PREFIX . "user u " . $this->from_app . " WHERE u.id = userid AND u.activated = 1 " . $this->where_app . " AND " . $this->table . ".response_to = " . $cid . " ORDER BY " . $this->table . ".time ASC") or die($this->db->error);
+            if ($res != null) {
+                while ($result = $res->fetch_array()) {
+                    $result["type"] = $this->type;
+                    $ruci->responses[] = new RatableUserContentItem($result);
                 }
             }
         }
@@ -177,8 +182,8 @@ abstract class RatableUserContentList {
                     $this->deleteItem($arr["id"], true);
             }
         }
-        if (!$trigger_action) {
-            Actions::addAction($id, Auth::getUserName(), "delete_" . str_replace(DB_PREFIX, "", $this->table));
+        if ($trigger_action) {
+            Actions::addAction($id, Auth::getUserName(), "delete_" . $this->type);
         }
         return $this;
     }

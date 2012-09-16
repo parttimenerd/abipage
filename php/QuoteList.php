@@ -53,7 +53,9 @@ class QuoteList extends RatableUserContentList {
             }
         }
         $this->db->query("INSERT INTO " . $this->table . "(id, person, teacherid, text, userid, isanonymous, time, rating, response_to, data) VALUES(NULL, '" . $person . "', " . $tid . ", '" . $text . "', " . $senduser->getID() . ", " . ($anonymous ? 1 : 0) . ", " . intval($time) . ", 0, " . intval($response_to) . ", '')");
-        Actions::addAction($this->db->insert_id, $name, "add_quote");
+        $id = $this->db->insert_id;
+        Actions::addAction($id, $name, "add_quote");
+        return $id;
     }
 
     protected function appendSearchAfterPhraseImpl($cphrase) {

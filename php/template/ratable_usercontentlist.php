@@ -140,7 +140,11 @@ function tpl_write_quote_response_item_hbs($title = "item-response-template") {
 }
 
 function tpl_quote_item(RatableUserContentItem $ruci) {
-    tpl_item_before($ruci->person, "speech_bubbles", "content-item", $ruci->id, "javascript:search('$ruci->person')", 'Nach Zitaten von/mit "' . $ruci->person . '" suchen');
+    if ($ruci->isResponse()) {
+        tpl_item_before("", "", "content-item", $ruci->id, "", "");
+    } else {
+           tpl_item_before($ruci->person, "speech_bubbles", "content-item", $ruci->id, "javascript:search('$ruci->person')", 'Nach Zitaten von/mit "' . $ruci->person . '" suchen');
+    }
     echo formatText($ruci->text);
     tpl_item_after_ruc($ruci);
 }
@@ -206,9 +210,9 @@ function tpl_item_after_ruc(RatableUserContentItem $ruci) {
     <div class="item-footer <?php echo Auth::isModerator() ? "deletable" : '' ?>">
         <ul>
             <li class="time_span_li"><?php tpl_time_span($ruci->time) ?></li>
-            <li class="rating_li"><?php tpl_rating($ruci->id, $ruci->own_rating, $ruci->userid, $ruci->rating, $ruci->rating_count, $ruci->data) ?></li>
+            <li class="rating_li"><?php tpl_rating($ruci) ?></li>
             <li class="user_span_li"><?php tpl_user_span($ruci->isAnonymous() ? -1 : $ruci->userid, true) ?></li>
-            <? if ($ruci->canHaveResponses()): ?>
+            <? if ($ruci->canHaveResponsesButton()): ?>
                 <li class="response_to_span_li"><? tpl_item_response_to_span($ruci) ?></li>
             <? endif ?>
             <? if ($ruci->isDeletable()): ?>
@@ -226,8 +230,17 @@ function tpl_response_to_div(RatableUserContentItem $ruci) {
     ?>
     <div id="responses_to_<?= $ruci->id ?>" class="responses" to="<?= $ruci->id ?>">
         <?
-        if (!empty($ruci->responses))
-            tpl_quote_list($ruci->responses, -1, -1, -1, "", false);
+        if (!empty($ruci->responses)){
+            $arr = $ruci->responses;
+            $count = count($arr);
+           for ($index = 0; $index < $count; $index++) {
+                $item = $arr[$index];
+                if ($index == $count - 1){
+                    $item->setMakeResponseToID($ruci->id);
+                }
+                call_user_func($item->getTplFunctionName(), $item);
+            }
+        }
         ?>
         <div class="add_response_container" to="<?= $ruci->id ?>"></div>
     </div>
@@ -236,7 +249,7 @@ function tpl_response_to_div(RatableUserContentItem $ruci) {
 
 function tpl_item_response_to_span(RatableUserContentItem $ruci) {
     ?>
-    <span class="response_to_item"><button class="btn" onclick="responseToItem('<?= $ruci->id ?>', '<?= $ruci->hasPersonVal() ? $ruci->person : '' ?>')"><?php tpl_icon("speech_bubbles", "Antworten") ?> Antworten</span>
+    <span class="response_to_item"><button class="btn" onclick="responseToItem('<?= $ruci->getMakeResponseToID() ?>', '<?= $ruci->hasPersonVal() ? $ruci->person : '' ?>')"><?php tpl_icon("speech_bubbles", "Antworten") ?> Antworten</span>
     <?
 }
 
@@ -246,22 +259,22 @@ function tpl_item_delete_span(RatableUserContentItem $ruci) {
     <?php
 }
 
-function tpl_rating($id, $own, $senduser, $average_rating, $rating_count, $data = array()) {
-    $can_rate = (is_numeric($senduser) ? $senduser : $senduser->getID()) != Auth::getUserID();
+function tpl_rating(RatableUserContentItem $ruci) {
+    $can_rate = !Auth::isSameUser($ruci->userid);
     ?>
-    <span id="<?php echo $id ?>rating" class="rating">
+    <span id="<?php echo $ruci->id ?>rating" class="rating">
         <?php if ($can_rate) { ?>
             <span class="stars">
                 <?php
                 for ($i = 1; $i <= 5; $i++) {
-                    echo '<span class="star ' . ($i <= $own ? "selected" : '') . '" onclick="rating(' . $id . ', ' . $i . ')">&#9733;</span>';
+                    echo '<span class="star ' . ($i <= $ruci->own_rating ? "selected" : '') . '" onclick="rating(' . $ruci->id . ', ' . $i . ')">&#9733;</span>';
                 }
                 ?>
             </span>
             <?php
         }
-        $show_av = !$can_rate || is_numeric($own);
-        tpl_average($show_av ? $average_rating : -1, $show_av ? $rating_count : -1, $data);
+        $show_av = !$can_rate || is_numeric($this->own_rating);
+        tpl_average($show_av ? $ruci->rating : -1, $show_av ? $ruci->rating_count : -1, $ruci->data);
         ?>
     </span>
     <?php
