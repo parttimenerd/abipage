@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-function tpl_image_list($rucis, $page, $pages, $sort_str = "", $phrase = "", $as_page = true) {
+function tpl_image_list($rucis, $page, $pages, $phrase = "", $as_page = true) {
     global $env;
     if ($as_page) {
         tpl_before("images", null, null, array("url_part" => "images", "page" => $page, "pagecount" => $pages, "phrase" => $phrase));
@@ -32,14 +32,8 @@ function tpl_image_list($rucis, $page, $pages, $sort_str = "", $phrase = "", $as
         var rating_url = "<?php echo tpl_url('images') ?>";
     <?php if ($as_page) echo 'var page = ' . $page . ';' ?>
         var max_page = pagecount = <?php echo $pages ?>;
-    <?php echo $sort_str == "" ? "" : 'var sort_str = "' . $sort_str . '";' ?>
     <?php echo $phrase == "" ? "" : 'var phrase = "' . $phrase . '";' ?>
-        var chocolat_options = {
-            leftImg: '<?php echo tpl_url('img/chocolat/left.gif') ?>',
-            rightImg: '<?php echo tpl_url('img/chocolat/right.gif') ?>',
-            loadingImg: '<?php echo tpl_url('img/chocolat/loading.gif') ?>',
-            closeImg: '<?php echo tpl_url('img/chocolat/close.gif') ?>'
-        };
+        var chocolat_options = {};
     </script>
     <?php
     if ($as_page) {
@@ -54,7 +48,7 @@ function tpl_image_list($rucis, $page, $pages, $sort_str = "", $phrase = "", $as
 
 function tpl_image_upload_item($with_descr = true) {//"enctype" => "multipart/form-data"
     //tpl_item_before_form(array("id" => "file_upload", "enctype" => "multipart/form-data"), "Bild hochladen", "camera", "item-send");
-    tpl_item_before("Bild hochladen", "upload_image", "item-send");
+    tpl_item_before("Bild hochladen", "camera", "item-send");
     ?>     
     <div id="drop_area">
         <p><span>Bild hier ablegen.</span><br/>
@@ -67,11 +61,16 @@ function tpl_image_upload_item($with_descr = true) {//"enctype" => "multipart/fo
         ?>
         <hr/>
         <textarea name="description" class="descr" placeholder="Kurze, aussagekräftige Bildbeschreibung" require="on"></textarea>
+        <input name="category" list="category_list" class="img_category" placeholder='Kategorie in die dieses Bild einsortiert wird, z.B. "Studienfahrt Barcelona"'/>
+        <?
+        $list = new ImageList();
+        tpl_datalist("category_list", $list->getCategories());
+        ?>
         <?php
     }
     ?>		
     <?php
-    tpl_item_after_send("Hochladen", "send", "uploadImage()", "<div class='progress' style='display: none'>
+    tpl_item_after_send("Hochladen", "send", "uploadImage()", "<div class='progress'>
     <div class='bar' style=\"width: 0%;\"></div>
 </div>");
 }
@@ -81,15 +80,23 @@ function tpl_image_item(RatableUserContentItem $ruci) {
     tpl_item_before("", "", "content-item", $ruci->id);
     $imgfile = $ruci->id . '.' . $ruci->format;
     ?>
-    <a class="item-content" href="<?php echo tpl_url($env->upload_path . '/' . $imgfile) ?>" title="<?php echo $descr = str_replace('\r\n', " ", formatText($ruci->descr)) ?>">
+    <a class="item-content" href="<?php echo tpl_url($env->upload_path . '/' . $imgfile) ?>" title="<?= date("d.m.y H:i", $ruci->capture_time) ?>: <?= $ruci->category != "" ? $ruci->category : str_replace('\r\n', " ", $ruci->description) ?>">
         <img src="<?php echo tpl_url($env->upload_path . '/thumbs/' . $imgfile) ?>"/>
     </a><br/>
+    <div class="img_descr">
+        <div class="descr_text">
+            <?= str_replace('&lt;br/>', "", formatText($ruci->description)) ?>
+        </div>
+        <div class="descr_ctime"> Aufnahmedatum: <?= date("d.m.y H:i", $ruci->capture_time) ?> </div>
+        <? if ($ruci->category != ""): ?>
+            <div class="descr_category"> Kategorie: <?= $ruci->category ?> </div>
+        <? endif; ?>
+    </div>
     <?
-    echo str_replace('&lt;br/>', "", formatText($ruci->descr));
     tpl_item_after_ruc($ruci);
 }
 
-function tpl_quote_list($rucis, $page, $pages, $sort_str, $phrase, $as_page = true) {
+function tpl_quote_list($rucis, $page, $pages, $phrase, $as_page = true) {
     global $env;
     if ($as_page) {
         tpl_before("quotes", null, null, array("url_part" => "quotes", "page" => $page, "pagecount" => $pages, "phrase" => $phrase));
@@ -105,7 +112,6 @@ function tpl_quote_list($rucis, $page, $pages, $sort_str, $phrase, $as_page = tr
     <?php if ($as_page) echo 'var page = ' . $page . ';' ?>
     <? if ($pages == -1): ?>
             var max_page = <?php echo $pages ?>;
-            var sort_str = "<?php echo $sort_str ?>";
             var phrase = "<?php echo $phrase ?>";
     <? endif; ?>
     </script>
@@ -122,32 +128,36 @@ function tpl_write_quote_item() {
     tpl_item_before("Zitat hinzufügen", "pencil", "item-send item-quote-send");
     ?>
     <input type="text" placeholder="Zitierter Lehrer" name="person" class="teacher_typeahead" list="teacher_datalist" required="on" pattern="([A-ZÄÖÜ.]([a-zßäöü.](-[a-zßäöüA-ZÄÖÜ.])?)+ ?){1,3}"/>
-    <? tpl_datalist("teacher_datalist", TeacherList::getTeacherNameList()) ?>
+    <? tpl_datalist("teacher_datalist", Teacher::getNameList()) ?>
     <textarea name="text" placeholder="Zitat" require="on"></textarea>
     <input type="hidden" name="response_to" value="-1"/>
     <?php
-    tpl_item_after_send_anonymous("Hinzufügen", "Anonym hinzufügen", "sendQuote(false, -1)", "sendQuote(true, -1)");
+    tpl_item_after_send_anonymous("Hinzufügen", "Anonym hinzufügen", "sendQuote(false, -1, '')", "sendQuote(true, -1, '')");
 }
 
 function tpl_write_quote_response_item_hbs($title = "item-response-template") {
     ?><script id="<?= $title ?>" type="text/x-handlebars-template"><?
-    tpl_item_before("item-send item-quote-send");
+    tpl_item_before("", "", "item-send item-quote-send");
     ?>
-    <input type="hidden" name="person" class="teacher_typeahead" value="{{teacher}}"/>
-    <textarea name="text" placeholder="Zitat" require="on"></textarea>
-    <input type="hidden" name="response_to" value="-1"/>
+        <input type="hidden" name="person" class="teacher_typeahead" value="{{teacher}}"/>
+        <textarea name="text" placeholder="Zitat" require="on"></textarea>
+        <input type="hidden" name="response_to" value="-1"/>
     <?php
-    tpl_item_after_buttons(array("{{button_answer_title}}" => array("onclick" => "sendQuote(false, {{response_to}})",  "{{button_answer_ano_title}}" => array("onclick" => "sendQuote(true, {{response_to}})"), "Schließen" => array("onclick" => "responseToItem({{response_to}})"))));
-    ?></script><?   
+    tpl_item_after_buttons(array("{{button_answer_title}}" => array("onclick" => "sendQuote(false, {{response_to}}, '{{teacher}}')"), "{{button_answer_ano_title}}" => array("onclick" => "sendQuote(true, {{response_to}}, '{{teacher}}')"), "Schließen" => array("onclick" => "responseToItem({{response_to}})")));
+    ?></script><?
 }
 
 function tpl_quote_item(RatableUserContentItem $ruci) {
-    tpl_item_before($ruci->person, "speech_bubbles", "content-item", $ruci->id, "javascript:search('$ruci->person')", 'Nach Zitaten von/mit "' . $ruci->person . '" suchen');
+    if ($ruci->isResponse()) {
+        tpl_item_before("", "", "content-item", $ruci->id, "", "");
+    } else {
+        tpl_item_before($ruci->person, "speech_bubbles", "content-item", $ruci->id, "javascript:search('$ruci->person')", 'Nach Zitaten von/mit "' . $ruci->person . '" suchen');
+    }
     echo formatText($ruci->text);
     tpl_item_after_ruc($ruci);
 }
 
-function tpl_rumor_list($rucis, $page, $pages, $sort_str, $phrase, $as_page = true) {
+function tpl_rumor_list($rucis, $page, $pages, $phrase, $as_page = true) {
     global $env;
     if ($as_page) {
         tpl_before("rumors", null, null, array("url_part" => "rumors", "page" => $page, "pagecount" => $pages, "phrase" => $phrase));
@@ -159,11 +169,10 @@ function tpl_rumor_list($rucis, $page, $pages, $sort_str, $phrase, $as_page = tr
         tpl_rumor_item($ruci);
     ?>
     <script>
-        var rating_url = "<?php echo tpl_url('quotes') ?>";
+        var rating_url = "<?php echo tpl_url('rumors') ?>";
     <?php if ($as_page) echo 'var page = ' . $page . ';' ?>
     <? if ($pages == -1): ?>
             var max_page = <?php echo $pages ?>;
-            var sort_str = "<?php echo $sort_str ?>";
             var phrase = "<?php echo $phrase ?>";
     <? endif; ?>
     </script>
@@ -179,7 +188,7 @@ function tpl_rumor_list($rucis, $page, $pages, $sort_str, $phrase, $as_page = tr
 function tpl_write_rumor_item() {
     tpl_item_before("Beitrag schreiben", "pencil", "item-send item-rumor-send");
     ?>
-    <textarea name="text" placeholder="..., dass " require="on">..., dass </textarea>
+    <textarea name="text" placeholder="…, dass " require="on">…, dass </textarea>
     <input type="hidden" name="response_to" value="-1"/>
     <?php
     tpl_item_after_send_anonymous("Absenden", "Anonym absenden", "sendRumor(false, -1)", "sendRumor(true, -1)");
@@ -187,13 +196,13 @@ function tpl_write_rumor_item() {
 
 function tpl_write_rumor_response_item_hbs($title = "item-response-template") {
     ?><script id="<?= $title ?>" type="text/x-handlebars-template"><?
-    tpl_item_before("item-send item-quote-send");
+    tpl_item_before("", "", "item-send item-rumor-send");
     ?>
-    <textarea name="text" placeholder="..., dass " require="on">..., dass </textarea>
-    <input type="hidden" name="response_to" value="-1"/>
+        <textarea name="text" placeholder="..., dass " require="on">..., dass </textarea>
+        <input type="hidden" name="response_to" value="-1"/>
     <?php
-     tpl_item_after_buttons(array("{{button_answer_title}}" => array("onclick" => "sendQuote(false, {{response_to}})",  "{{button_answer_ano_title}}" => array("onclick" => "sendQuote(true, {{response_to}})"))));
-   ?></script><?   
+    tpl_item_after_buttons(array("{{button_answer_title}}" => array("onclick" => "sendRumor(false, {{response_to}})"), "{{button_answer_ano_title}}" => array("onclick" => "sendRumor(true, {{response_to}})"), "Schließen" => array("onclick" => "responseToItem({{response_to}})")));
+    ?></script><?
 }
 
 function tpl_rumor_item(RatableUserContentItem $ruci) {
@@ -209,13 +218,13 @@ function tpl_item_after_ruc(RatableUserContentItem $ruci) {
     <div class="item-footer <?php echo Auth::isModerator() ? "deletable" : '' ?>">
         <ul>
             <li class="time_span_li"><?php tpl_time_span($ruci->time) ?></li>
-            <li class="rating_li"><?php tpl_rating($ruci->id, $ruci->own_rating, $ruci->userid, $ruci->rating, $ruci->rating_count, $ruci->data) ?></li>
-            <li class="user_span_li"><?php tpl_user_span($ruci->isAnonymous() ? $ruci->userid : null, false, true) ?></li>
-            <? if ($ruci->canHaveResponses()): ?>
-                <li class="response_to_span_li"><? tpl_item_response_to_span($ruci->id) ?></li>
+            <li class="rating_li"><?php tpl_rating($ruci) ?></li>
+            <li class="user_span_li"><?php tpl_user_span($ruci->isAnonymous() ? -1 : $ruci->userid, true) ?></li>
+            <? if ($ruci->canHaveResponsesButton()): ?>
+                <li class="response_to_span_li"><? tpl_item_response_to_span($ruci) ?></li>
             <? endif ?>
             <? if ($ruci->isDeletable()): ?>
-                <li class="delete_span_li"><? tpl_item_delete_span($ruci->id) ?></li>
+                <li class="delete_span_li"><? tpl_item_delete_span($ruci) ?></li>
             <? endif ?>
         </ul>
     </div>
@@ -229,42 +238,51 @@ function tpl_response_to_div(RatableUserContentItem $ruci) {
     ?>
     <div id="responses_to_<?= $ruci->id ?>" class="responses" to="<?= $ruci->id ?>">
         <?
-        if (!empty($ruci->responses))
-            tpl_quote_list($ruci->responses, -1, -1, -1, "", false);
+        if (!empty($ruci->responses)) {
+            $arr = $ruci->responses;
+            $count = count($arr);
+            for ($index = 0; $index < $count; $index++) {
+                $item = $arr[$index];
+                if ($index == $count - 1) {
+                    $item->setMakeResponseToID($ruci->id);
+                }
+                call_user_func($item->getTplFunctionName(), $item);
+            }
+        }
         ?>
         <div class="add_response_container" to="<?= $ruci->id ?>"></div>
     </div>
     <?
 }
 
-function tpl_item_response_to_span($id) {
+function tpl_item_response_to_span(RatableUserContentItem $ruci) {
     ?>
-    <span class="response_to_item"><button class="btn" onclick="responseToItem('<?= $id ?>')"><?php tpl_icon("speech_bubbles", "Antworten") ?> Antworten</span>
+    <span class="response_to_item"><button class="btn" onclick="responseToItem('<?= $ruci->getMakeResponseToID() ?>', '<?= $ruci->hasPersonVal() ? $ruci->person : '' ?>')"><?php tpl_icon("speech_bubbles", "Antworten") ?> Antworten</span>
     <?
 }
 
-function tpl_item_delete_span($id) {
+function tpl_item_delete_span(RatableUserContentItem $ruci) {
     ?>
-    <span class="del_item"><?php tpl_icon("delete", "Löschen", "deleteItem('" . $id . "')") ?></span>
+    <span class="del_item"><?php tpl_icon("delete", "Löschen", "deleteItem('" . $ruci->id . "')") ?></span>
     <?php
 }
 
-function tpl_rating($id, $own, $senduser, $average_rating, $rating_count, $data = array()) {
-    $can_rate = (is_numeric($senduser) ? $senduser : $senduser->getID()) != Auth::getUserID();
+function tpl_rating(RatableUserContentItem $ruci) {
+    $can_rate = !Auth::isSameUser($ruci->userid);
     ?>
-    <span id="<?php echo $id ?>rating" class="rating">
+    <span id="<?php echo $ruci->id ?>rating" class="rating">
         <?php if ($can_rate) { ?>
             <span class="stars">
                 <?php
                 for ($i = 1; $i <= 5; $i++) {
-                    echo '<span class="star ' . ($i <= $own ? "selected" : '') . '" onclick="rating(' . $id . ', ' . $i . ')">&#9733;</span>';
+                    echo '<span class="star ' . ($i <= $ruci->own_rating ? "selected" : '') . '" onclick="rating(' . $ruci->id . ', ' . $i . ')">&#9733;</span>';
                 }
                 ?>
             </span>
             <?php
         }
-        $show_av = !$can_rate || is_numeric($own);
-        tpl_average($show_av ? $average_rating : -1, $show_av ? $rating_count : -1, $data);
+        $show_av = !$can_rate || is_numeric($this->own_rating);
+        tpl_average($show_av ? $ruci->rating : -1, $show_av ? $ruci->rating_count : -1, $ruci->data);
         ?>
     </span>
     <?php

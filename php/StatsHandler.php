@@ -20,7 +20,7 @@
 class StatsHandler extends ToroHandler {
 
     public function get($slug = "") {
-        tpl_stats_page(TeacherList::getTeacherWithQuoteRatingAndCount(), TeacherList::getTeacherWithRumorRatingAndCount());
+        tpl_stats_page(Teacher::getTeacherWithQuoteRatingAndCount(), Teacher::getTeacherWithRumorRatingAndCount());
     }
 
 }

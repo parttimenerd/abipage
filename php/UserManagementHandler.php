@@ -47,6 +47,8 @@ class UserManagementHandler extends ToroHandler {
                             $user->setPassword($_POST["password"], true);
                         } else if (isset($_POST["delete"]) && Auth::canDeleteUser()) {
                             $user->delete();
+                        } else if (isset($_POST["setvisible"]) && Auth::canSetUserVisibility()) {
+                            $user->setVisible(isset($_POST["visible"]));
                         }
                         $user->updateDB();
                     }

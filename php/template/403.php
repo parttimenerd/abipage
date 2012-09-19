@@ -19,17 +19,18 @@
 
 function tpl_403() {
     global $env;
-    tpl_before(null, "Seite nicht gefunden", $env->fourothree_subtitle);
+    header('HTTP/1.0 404 Forbidden');
+    tpl_before("fourothree", "Zugriff verweigert", $env->fourothree_subtitle, false, null, "fort");
     tpl_item_before("", "", "html_error");
     ?>
     <style>
     </style>
-    <!--    <h1>Nicht gefunden <span>:(</span></h1>-->
-    <p>Entschuldigung, aber die Seite die du versuchst hast anzuschauen existiert nicht.</p>
-    <p>Es scheint, das dass ein Ergebnis von einem der folgenden Punkte ist:</p>
+    <p>Entschuldigung, aber ihnen fehlen die nötigen Rechte um diese Seite anzuschauen.</p>
+    <p>Das kann an folgendem Gründen liegen:</p>
     <ul>
-        <li>eine falsch eingegebene Adresse</li>
-        <li>ein nicht mehr aktueller Link</li>
+        <li>sie sind entweder nicht angemeldet</li>
+        <li>oder sie versuchen auf eine Seite zuzugreifen, die zur Zeit gesperrt ist</li>
+        <li>oder jene Seite ist nur für Benutzer mit bestimmten Privilegien erreichbar</li>
     </ul>
     <?php
 

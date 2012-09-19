@@ -17,25 +17,43 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class RatableUserContentList {
+abstract class RatableUserContentList {
 
     protected $table = "";
+    protected $type = "";
     protected $db = "";
     private $count = -1;
     protected $where_app = "";
     protected $from_app = "";
     protected $items_per_page;
     protected $response_allowed;
+    protected $has_anonymous_field;
+    protected $order_by;
+    protected $order_direction;
+    protected $order_by_dic = array(
+        "user" => "u.id",
+        "rating",
+        "own_rating",
+        "rating_count",
+        "time"
+    );
+    protected $start = 0;
 
     /** $fromapp = ", table"; $where_app = "AND id=0" */
-    public function __construct($table, $response_allowed = false, $from_app = "", $where_app = "") {
+    public function __construct($table, $response_allowed = false, $has_anonymous_field = true, $order_by = "time", $order_direction = "desc", $from_app = "", $where_app = "") {
         global $env, $db;
         $this->items_per_page = $env->items_per_page;
         $this->table = DB_PREFIX . $table;
+        $this->type = substr($table, strlen($table) - 1) == "s" ? substr($table, 0, strlen($table) - 1) : $table;
         $this->db = $db;
         $this->where_app = $where_app;
         $this->from_app = $from_app;
         $this->response_allowed = $response_allowed;
+        $this->setOrderBy($order_by);
+        $this->setOrderDirection($order_direction);
+        $this->has_anonymous_field = $has_anonymous_field;
+        if ($this->has_anonymous_field)
+            $this->order_by_dic["anonymous"] = 'isanonymous';
     }
 
     public function getCount() {
@@ -59,29 +77,33 @@ class RatableUserContentList {
         return ceil($this->getCount() / floatval($this->items_per_page));
     }
 
-    public function getItems($start = 0, $time_sort = true, $desc = true, $user = null) {
-        if (!$user) {
-            $user = Auth::getUser();
-        }
+    public function getItems($start = -1) {
+        if ($start == -1)
+            $start = $this->start;
+        $user = Auth::getUser();
         $arr = array();
         if ($this->getCount() > 0) {
             if ($start > $this->getCount()) {
                 $start = ($this->getPageCount() * $this->items_per_page) - $this->items_per_page;
             }
+            $ano_app = !Auth::canSeeNameWhenSentAnonymous() ? ', userid = 0' : '';
             //$start = intval($start) - (intval($start) % $this->items_per_page);
-            $res = $this->db->query("SELECT " . $this->table . ".rating AS rating, " . $this->table . ".*, (SELECT " . $this->table . "_ratings.rating FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id AND userid=" . $user->getID() . ") AS own_rating, (SELECT COUNT(*) FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id) AS rating_count FROM " . $this->table . ", " . DB_PREFIX . "user u " . $this->from_app . " WHERE u.id = userid AND u.activated = 1 " . $this->where_app . " ORDER BY " . ($time_sort ? "time" : "rating") . " " . ($desc ? "DESC" : "ASC") . " LIMIT " . $start . ", " . $this->items_per_page) or die($this->db->error);
+            $res = $this->db->query("SELECT " . $this->table . ".rating AS rating, " . $this->table . ".*" . $ano_app . ", (SELECT " . $this->table . "_ratings.rating FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id AND userid=" . $user->getID() . ") AS own_rating, (SELECT COUNT(*) FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id) AS rating_count FROM " . $this->table . ", " . DB_PREFIX . "user u " . $this->from_app . " WHERE u.id = userid AND u.activated = 1 " . ($this->response_allowed ? ("AND " . $this->table . ".response_to = -1") : "") . $this->where_app . " ORDER BY " . $this->order_by . " " . $this->order_direction . " LIMIT " . $start . ", " . $this->items_per_page) or die($this->db->error);
             if ($res != null) {
                 while ($result = $res->fetch_array()) {
-                    $arr[] = new RatableUserContentItem($result);
+                    $result["response_to"] = -1;
+                    $result["type"] = $this->type;
+                    $arr[$result["id"]] = new RatableUserContentItem($result);
                 }
             }
-            if ($this->response_allowed) {
+            if ($this->response_allowed && !empty($arr)) {
                 $str = "";
                 foreach ($arr as $ruci)
                     $str .= ($str != "" ? ", " : "") . $ruci->id;
-                $res = $this->db->query("SELECT " . $this->table . ".rating AS rating, " . $this->table . ".*, (SELECT " . $this->table . "_ratings.rating FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id AND userid=" . $user->getID() . ") AS own_rating, (SELECT COUNT(*) FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id) AS rating_count FROM " . $this->table . ", " . DB_PREFIX . "user u " . $this->from_app . " WHERE u.id = userid AND u.activated = 1 " . $this->where_app . " AND " . $this->table . ".response_to IN (" . $str . ") ORDER BY time ASC LIMIT 0, " . $this->items_per_page) or die($this->db->error);
+                $res = $this->db->query("SELECT " . $this->table . ".rating AS rating, " . $this->table . ".*, (SELECT " . $this->table . "_ratings.rating FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id AND userid=" . $user->getID() . ") AS own_rating, (SELECT COUNT(*) FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id) AS rating_count FROM " . $this->table . ", " . DB_PREFIX . "user u " . $this->from_app . " WHERE u.id = userid AND u.activated = 1 " . $this->where_app . " AND " . $this->table . ".response_to IN (" . $str . ") ORDER BY " . $this->table . ".time ASC") or die($this->db->error);
                 if ($res != null) {
                     while ($result = $res->fetch_array()) {
+                        $result["type"] = $this->type;
                         $arr[$result["response_to"]]->responses[] = new RatableUserContentItem($result);
                     }
                 }
@@ -89,6 +111,30 @@ class RatableUserContentList {
         }
         $retarr = array("items" => $arr, "start" => $start, "page" => ($start / $this->items_per_page) + 1);
         return $retarr;
+    }
+
+    public function getItemByID($id) {
+        $cid = intval($id);
+        $user = Auth::getUser();
+        $res = $this->db->query("SELECT " . $this->table . ".rating AS rating, " . $this->table . ".*, (SELECT " . $this->table . "_ratings.rating FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id AND userid=" . $user->getID() . ") AS own_rating, (SELECT COUNT(*) FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id) AS rating_count FROM " . $this->table . ", " . DB_PREFIX . "user u " . $this->from_app . " WHERE u.id = userid AND u.activated = 1 AND " . $this->table . ".id = " . $cid) or die($this->db->error);
+        $ruci = null;
+        if ($res != null) {
+            $result = $res->fetch_array();
+            if ($result != null) {
+                $result["type"] = $this->type;
+                $ruci = new RatableUserContentItem($result);
+            }
+        }
+        if ($this->response_allowed && $ruci && $ruci->canHaveResponses()) {
+            $res = $this->db->query("SELECT " . $this->table . ".rating AS rating, " . $this->table . ".*, (SELECT " . $this->table . "_ratings.rating FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id AND userid=" . $user->getID() . ") AS own_rating, (SELECT COUNT(*) FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id) AS rating_count FROM " . $this->table . ", " . DB_PREFIX . "user u " . $this->from_app . " WHERE u.id = userid AND u.activated = 1 " . $this->where_app . " AND " . $this->table . ".response_to = " . $cid . " ORDER BY " . $this->table . ".time ASC") or die($this->db->error);
+            if ($res != null) {
+                while ($result = $res->fetch_array()) {
+                    $result["type"] = $this->type;
+                    $ruci->responses[] = new RatableUserContentItem($result);
+                }
+            }
+        }
+        return $ruci;
     }
 
     public function updateRating($id) {
@@ -126,7 +172,6 @@ class RatableUserContentList {
     }
 
     public function deleteItem($id, $trigger_action = true) {
-        global $env;
         $cid = intval($id);
         $this->db->query("DELETE FROM " . $this->table . " WHERE id=" . $cid) or die($this->db->error);
         $this->db->query("DELETE FROM " . $this->table . "_ratings WHERE itemid=" . $cid) or die($this->db->error);
@@ -137,19 +182,38 @@ class RatableUserContentList {
                     $this->deleteItem($arr["id"], true);
             }
         }
-        if (!$trigger_action) {
-            $env->addAction($id, Auth::getUserName(), "delete_" . str_replace(DB_PREFIX, "", $this->table));
+        if ($trigger_action) {
+            Actions::addAction($id, Auth::getUserName(), "delete_" . $this->type);
         }
-        return true;
+        return $this;
+    }
+
+    public function setOrderBy($order_by) {
+        foreach ($this->order_by_dic as $key => $value) {
+            if ((is_int($key) && $value === $order_by) || $key === $order_by) {
+                $this->order_by = $value;
+                break;
+            }
+        }
+        return $this;
+    }
+
+    public function setOrderDirection($direction) {
+        $direction = strtoupper($direction);
+        if ($direction == "DESC" || $direction == "ASC")
+            $this->order_direction = $direction;
+        return $this;
     }
 
     public function setApps($from_app, $where_app) {
         $this->where_app = $where_app;
         $this->from_app = $from_app;
+        return $this;
     }
 
     public function appendToFromApp($text) {
         $this->from_app .= ' ' . $text;
+        return $this;
     }
 
     public function appendToWhereApp($text) {
@@ -158,6 +222,36 @@ class RatableUserContentList {
 
     public function getItemsPerPage() {
         return $this->items_per_page;
+    }
+
+    public function appendSearchAfterPhrase($phrase) {
+        $phrase = cleanInputText($phrase);
+        if ($phrase != "" && $phrase != null)
+            $this->appendSearchAfterPhraseImpl($phrase);
+        return $this;
+    }
+
+    protected abstract function appendSearchAfterPhraseImpl($phrase);
+
+    public function appendSearchAfterUser($user_str) {
+        if ($user_str == "" || $user_str == null)
+            return;
+        $ano_app = !Auth::canSeeNameWhenSentAnonymous() ? 'AND isanonymous = 0' : '';
+        if (is_numeric($user_str) || $user_str == "me") {
+            $id = $user_str == "me" ? Auth::getUserID() : intval($user_str);
+            $this->appendToWhereApp(" AND u.id = " . $id);
+        } else {
+            $namearr = User::splitName(cleanInputText($user_str));
+            $this->appendToWhereApp(" AND (u.first_name LIKE '%" . $namearr[0] . "%' OR u.last_name LIKE '%" . $namearr[1] . "%')" . $ano_app);
+        }
+        return $this;
+    }
+
+    public function setStart($start) {
+        $start = intval($start);
+        if ($start > 0)
+            $this->start = $start;
+        return $this;
     }
 
 }

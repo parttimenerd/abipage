@@ -171,3 +171,10 @@ uploads
 /php/db_config.php
 /smf/
 nbproject
+/js/min/handlebars-1.0.0.beta.6.min.js
+/js/min/bootstrap.min.min.js
+/js/min/plugins.min.js
+/js/min/script.min.js
+/js/min/application.min.js
+/js/min/bootstrap.min.js
+/js/min/jquery-1.7.2.min.js

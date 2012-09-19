@@ -71,11 +71,11 @@ td { vertical-align: top; }
 
 
 /* ===== Primary Styles ========================================================
-   Author: Johannes Bechberger based on work of Robert Häcker
+   Author: Johannes Bechberger
    ========================================================================== */
 
 /*font-family: 'Voltaire',
-'Josefin Sans':400,700,600,400italic,300, 
+'PT Sans':400,700,600,400italic,300, 
 'Just Me Again Down Here' */
 
 h1, h2, h3, h4, h5, h6, .navbar {
@@ -142,7 +142,7 @@ textarea {
     margin-bottom: -5px;
 }
 button {
-    font-family: 'Josefin Sans';
+    font-family: 'PT Sans';
 }
 /*.brand {
         font-weight: 400;
@@ -156,11 +156,10 @@ button {
     margin-top: -30px;
 }
 .navbar-fixed-top .btn-navbar {
-    padding: 7px 7px;
-    padding-top: 0px;
+    padding: 10px 7px 0;
 }
 .item-header, .item-footer {
-    font-family: 'Josefin Sans';
+    font-family: 'PT Sans';
 }
 .popover {
     border-top-width: 1px;
@@ -176,7 +175,7 @@ button {
     font-family: 'Just Me Again Down Here';
 }
 table {
-    font-family: 'Josefin Sans';
+    font-family: 'PT Sans';
 }
 .item-content form {
     border: none;
@@ -230,7 +229,7 @@ table {
 }
 .sidebar .well .nav-header {
     font-size: 20px;
-    font-family: 'Josefin Sans';
+    font-family: 'PT Sans';
     margin-bottom: 20px;
 }
 .sidebar .well .nav-list li a {
@@ -248,7 +247,7 @@ table {
     padding-left: 25px;
 }
 .sidebar .timediff {
-    font-family: 'Josefin Sans';
+    font-family: 'PT Sans';
     margin-left: -25px;
 }
 /*.item-send .item-footer button[type=""] {
@@ -257,6 +256,7 @@ table {
 .item-footer .progress {
     width: auto;
     margin-left: 30%;
+    visibility:  hidden;
 }
 .item-footer .progress .bar {
     text-align: left;
@@ -269,6 +269,7 @@ table {
     right: 1%;
     height: 40px;
     opacity: 0.2;
+    z-index: 10;
 }	
 .go_up .icon:hover {
     opacity: 0.6;
@@ -277,8 +278,11 @@ table {
 .pref_table {
     width: 100%;
 }
-.pref_table .left_column, .pref_table .right_column {
-    width: 50%;
+.pref_table .left_column {
+    width: 30%;
+}
+.pref_table .right_column {
+     width: 70%;
 }
 
 .notified_as_bad .item-content, .notified_as_bad hr {
@@ -371,6 +375,47 @@ table {
     margin-top: -6px;
 }
 
+.list_header {
+    margin-top: 1em;
+    font-size: 1.05em;
+    font-weight: 600;
+}
+#log {
+    width: 100%;
+    max-height: 33%;
+    z-index: 5;
+    position: fixed;
+    bottom: 0px;
+    background: white;
+    overflow-y: scroll;
+}
+#log_container {
+    max-width: 1000px;
+    text-align: left;
+}
+
+.header-icon {
+    float: left;
+}
+.fort {
+    height: 1.2em;
+}
+.newspaper {
+    height: 1.7em;
+}
+
+
+.tile {
+    background-color: #F5F5F5;
+    color: #333333;
+    font-size: 2em;
+    height: 2em;
+    margin-bottom: 0.5em;
+}
+.tile .sub {
+    font-size: 0.5em;
+}
+
 /* =============================================================================
    Media Queries
    ========================================================================== */
@@ -384,6 +429,12 @@ table {
         font-family: 'Fredericka the Great', cursive;
     }
 }*/
+
+@media (max-width: 767px) {
+    .with_sidebar {
+        width: 100% !important;
+    }
+}
 
 /* =============================================================================
    Print Styles

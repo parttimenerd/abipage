@@ -24,7 +24,6 @@ class QuoteList extends RatableUserContentList {
     }
 
     public function addQuote($person, $text, $anonymous, $response_to = -1, $teacherid = -1, $senduser = null, $time = -1) {
-        global $env;
         if ($senduser == null) {
             $senduser = Auth::getUser();
         }
@@ -45,16 +44,22 @@ class QuoteList extends RatableUserContentList {
         }
         $name = $person;
         if ($tid != -1) {
-            $res = $this->db->query("SELECT name_str FROM " . DB_PREFIX . "teacher WHERE id=" . $tid);
+            $res = $this->db->query("SELECT namestr FROM " . DB_PREFIX . "teacher WHERE id=" . $tid);
             if ($res) {
                 $arr = $res->fetch_array();
                 if ($arr) {
-                    $name = $arr["name_str"];
+                    $name = $arr["namestr"];
                 }
             }
         }
         $this->db->query("INSERT INTO " . $this->table . "(id, person, teacherid, text, userid, isanonymous, time, rating, response_to, data) VALUES(NULL, '" . $person . "', " . $tid . ", '" . $text . "', " . $senduser->getID() . ", " . ($anonymous ? 1 : 0) . ", " . intval($time) . ", 0, " . intval($response_to) . ", '')");
-        $env->addAction($this->db->insert_id, $name, "add_quote");
+        $id = $this->db->insert_id;
+        Actions::addAction($id, $name, "add_quote");
+        return $id;
+    }
+
+    protected function appendSearchAfterPhraseImpl($cphrase) {
+        $this->appendToWhereApp(" AND (MATCH(person, text) AGAINST('" . $cphrase . "') OR text LIKE '%" . $cphrase . "%' OR person LIKE '%" . $cphrase . "%') ");
     }
 
 }

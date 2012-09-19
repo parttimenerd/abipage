@@ -24,7 +24,7 @@ class UserHandler extends ToroHandler {
         $arr = explode('/', substr($slug, 1));
         $user = $this->getUserFromSlug($slug);
         if (!$user) {
-            tpl_userlist($env->getUserNames(false, isset($arr[1]) ? str_replace('_', ' ', $arr[1]) : ""));
+            tpl_userlist($env->getUserNames(false, isset($arr[1]) ? str_replace('_', ' ', $arr[1]) : "", false));
         } else if (count($arr) == 2 && $arr[1] == "preferences" && Auth::canEditUser($user)) {
             tpl_user_prefs($user);
         } else {
@@ -53,7 +53,11 @@ class UserHandler extends ToroHandler {
             } else if (is_int($slug)) {
                 return User::getByID(intval($slug));
             } else {
-                return User::getByName(str_replace("_", " ", $slug));
+                $str = str_replace("_", " ", $slug);
+                $user = User::getByName($str);
+                if ($user == null)
+                    $user = User::getByNameLike($str);
+                return $user;
             }
         }
         return null;
@@ -83,29 +87,33 @@ class UserHandler extends ToroHandler {
                     Auth::cryptCompare($_POST["old_password"], $user->getCryptStr())) {
                 $user->setPassword($_POST["password"], !Auth::isSameUser($user));
             }
-            $user->sendEmailWhenBeingCommented(isset($_POST["send_email_when_being_commented"]));
+            $user->setSendEmailWhenBeingCommented(isset($_POST["send_email_when_being_commented"]));
             $user->updateDB();
             Auth::login($_POST["name"], $_POST["password"]);
             $this->get($slug);
         } else if (isset($_POST["id"]) && $user->getID() == Auth::getUserID()) {
+            $data = array("id" => intval($_POST["id"]));
             if ($_POST["action"] == "notify") {
-                $user->notifyUserComment($_POST["id"]);
-                echo $_POST["id"] . "|unnotified";
+                $user->notifyUserComment(intval($_POST["id"]));
+                $data["msg"] = "unnotified";
             } else {
-                $user->unnotifyUserComment($_POST["id"]);
-                echo $_POST["id"] . "|notified";
+                $user->unnotifyUserComment(intval($_POST["id"]));
+                $data["msg"] = "notified";
             }
+            jsonAjaxResponse($data);
         } else if (isset($_POST["text"]) && strlen($_POST["text"]) >= 5 &&
                 $user->getID() != Auth::getUserID()) {
             $comment = $user->postUserComment($_POST["text"], isset($_POST["send_anonymous"]));
+            jsonAjaxResponseStart();
             if ($comment)
                 tpl_user_comment($user, $comment);
             if (isset($_POST["send_anonymous"]))
                 PiwikHelper::addTrackGoalJS("Anonymous contribution");
             PiwikHelper::addTrackGoalJS("User commented", $_POST["text"]);
-        } else if (isset($_POST["deleteItem"]) && Auth::canDeleteUserComment()){
+            jsonAjaxResponseEndSend();
+        } else if (isset($_POST["deleteItem"]) && Auth::canDeleteUserComment()) {
             User::deleteUserComment(intval($_POST["deleteItem"]));
-            echo intval($_POST["deleteItem"]);
+            jsonAjaxResponse(array("id" => intval($_POST["deleteItem"])));
         }
     }
 

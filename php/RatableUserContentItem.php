@@ -17,32 +17,64 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class RatableUserContentListItem {
-   
+class RatableUserContentItem {
+
     private $props = array();
     public $responses = array();
-    
+
     public function __construct($props) {
         $this->props = $props;
-        if ($props["responses"])
+        if (isset($props["responses"]) && $props["responses"])
             $this->responses &= $props["responses"];
     }
-    
-    public function __get($var){
+
+    public function __get($var) {
         return $this->props[$var];
     }
-    
-    public function canHaveResponses(){
+
+    public function canHaveResponses() {
         global $env;
-        return $env->responses_allowed && isset($this->props["response_to"]);
+        return $env->response_allowed && isset($this->props["response_to"]) && $this->props["response_to"] == -1;
     }
-    
-    public function isAnonymous(){
-        return $this->props["isanonymous"] && !Auth::canSeeNameWhenSentAnonymous();
+
+    public function canHaveResponsesButton() {
+        global $env;
+        return $env->response_allowed && isset($this->props["response_to"]) && ($this->props["response_to"] == -1 || isset($this->props["make_response_to"]));
     }
-    
-    public function isDeletable(){
+
+    public function isAnonymous() {
+        return isset($this->props["isanonymous"]) ? ($this->props["isanonymous"] && !Auth::canSeeNameWhenSentAnonymous()) : false;
+    }
+
+    public function isDeletable() {
         return Auth::canDeleteRucItem();
     }
+
+    public function hasPersonVal() {
+        return isset($this->props["person"]);
+    }
+
+    public function getTplFunctionName() {
+        return "tpl_" . $this->type . "_item";
+    }
+
+    public function getMakeResponseToID() {
+        return isset($this->props["make_response_to"]) ? $this->props["make_response_to"] : $this->props["id"];
+    }
+
+    public function setMakeResponseToID($id) {
+        $this->props["make_response_to"] = $id;
+    }
+
+    public function isResponse() {
+        global $env;
+        return $env->response_allowed && isset($this->props["response_to"]) && $this->props["response_to"] != -1;
+    }
+
+    public function __isset($name) {
+        return isset($this->props[$name]);
+    }
+
 }
+
 ?>

@@ -20,7 +20,7 @@ function tpl_teacherlist($teacherarr) {
     tpl_before("teacherlist", "Lehrerliste");
     tpl_item_before_form(array());
     ?>
-    <table>
+    <table class="table table-striped">
         <thead>
             <tr>
                 <th>Auswahl</th>

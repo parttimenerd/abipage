@@ -24,11 +24,11 @@
  */
 class FourothreeHandler {
     
-    public function get($slug){
+    public function get($slug = ""){
         tpl_403();
     }
     
-    public function post($slug){
+    public function post($slug = ""){
         tpl_403();
     }
 }

@@ -71,8 +71,14 @@ if (!function_exists('require_dir')) {
          * @var Environment 
          */
         $env = new Environment();
+        set_error_handler(function($type, $msg) {
+                    Logger::log($msg, $type);
+                }, E_ALL);
+        set_exception_handler(function($msg) {
+                    Logger::log($msg, E_ERROR);
+                });
     }
-    
+
     function require_dir($dirpath) {
         foreach (scandir($dirpath) as $dir) {
             if ($dir != '.' && $dir != '..' && $dir != "htmlpurifier") {

@@ -23,8 +23,10 @@ class ImageList extends RatableUserContentList {
 
     public function __construct() {
         global $env;
-        parent::__construct("images");
+        parent::__construct("images", false, true);
         $this->items_per_page = $env->images_per_page;
+        array_push($this->order_by_dic, "category");
+        array_push($this->order_by_dic, "capture_time");
     }
 
     public function deleteItem($id, $trigger_action = true) {
@@ -36,7 +38,7 @@ class ImageList extends RatableUserContentList {
             $filename = $arr["id"] . '.' . $arr["format"];
             $file = $env->main_dir . '/' . $env->upload_path . '/' . $filename;
             $thumbfile = $env->main_dir . '/' . $env->upload_path . '/thumbs/' . $filename;
-            parent::deleteItem($cid);
+            parent::deleteItem($cid, $trigger_action);
             if (file_exists($file)) {
                 unlink($file);
             }
@@ -50,11 +52,24 @@ class ImageList extends RatableUserContentList {
 
     public function setDescription($id, $descr) {
         $this->db->query("UPDATE " . $this->table . " SET description = '" . cleanInputText($descr) . "' WHERE id=" . intval($id)) or die($this->db->error);
+        return $this;
+    }
+    
+    public function setCategory($id, $category) {
+        $this->db->query("UPDATE " . $this->table . " SET category = '" . cleanInputText($category) . "' WHERE id=" . intval($id)) or die($this->db->error);
+        return $this;
+    }
+    
+    public function setExif($id, $exif) {
+        $ctime = strtotime(isset($exif["DateTimeOriginal"]) ? $exif["DateTimeOriginal"] : $exif["DateTime"]);
+        $datastr = $this->db->real_escape_string(json_encode($exif));
+        $this->db->query("UPDATE " . $this->table . " SET capture_time = " . $ctime . ", data='" . $datastr . "' WHERE id=" . intval($id)) or var_dump($this->db->error);
+        return $this;
     }
 
-    public function addImage($descr = "", $time = -1, $user = null) {
+    public function addImage($descr = "", $category = "", $time = -1, $user = null) {
         global $env;
-        if (get_upload_dir_size_mib() + 3 > $env->max_uploads_size){
+        if (get_upload_dir_size_mib() + 3 > $env->max_uploads_size) {
             $env->sendAdminMail("Upload-Ordner ist voll", "Es können keine Bilder mehr hochgeladen werden, da der Upload-Ordner voll ist, bitte löschen sie entweder Bilder oder vergrößern sie die Größe des Upload-Ordners in den <a href='" . tpl_url("preferences") . "'>Seiteneinstellungen</a>.");
             return;
         }
@@ -65,11 +80,26 @@ class ImageList extends RatableUserContentList {
         if (!$user) {
             $user = Auth::getUser();
         }
-        $descr = $this->db->real_escape_string(cleanInputText($descr));
-        $this->db->query("INSERT INTO " . $this->table . "(id, userid, description, format, time, rating, data) VALUES(NULL, " . $user->getID() . ", '" . $descr . "', '" . $env->pic_format . "', " . $time . ", 0, '')") or die($this->db->error);
+        $descr = cleanInputText($descr);
+        $category = cleanInputText($category);
+        $this->db->query("INSERT INTO " . $this->table . "(id, userid, description, category, capture_time, format, time, rating, data) VALUES(NULL, " . $user->getID() . ", '" . $descr . "', '" . $category . "', 0, '" . $env->pic_format . "', " . $time . ", 0, '')") or die($this->db->error);
         $id = $this->db->insert_id;
-        $env->addAction($id, $user->getName(), "upload_image");
+        Actions::addAction($id, $user->getName(), "upload_image");
         return $id;
+    }
+
+    protected function appendSearchAfterPhraseImpl($cphrase) {
+        $this->appendToWhereApp(" AND (MATCH(description) AGAINST('" . $cphrase . "') OR description LIKE '%" . $cphrase . "%' OR category LIKE '%" . $cphrase . "%')");
+    }
+
+    public function getCategories() {
+        $res = $this->db->query("SELECT DISTINCT category FROM " . $this->table);
+        $arr = array();
+        if ($res != null) {
+            while ($a = $res->fetch_array())
+                $arr[] = $a["category"];
+        }
+        return $arr;
     }
 
 }

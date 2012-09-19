@@ -126,6 +126,9 @@ class Auth {
     }
 
     public static function logout() {
+        if (Auth::getUser() == null)
+            return;
+        Auth::getUser()->updateAccessKey();
         self::setCookie(Auth::getUserID(), Auth::random_string(), Auth::random_string());
         self::$user = null;
     }
@@ -137,6 +140,14 @@ class Auth {
             }
         }
         return self::$user;
+    }
+    
+    public static function getAccessKey(){
+        return self::getUser() != null ? self::$user->getAccessKey() : '';
+    }
+    
+    public static function hasAccess() {
+        return self::getUser() ? self::getUser()->compareAccessKey(isset($_REQUEST["access_key"]) ? $_REQUEST["access_key"] : "") : false;
     }
 
     public static function getUserMode() {
@@ -163,12 +174,16 @@ class Auth {
         return self::getUser() != null ? (self::$user->getMode() == User::ADMIN_MODE) : false;
     }
 
+    public static function isFirstAdmin(){
+        return self::getUserID() == 1;
+    }
+
     public static function isSameUser($user) {
         $id = $user == null ? -2 : (is_numeric($user) ? intval($user) : $user->getID());
         return $id == self::getUserID();
     }
 
-    public function canEditUser($user) {
+    public static function canEditUser($user) {
         if (is_numeric($user))
             $user = User::getByID(intval($user));
         return $user != null && (Auth::isSameUser($user) || Auth::isAdmin() || (Auth::getUserMode() > $user->getMode() && Auth::getUserMode() < User::EDITOR_MODE));
@@ -181,6 +196,11 @@ class Auth {
     public static function isViewingResults() {
         global $env, $store;
         return $env->results_viewable && $store->result_mode_ud;
+    }
+
+    public static function canViewLogs() {
+        global $env;
+        return ($env->show_logs || defined(SHOW_LOGS_TO_ADMIN)) && Auth::isAdmin();
     }
 
     public static function canWriteNews() {
@@ -198,36 +218,48 @@ class Auth {
     public static function canModifyPreferences() {
         return Auth::isAdmin();
     }
-    
-    public static function canSeeNameWhenSentAnonymous(){
+
+    public static function canSeeNameWhenSentAnonymous() {
         return Auth::isModerator();
     }
 
-    public static function canDeleteRucItem(){
+    public static function canDeleteRucItem() {
         return Auth::isModerator();
     }
-    
-    public static function canDeleteUserComment(){
+
+    public static function canDeleteUserComment() {
+        return Auth::isModerator();
+    }
+
+    public static function canDeleteUser() {
+        return Auth::isAdmin();
+    }
+
+    public static function canAddTeacher() {
+        return Auth::isModerator();
+    }
+
+    public static function canEditTeacher() {
+        return Auth::isModerator();
+    }
+
+    public static function canDeleteTeacher() {
+        return Auth::isModerator();
+    }
+
+    public static function canSetUserMode() {
+        return Auth::isModerator();
+    }
+
+    public static function canSeeDebugOutput() {
         return Auth::isAdmin();
     }
     
-    public static function canDeleteUser(){
+    public static function canSetUserVisibility(){
         return Auth::isAdmin();
     }
     
-    public static function canAddTeacher(){
-        return Auth::isModerator();
-    }
-    
-    public static function canEditTeacher(){
-        return Auth::isModerator();
-    }
-    
-    public static function canDeleteTeacher(){
-        return Auth::isModerator();
-    }
-    
-    public static function canSetUserMode(){
-        return Auth::isModerator();
+    public static function canEditUserPolls(){
+        return Auth::isEditor();
     }
 }

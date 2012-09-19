@@ -23,7 +23,8 @@ function tpl_usermanagement($userarr, $as_page = true, $urlapp = "") {
     }
     ?>
     <form method="post" <?php echo $urlapp != "" ? ('action="?' . $urlapp . '"') : "" ?> class="usermanagement">
-        <table class="tablesorter">
+        <input type="hidden" name="access_key" value="<?= Auth::getAccessKey() ?>"/>
+        <table class="table table-striped tablesorter">
             <thead>
                 <tr>
                     <th>Auswählen</th>
@@ -44,7 +45,7 @@ function tpl_usermanagement($userarr, $as_page = true, $urlapp = "") {
                     <tr>
                         <td>
                             <? if (!Auth::isSameUser($user) && Auth::canEditUser($user)): ?>
-                            <input type="checkbox" value="true" name="<?php echo $user->getID() ?>"/>
+                                <input type="checkbox" value="true" name="<?php echo $user->getID() ?>"/>
                             <? endif; ?>
                         </td>
                         <td><?php echo $user->getID() ?></td>
@@ -68,10 +69,14 @@ function tpl_usermanagement($userarr, $as_page = true, $urlapp = "") {
             Modus <?php tpl_usermode_combobox("mode") ?>
             <button class="btn" type="submit" name="setmode">setzen</button><br/>
             <button class="btn btn-danger" type="submit" name="delete">Benutzer löschen (Es werden dabei alle Beiträge der betreffenden Benutzer gelöscht!!!)</button><br/>
-                <?php endif ?>
+        <?php endif ?>
         <input type="password" name="password" style="width: 150px" placeholder="Neues Passwort"/>
         <button class="btn" type="submit" name="setpassword">Passwort setzen</button>
         (mit E-Mail Benachrichtigung der jeweiligen Benutzer)
+        <? if (Auth::canSetUserVisibility()): ?>
+        <input type="checkbox" checked="checked" name="visible"/>
+        <button class="btn" name="setvisible">Sichtbar?</button>
+        <? endif ?>
     </form>
     <?
     if ($as_page) {

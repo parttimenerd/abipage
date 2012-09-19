@@ -31,6 +31,7 @@ class Database {
             if (defined('DEBUG')){
                 self::$db = new DebugDBWrapper(self::$db);
             }
+            return self::$db;
         }
     }
 
@@ -56,7 +57,7 @@ class Database {
         self::$db->query('CREATE TABLE IF NOT EXISTS ' . DB_PREFIX . "quotes_ratings(userid INT, itemid INT, rating TINYINT)") or die("Can't create quotes_ratings table: " . self::$db->error);
         self::$db->query('CREATE TABLE IF NOT EXISTS ' . DB_PREFIX . "rumors(id INT AUTO_INCREMENT PRIMARY KEY, text TEXT, userid INT, isanonymous TINYINT, time BIGINT, rating FLOAT NOT NULL, rating_count INT NOT NULL, response_to INT, data TEXT, FULLTEXT(text)) ENGINE = MYISAM") or die("Can't create rumours table: " . self::$db->error);
         self::$db->query('CREATE TABLE IF NOT EXISTS ' . DB_PREFIX . "rumors_ratings(userid INT, itemid INT, rating TINYINT)") or die("Can't create rumours_ratings table: " . self::$db->error);
-        self::$db->query('CREATE TABLE IF NOT EXISTS ' . DB_PREFIX . "images(id INT AUTO_INCREMENT PRIMARY KEY, userid INT, description TEXT, format VARCHAR(5), time BIGINT, rating FLOAT NOT NULL, rating_count INT NOT NULL, data TEXT, FULLTEXT(description)) ENGINE = MYISAM") or die("Can't create pictures table: " . self::$db->error);
+        self::$db->query('CREATE TABLE IF NOT EXISTS ' . DB_PREFIX . "images(id INT AUTO_INCREMENT PRIMARY KEY, userid INT, description TEXT, category VARCHAR(100), capture_time BIGINT, format VARCHAR(5), time BIGINT, rating FLOAT NOT NULL, rating_count INT NOT NULL, data TEXT, FULLTEXT(description)) ENGINE = MYISAM") or die("Can't create pictures table: " . self::$db->error);
         self::$db->query('CREATE TABLE IF NOT EXISTS ' . DB_PREFIX . "images_ratings(userid INT, itemid INT, rating TINYINT)") or die("Can't create picture_ratings table: " . self::$db->error);
         self::$db->query('CREATE TABLE IF NOT EXISTS ' . DB_PREFIX . "teacher(id INT AUTO_INCREMENT PRIMARY KEY, first_name VARCHAR(30), last_name VARCHAR(30), namestr VARCHAR(35), ismale TINYINT, FULLTEXT(namestr)) ENGINE = MYISAM") or die("Can't create teacher table: " . self::$db->error);
         self::$db->query('CREATE TABLE IF NOT EXISTS ' . DB_PREFIX . "news(id INT AUTO_INCREMENT PRIMARY KEY, title VARCHAR(100), content TEXT, time BIGINT, userid INT, FULLTEXT(title, content)) ENGINE = MYISAM") or die("Can't create news table: " . self::$db->error);

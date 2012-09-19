@@ -16,14 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-function tpl_infobox($strong_text, $message_text) {
+function tpl_infobox($strong_text, $message_text, $href = "") {
     ?>
+    <?= $href != "" ? ('<a href="' . $href . '">') : '' ?>
     <div class="alert alert-info">
         <?php if ($strong_text != ""): ?>
             <h4 class="alert-heading"><?php echo $strong_text ?></h4>
         <?php endif ?>
         <?php echo $message_text ?>
     </div>
+    <?= $href != "" ? '</a>' : '' ?>
     <?php
 }
 
@@ -32,12 +34,10 @@ function tpl_usermode_combobox($name, $preset_modenum = User::NORMAL_MODE, $echo
         User::NORMAL_MODE => "Normal",
         User::EDITOR_MODE => "Editor",
     );
-    if ($echo_all || Auth::isAdmin()) {
-        $arr = array_merge($arr, array(
-            User::MODERATOR_MODE => "Moderator",
-            User::ADMIN_MODE => "Administrator"
-                ));
-    }
+    if ($echo_all || Auth::isAdmin())
+        $arr = array_merge($arr, array(User::MODERATOR_MODE => "Moderator"));
+    if ($echo_all || Auth::isFirstAdmin())
+        $arr = array_merge($arr, array(User::ADMIN_MODE => "Administrator"));
     ?>
     <select style="display: inline;" name="<?php echo $name ?>" class="user_mode_combobox">
         <?php foreach ($arr as $key => $value): ?>
@@ -133,6 +133,7 @@ function tpl_userlink($id_or_name, $last_name_first = false) {
         ?>
         <a href="<?php echo $url ?>" class="userlink"><?php echo $namestr ?></a> 
         <?php
+        return $url;
     }
 }
 
@@ -234,8 +235,12 @@ function tpl_color_selector($name, $default_value = "#ff0000", $js_onchange = ""
     <?php
 }
 
-function tpl_icon($name, $title = "", $onclick = "", $format = "svg") {
-    echo '<img class="icon ' . $name . '" src="' . tpl_url("img/icons/" . $name . '.' . $format) . '" ' . ($title != "" ? (' title="' . $title . '"') : "") . 'onclick="' . $onclick . '"/>';
+function tpl_icon($name, $title = "", $onclick = "", $class_app = "", $has_container = false, $format = "svg") {
+    if ($has_container)
+        echo '<div class="icon-container ' . $name . ' ' . $class_app . '">';
+    echo '<img class="icon ' . $name . ' ' . $class_app . '" src="' . tpl_url("img/icons/" . $name . '.' . $format) . '" ' . ($title != "" ? (' title="' . $title . '"') : "") . 'onclick="' . $onclick . '"/>';
+    if ($has_container)
+        echo '</div>';
 }
 
 function tpl_popover($text, $title, $content, $class = "") {
@@ -246,10 +251,87 @@ function tpl_popover($text, $title, $content, $class = "") {
 
 function tpl_datalist($id, $stringarr) {
     ?>
-    <datalist id="<?= $id ?>">
+    <datalist <?= $id != "" ? ('id="' . $id . '"') : "" ?>>
         <? foreach ($stringarr as $str): ?>
             <option value="<?= formatText($str, false) ?>"></option>
         <? endforeach; ?>
     </datalist>
     <?
+}
+
+/**
+ * 
+ * @param array $args name, value, placeholder, js_onchange (only with type = "color"), type
+ */
+function tpl_input($args = array("name" => "default", "value" => "", "placeholder" => "", "onchange" => "")) {
+    global $editor_needed;
+    if ($args["name"] == "default")
+        Logger::log("Use this function correct!!!", LOG_INFO);
+    $name = $args["name"];
+    $value = isset($args["default"]) ? $args["default"] : (isset($args["value"]) ? $args["value"] : "");
+    $type = isset($args["type"]) ? $args["type"] : (is_numeric($value) ? "number" : "inputfield");
+    $id = isset($args["id"]) ? $args["id"] : $name;
+    $str = 'name="' . $args["name"] . '" id="' . $id . '"';
+    if (isset($args["placeholder"]) && $args["placeholder"] != "")
+        $str .= ' placeholder="' . $args["placeholder"] . '" ';
+    if (isset($args["js_onchange"]) && $args["js_onchange"] != "")
+        $str .= ' onchange="' . $args["js_onchange"] . '" ';
+    if (isset($args["required"]) && $args["required"] != "")
+        $str .= ' required="' . $args["required"] . '" ';
+    switch ($type) {
+        case "textarea":
+            ?>
+            <div class="textarea_container" id="<?= $id ?>">
+                <ul class="nav nav-tabs">
+                    <li class="active"><a href="#<?= $name ?>_editor" data-toggle="tab">Editor</a></li>
+                    <li><a href="#<?= $name ?>_code" data-toggle="tab">Code</a></li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane active" id="<?= $name ?>_editor">
+                        <textarea class="textarea" onchange="$('#<?= $name ?>_code textarea').val($(this).wysiwyg('getContent'));"><?= $value ?></textarea>
+                    </div>
+                    <div class="tab-pane" id="<?= $name ?>_code">
+                        <textarea <?= $str ?> onkeyup="$('#<?= $name ?>_editor .textarea').wysiwyg('setContent', $(this).val());"><?= $value ?></textarea>
+                    </div>
+                </div>
+            </div>
+            <?
+            tpl_add_js('$("#' . $name . '_editor textarea.textarea").wysiwyg({
+                            css: "' . tpl_url("css/style.css") . '",
+                            i18n: {lang: "de"},
+                            rmUnwantedBr: true,
+                            controls: {
+                                increaseFontSize : { visible : true },
+                                decreaseFontSize : { visible : true }
+                            },
+                            removeHeadings: true
+                        }); ');
+//                echo '<textarea ' . $str . ' class="textarea">' . $value . '</textarea>';
+            $editor_needed = true;
+            break;
+        case "codearea":
+            echo '<textarea ' . $str . ' class="codearea">' . $value . '</textarea>';
+            break;
+        case "number":
+            echo "<input type='number' " . $str . " value='" . $value . "'/>";
+            break;
+        case "inputfield":
+            echo "<input type='text' " . $str . " value=\"" . $value . "\"/>";
+            break;
+        case "password":
+            echo '<input type="password" ' . $str . ' value="' . $value . '"/>';
+            break;
+        case "checkbox":
+            echo '<input type="checkbox" ' . $str . ' value="true"' . ($value == "true" ? ' checked="checked"' : '') . '/>';
+            break;
+        case "usermode":
+            tpl_usermode_combobox($args["name"], $value == "" ? 0 : intval($value));
+            break;
+        case "color":
+            tpl_color_selector($args["name"], $value, $args["js_onchange"] != "" ? $args["js_onchange"] : "", $id);
+            break;
+        case "email":
+            echo '<input type="email" ' . $str . ' value="' . $value . '"/>';
+            break;
+    }
 }

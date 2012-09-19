@@ -25,20 +25,21 @@ class ImagesHandler extends RatableUserContentHandler {
 
     public function post_impl() {
         global $env;
-        if (!empty($_FILES["uploaded_file"]) && ($_FILES['uploaded_file']['error'] == 0) && isset($_POST["description"])) {
-            $id = $this->list->addImage($_POST["description"]);
-            $env->uploadImage($id);
-            if (isset($_POST["send_anonymous"]))
-                PiwikHelper::addTrackGoalJS("Anonymous contribution");
-            PiwikHelper::addTrackGoalJS("Image uploaded", $_POST["description"]);
-            return true;
+        if (!empty($_FILES["uploaded_file"]) && ($_FILES['uploaded_file']['error'] == 0) && isset($_POST["description"]) && isset($_POST["category"])) {
+            $id = $this->list->addImage($_POST["description"], $_POST["category"]);
+            $exif = $env->uploadImage($id);
+            if ($exif) {
+                $this->list->setExif($id, $exif);
+                if (isset($_POST["send_anonymous"]))
+                    PiwikHelper::addTrackGoalJS("Anonymous contribution");
+                PiwikHelper::addTrackGoalJS("Image uploaded", $_POST["description"]);
+                return $id;
+            }
         }
         return false;
     }
 
-    public function processPhraseImpl($phrase) {
-        $phrase = cleanInputText($phrase);
-        $this->list->appendToWhereApp(" AND (MATCH(description) AGAINST('" . $phrase . "') OR description LIKE '%" . $phrase . "%')");
-    }
+    protected function configListFromSlugParamsImpl($params) {
+       }
 
 }

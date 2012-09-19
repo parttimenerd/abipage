@@ -18,21 +18,16 @@
 
 function rating(id, rating){
     fillStars(id, rating);
-    var func = function(html){
-        if (typeof(html) != "string")
-            html = html.responseText;
-        $("#" + id + "rating .average").replaceWith(html);
-        rated_items.push(id);
-    }
-    $.ajax({
-        type: "POST",
-        url: rating_url2,
+    ajax({
         data: $.param({
             rating: rating, 
             id: id
         }),
-        success: func,
-        error: func
+        func: function(data){
+            $("#" + id + "rating .average").replaceWith(data["html"]);
+            rated_items.push(id);
+        },
+        needs: ["html"]
     });
 }
 
@@ -50,27 +45,20 @@ function fillStars(id, rating){
 
 function deleteItem(id){
     if (confirm("Wollen sie diesen Beitrag wirklich löschen?")){
-        var func = function(html){
-            if (typeof(html) != "string")
-                html = html.responseText;
-            if (html != ""){
-                var arr = html.split("|", 2);
-                $("#" + arr[0]).remove();
-                $("body").append(arr[1]);
-            }
-        }
-        $.ajax({
-            type: "POST",
-            url: rating_url2,
-            data: "delete=0&id=" + id,
-            success: func,
-            error: func
+        ajax({
+            data: {
+                "delete" : 0, 
+                "id": id
+            },
+            func: function(data){
+                $("#" + data["id"]).remove();
+            },
+            needs: ["id"]
         });
     }
 }
 
 var is_loading = false;
-var sort_str = "";
 var phrase = "";
 var last_item = null;
 var chocolat_options = {};
@@ -98,11 +86,9 @@ function loadItems(){
                 'phrase': phrase
             }),
             success: function(html){
-                is_loading = false;
                 addLoadedItemsHTML(html);
             },
             error: function(html){
-                is_loading = false;
                 addLoadedItemsHTML(html.responseText);
             }
         });
@@ -137,26 +123,17 @@ jQuery.fn.reverse = [].reverse;
 
 function search(_phrase){        
     phrase = _phrase;
-    is_loading = true;
     page = 1;
-    $.ajax({
-        type: "POST",
-        url: rating_url2,
-        data: $.param({
-            'page': "1", 
-            'sort': sort_str, 
+    ajax({
+        type: "GET",
+        data: {
+            'page': "1",
             'phrase': phrase
-        }),
-        success: function(html){
-            is_loading = false;
-            $(".content-item").remove();
-            addLoadedItemsHTML(html);
         },
-        error: function(html){
-            is_loading = false;
+        func: function(data){
             $(".content-item").remove();
-            addLoadedItemsHTML(html.responseText);
-        }
+            addLoadedItemsHTML(data["html"]);
+        },
     });
 }
 
@@ -164,40 +141,30 @@ if (window.max_page !== undefined){
     $(window).bottom({
         proximity: 0.2
     }).bind('bottom', function(){
-        if(!is_loading) loadItems();
+        loadItems();
     });
 }
 
 function updateActionsSidebar(){
-    if (!is_loading){
-        var func = function(html){
-            if (typeof(html) != "string")
-                html = html.responseText;
-            if (html == "")
-                return;
-            $(".sidebar .nav-list .action_list_item:first").before(html);
-            $(".sidebar .nav-list .action_list_item").slice(showed_actions).each(function(){
-                $(this).remove();
-            });
-            last_action_id = $(".sidebar .nav-list .action_list_item").attr("id").split("_")[1];
-        }
-        $.ajax({
-            type: "GET",
-            url: ajax_url + "/last_actions",
-            data: $.param({
-                'last_id': last_action_id, 
-            }),
-            success: func,
-            error: func
-        });
-    }
-     
+    if ($(".sidebar").css("display") == "hidden")
+        return;
+    ajax({
+        type: "GET",
+        url: ajax_url + "/last_actions",
+        data: {
+            'id': last_action_id
+        },
+        func: function(data){
+            $(".action_list_container .action_list_item:first").before(data["html"]);
+            if (data["last_action_id"] !== undefined)
+                last_action_id = data["last_action_id"];
+        },
+        needs: ["html", "last_action_id"]
+    });     
 }
 
-var interval = 10000; //in ms
-
-//if (has_sidebar)
-//    setInterval("updateActionsSidebar()", interval);
+if ($(".action_list_container").length > 0)
+    setInterval("updateActionsSidebar()", auto_update_interval);
 
 /*function loadNew(){
     //var get_items = window.first_item_id !== undefined;
@@ -312,8 +279,8 @@ if ($("#drop_area").length != 0){
             xhr.upload.onprogress = function(e) {
                 if (e.lengthComputable) {
                     percent = Math.round((e.loaded * 100) / e.total); 
-                    progressbar.attr("style", "width: " + percent + "%");
-                    if (percent < 100){
+                    progressbar.attr("style", "width: " + percent + "%; visibility: visible");
+                    if (percent < 90){
                         progressbar.html(byteToMiB(e.loaded, 2) + "MiB von " + byteToMiB(e.total, 2) + "MiB hochgeladen");
                     } else {
                         progressbar.html("Erzeugung von Vorschaubildern...");
@@ -323,125 +290,110 @@ if ($("#drop_area").length != 0){
 			
             xhr.open("post", rating_url2, true);
             xhr.overrideMimeType('text/plain; charset=x-user-defined-binary');
-            // Set appropriate headers
-            //xhr.setRequestHeader("Content-Type", "multipart/form-data");
-            //xhr.setRequestHeader("description", $(".descr").val() == "" ? "" : $(".descr").serialize().split("=", 2)[1]);
-            //xhr.setRequestHeader("send", "");
-            //xhr.setRequestHeader("X-File-Name", "uploaded_file");
-            //xhr.setRequestHeader("X-File-Size", file.size);
-            //xhr.setRequestHeader("X-File-Type", file.type);
             var fd = new FormData;
             fd.append("uploaded_file", file);
             fd.append("description", $(".descr").val());
-            // Send the file (doh)
-            progress.attr("style", "visibility: visible");
+            fd.append("category", $("input.img_category").val());
+            fd.append("access_key", access_key);
+            progress.attr("style", "display: visible");
             xhr.send(fd);
 
             xhr.onreadystatechange = function(){
-                if (xhr.readyState == 4 && xhr.status == 200){
-                    $(".item-send").after(xhr.responseText);
-                    $(".item-send .descr").val("");
-                    $("#drop_area").html(droparea_html);
-                    progress.attr("style", "visibility: hidden");
-                    progressbar.attr("style", "width: 0%");
-                    file = null;
-                    file_content = ""; 
+                if (xhr.status == 200){
+                    try {
+                        var json = JSON.parse(xhr.response);
+                    } catch (err){
+                        console.log(err);
+                    }
+                    if (json != null)
+                        return;
+                    if (json["logs"] !== undefined)
+                        add_log_object(json["logs"]);
+                    if (json["data"] !== undefined && json["data"]["html"] !== undefined){
+                        $(".item-send").after(json["data"]["html"]);
+                        $(".item-send .descr").val("");
+                        $("#drop_area").html(droparea_html);
+                        progress.attr("style", "visibility: hidden");
+                        progressbar.attr("style", "width: 0%");
+                        file = null;
+                        file_content = ""; 
+                    }
                 }
             };
         }
     }
 }
 
-function sendQuote(is_anonymous, response_to){
-    console.log(response_to);
-    var func = function(html){
-        if (html == null)
-            return;
-        if (typeof(html) != "string")
-            html = html.responseText;
-        if (html != ""){
-              if (response_to == -1){
-                $(".content .item-quote-send").after(html);
-                $(".item-quote-send textarea").val("");
-                $(".item-quote-send input").val("");
-            } else {
-                $("#responses_to_" + id + " .add_response_container").before(html);
-                $("#" + response_to + " .item-quote-send textarea").val("");
-                $("#" + response_to + " .item-quote-send input").val("");
-            }
-        }
-        is_loading = false;
-    }, ele;
-    if (response_to)
-        ele = $("#responses_to_" + response_to + ".item-quote-send");
+function sendQuote(is_anonymous, response_to, person){
+    var ele_str;
+    if (response_to && response_to != -1)
+        ele_str = "#responses_to_" + response_to + " .item-quote-send ";
     else
-        ele = $(".item-quote-send");
+        ele_str = ".content > .item-quote-send ";
     var data = {
-        'person': ele.children("input[name=person]").val(),
-        'text': ele.children("textarea").val(),
-        'response_to': ele.children("input[name=response_to]").val()
+        'person': person == '' ? $(ele_str + "input[name=person]").val() : person,
+        'text': $(ele_str + "textarea").val(),
+        'response_to': response_to
     };
     if (is_anonymous){
         data['send_anonymous'] = '';
     } else {
         data['send'] = '';
     }
-    is_loading = true;
-    $.ajax({
-        type: "POST",
-        url: rating_url2,
-        data: $.param(data),
-        success: func,
-        error: func
+    ajax({
+        data: data,
+        func: function(data){
+            if (response_to == -1){
+                $(".content > .item-quote-send").after(data["html"]);
+                $(".content > .item-quote-send textarea").val("");
+                $(".content > .item-quote-send input").val("");
+            } else {
+                $("#responses_to_" + response_to + " .add_response_container").before(data["html"]);
+                $("#responses_to_" + response_to + " .item-quote-send textarea").val("");
+            }
+        },
+        needs: ["html"]
     });
 }
 
-function sendRumor(is_anonymous){
-    var func = function(html){
-        if (html == null)
-            return;
-        if (typeof(html) != "string")
-            html = html.responseText;
-        if (html != ""){
-            $(".content .item-rumor-send").after(html);
-            $(".item-rumor-send textarea").val("..., dass");
-            piwikTracker.setDocumentTitle("ajax/write rumor");
-            piwikTracker.trackPageView(); 
-        }
-        is_loading = false;
-    }
+function sendRumor(is_anonymous, response_to){
     var data = {
-        'text': $(".item-rumor-send textarea").val(),
-        'response_to': $(".item-rumor-send input[name=response_to]").val()
+        'response_to': response_to
     };
+    data["text"] = response_to == -1 ? $(".content > .item-rumor-send textarea").val() : $("#responses_to_" + response_to + " .item-rumor-send textarea").val();
     if (is_anonymous){
         data['send_anonymous'] = '';
     } else {
         data['send'] = '';
     }
-    is_loading = true;
-    $.ajax({
-        type: "POST",
-        url: rating_url2,
-        data: $.param(data),
-        success: func,
-        error: func
+    ajax({
+        data: data,
+        func: function(data){
+            if (response_to == -1){
+                $(".content > .item-rumor-send").after(data["html"]);
+                $(".content > .item-rumor-send textarea").val("..., dass");
+            } else {
+                $("#responses_to_" + response_to + " .item-rumor-send").before(data["html"]);
+                $("#responses_to_" + response_to + " .item-rumor-send textarea").val("..., dass");
+            }
+        },
+        needs: ["html"]
     });
 }
 
-function responseToItem(id){
+function responseToItem(id, person){
     var container = $("#responses_to_" + id + " .add_response_container");
     if (container){
-        if (window.item-response-template === undefined){
+        if (window.item_response_template === undefined){
             window.item_response_template = Handlebars.compile($("#item-response-template").html());
         }
         if (container.children(".item-send").length == 0){
             var html = "";
             var ele = $("#" + id);
-            if (ele.children("input[type=person]").length != 0){ // Send quote item
+            if (person != ""){ // Send quote item
                 html = item_response_template({
                     response_to: id, 
-                    teacher: ele.children("input[type=person]").val(), 
+                    teacher: person, 
                     button_answer_title: "Hinzufügen", 
                     button_answer_ano_title: "Anonym hinzufügen"
                 });
@@ -466,128 +418,189 @@ function scrollToTop(){
 //$("input[title!='']").tooltip({placement: 'left'});
 
 function userCommentNotify(id){
-    var func = function(html){
-        if (typeof(html) != "string")
-            html = html.responseText;
-        if (html != ""){
-            var arr = html.split("|", 2);
-            var id = arr[0];
-            if (arr[1] != "notified"){
+    var action = $("#" + id).hasClass("notified_as_bad") ? "unnotify" : "notify"; 
+    ajax({
+        data: {
+            action: action, 
+            id: id
+        },
+        func: function(data){
+            var msg = data["msg"];
+            var id = data["id"];
+            if (msg != "notified"){
                 $("#" + id).addClass("notified_as_bad");
                 $("#" + id + " .notify").attr("title", "Positiv bewerten");
-            } else if (arr[1] != "unnotified"){
+            } else if (msg != "unnotified"){
                 $("#" + id).removeClass("notified_as_bad");
                 $("#" + id + " .notify").attr("title", "Negativ bewerten");
             }
-        }
-    }
-    var action = $("#" + id).hasClass("notified_as_bad") ? "unnotify" : "notify"; 
-    $.ajax({
-        type: "POST",
-        url: rating_url2,
-        data: $.param({
-            action: action, 
-            id: id
-        }),
-        success: func,
-        error: func
+        },
+        needs: ["id", "msg"]
     });
 }
 
 function sendUserComment(is_anonymous){
     var data = {
-        'text': $("#textarea").val(),
+        'text': $("#textarea").val()
     };
     if (is_anonymous){
         data['send_anonymous'] = '';
     } else {
         data['send'] = '';
     }
-    var func = function(html){
-        $(".write_comment textarea").val("");
-        if (html != "")
-            $(".write_comment").after(html);
-        is_loading = false;
-    }
-    is_loading = true;
-    $.ajax({
-        type: "POST",
-        url: "",
-        data: $.param(data),
-        success: func,
-        error: func
+    ajax({
+        data: data,
+        func: function(data){
+            $(".write_comment textarea").val("");
+            if (data["html"] != "")
+                $(".write_comment").after(data["html"]);
+        }
     });
 }
 
 function setResultMode(view_results){
-    $.ajax({
+    ajax({
         type: "POST",
         url: ajax_url + "/result_mode",
-        data: $.param({
+        data: {
             value: view_results
-        })
+        }
     });
 }
 
 function updateTimespans(){
-    $(".timespan[time]").each(function(){
+    $(".timediff").each(function(){
         var ele = $(this);
-        ele.html(timespanText(ele.attr("time")));
+        ele.html(timespanText(getUTCUnixTime() - ele.attr("time")));
     });
 }
 
+function getUTCUnixTime(){
+    var now = new Date();
+    return Math.round(Date.UTC(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+        now.getHours(),
+        now.getMinutes()
+        ) / 1000);
+}
+
+//TODO fix me
 function timespanText(timediff){
-    text = "";
-    arr = [
-    [1, 60, ["Sekunde", "n"]],
-    [60, 3600, ["Minute", "n"]],
-    [3600, 86400, ["Stunde", "n"]],
-    [86400, 2626560, ["Tag", "en"]],
-    [2626560, 31518720, ["Monat", "en"]],
-    [31518720, 1E10, ["Jahr", "en"]]
+    var text = "";
+    var arr = [
+    [1, 60, ["Sekunde", "n", "einer"]],
+    [60, 3600, ["Minute", "n", "einer"]],
+    [3600, 86400, ["Stunde", "n", "einer"]],
+    [86400, 2626560, ["Tag", "en", "einem"]],
+    [2626560, 31518720, ["Monat", "en", "einem"]],
+    [31518720, 1E10, ["Jahr", "en", "einem"]]
     ];
-    for (var steparr in arr) {
+    for (var i = 0; i < arr.length; i++){
+        var steparr = arr[i];
         if (steparr[1] > timediff) {
-            value = floor(timediff / steparr[0]);
-            text = value + " " + (value == 1 ? steparr[2][0] : steparr[2][0] . steparr[2][1]);
+            var value = Math.floor(timediff / steparr[0]);
+            text = (value == 1 ? steparr[2][2] : value) + " " + (value == 1 ? steparr[2][0] : (steparr[2][0] + steparr[2][1]));
             break;
         }
     }
     return 'Vor ' + text;
 }
 
+//window.setInterval("updateTimespans()", 5000);
+
 function deleteUserComment(id){
-    var func = function(html){
-        if (typeof(html) != "string")
-            html = html.responseText;
-        $("#" + html).remove();
-        is_loading = false;
-    }
-    is_loading = true;
-    $.ajax({
-        type: "POST",
-        url: "",
-        data: $.param({
+    ajax({
+        data: {
             "deleteComment": id
-        }),
-        success: func,
-        error: func
+        },
+        func: function(data){
+            $("#" + data["id"]).remove();
+        },
+        needs: ["id"]
     });
 }
 
-function markdown(markdown){
-    return (new Showdown.converter()).makeHtml(markdown);
+function ajax(args){
+    var func = function(resp){
+        if (resp == null){
+            args["no_return"](null);
+            return;
+        }
+        if (resp["logs"] !== undefined)
+            add_log_object(resp["logs"]);
+        if (resp["data"] !== undefined){
+            var ok = true;
+            for (var i = 0; i < args["needs"].length; i++) {
+                var need_data = resp["data"][args["needs"][i]];
+                if (need_data === undefined || need_data == null || need_data == ""){
+                    ok = false;
+                    args["func"](false);
+                    return;
+                }
+            }
+            if (ok)
+                args["func"](resp["data"]);
+        }
+    }
+    args = $.extend({
+        type: "POST",
+        dataType: "json",
+        success: func,
+        error: function(resp, textStatus){
+            console.error(textStatus);
+            func($.parseJSON(resp.responseText));
+        },
+        no_return: function(){
+            
+        },
+        needs: []
+    }, args);
+    args["data"] = $.extend({
+        access_key: access_key,
+        ajax: true
+    }, args["data"]);
+    if (args["data"] !== undefined && args["data"] === Object(args["data"]))
+        args["data"] = $.param(args["data"]);
+    $.ajax(args);
 }
 
-//function markdownPreview(ele){
-//    var converter = new Showdown.converter();
-//    $(".write-news .preview").html(converter.makeHtml($(".write-news textarea[name=text]").val()));
-//}
+var weird_counter = 23426;
 
-$("input[data-markdown-preview]").each(function (ele){
-    $(ele).keydown(function(){
-        $("#" + $(this).attr("data-markdown-preview")).html(markdown($(this).val()));
-    })
-});
+function add_log_object(object){
+    weird_counter++;
+    if (window.log_table_template_hbs === undefined)
+        window.log_table_template_hbs = Handlebars.compile($("#log_table_template").html());
+    $("#log").append(log_table_template_hbs({
+        id: weird_counter, 
+        data: object
+    }));
+    $("#" + weird_counter + " .tablesorter").tablesorter();
+}
 
-window.setInterval("updateTimespans", 5000);
+var time_precision = 3;
+
+Handlebars.registerHelper("s_to_ms", function(value){
+    var precision = Math.pow(10, time_precision);
+    return Math.round(value * 1000 * precision) / precision;
+})
+
+function deletePoll(id, real_del){
+    if (real_del){
+        $("#" + id).replaceWith('<input type="hidden" name="' + $id + '"/><input type="hidden" name="' + $id + '_action" value="delete"/>');
+    } else {
+        $("#" + id).remove();
+    }
+}
+
+function addPoll(type, ele){
+    weird_counter++;
+    if (window.edit_poll_item_template === undefined){
+        window.edit_poll_item_template = Handlebars.compile($("#edit_poll_item_template").html());
+    }
+    $(ele).before(edit_poll_item_template({
+        id: weird_counter, 
+        type: type
+    }));
+}

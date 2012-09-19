@@ -48,11 +48,11 @@ class Environment {
     }
 
     public function __get($var) {
-        if (array_key_exists($var, $this->__vars)) {
+        if ($var == "url") {
+            return URL;
+        } else if (array_key_exists($var, $this->__vars)) {
 //            var_dump($var, $this->__vars[$var]);
             return $this->__vars[$var];
-        } else if ($var == "url") {
-            return URL;
         } else if ($this->__prefhandler->hasDefault($var)) {
             return $this->__prefhandler->getDefault($var);
         }
@@ -70,7 +70,7 @@ class Environment {
     }
 
     //HACK implement search
-    public function getUserNames($also_deactivated = false, $search_string = "") {
+    public function getUserNames($also_deactivated = false, $search_string = "", $also_unvisible = true) {
         global $db;
         //$key = $also_deactivated ? "also_deactivated" : "activated";
         $app = "";
@@ -79,6 +79,9 @@ class Environment {
         if ($search_string != "") {
             $search_string_c = str_replace(" ", "%", $db->real_escape_string($search_string));
             $app .= ($app == "" ? " WHERE " : " AND ") . "(first_name LIKE \"%$search_string_c%\" OR last_name LIKE \"%$search_string_c%\") ";
+        }
+        if (!$also_unvisible) {
+            $app .= ($app == "" ? " WHERE " : " AND ") . " visible=" . 1;
         }
         //if ($this->__usernamesarr[$key] == null) {
         $arr = array();
@@ -131,12 +134,12 @@ class Environment {
             if (in_array($ext, $img_types) && ($_FILES["uploaded_file"]["size"] < 4000000)) {
                 $newname_wo_ext = $this->main_dir . '/' . $this->upload_path . '/' . $new_filename_wo_ext;
                 $newname = $newname_wo_ext . '.' . $ext;
-                var_dump($newname);
                 if (!file_exists($newname)) {
                     if ((move_uploaded_file($_FILES['uploaded_file']['tmp_name'], $newname))) {
-                        resizeImage($this->pic_width, $newname, $newname_wo_ext . '.' . $this->pic_format);
+                        $exif = read_exif_data($newname, 'ANY_TAG', false);
+                        resizeImage($this->resize_original_image ? $this->pic_width : -1, $newname, $newname_wo_ext . '.' . $this->pic_format);
                         resizeImage($this->thumbnail_width, $newname, $this->main_dir . '/' . $this->upload_path . '/thumbs/' . $new_filename_wo_ext . '.' . $this->pic_format);
-                        return true;
+                        return $exif;
                     }
                 }
             }
@@ -144,36 +147,11 @@ class Environment {
         return false;
     }
 
-    public function getLastActions($last_action_id = -1) {
-        global $db;
-        $actions = array();
-        $res = $db->query("SELECT * FROM " . DB_PREFIX . "actions WHERE id > " . intval($last_action_id) . " ORDER BY time DESC LIMIT 0, " . $this->showed_actions) or die($db->error);
-        while ($action = $res->fetch_array()) {
-            $actions[] = $action;
-        }
-        return $actions;
-    }
-
-    public function addAction($itemid, $person, $type, $time = -1, $user = null) {
-        global $db, $store;
-        if ($user == null) {
-            $user = Auth::getUser();
-        }
-        if ($time == -1) {
-            $time = time();
-        }
-        $person = $db->real_escape_string($person);
-        $type = $db->real_escape_string($type);
-        $db->query("INSERT INTO " . DB_PREFIX . "actions(id, userid, itemid, person, type, time) VALUES(NULL, " . $user->getID() . ", " . intval($itemid) . ", '" . $person . "', '" . $type . "', " . $time . ")") or die($db->error);
-        $store->last_action_id = $db->insert_id;
-        $store->updateDB();
-    }
-
     function sendMail($to, $topic, $text) {
         if (is_a($to, "User"))
             $to = $to->getMailAdress();
         mail($to, $topic, Markdown($text), "From: " . TITLE . "<" . ($this->system_mail_adress != "" ? $this->system_mail_adress : ("info@" . $_SERVER['HTTP_HOST'])) . ">\r\n"
-                . "X-Mailer: PHP/" . phpversion() . "MIME-Version: 1.0\r\nContent-Type: text/html; charset=ISO-8859-1\r\n");
+                . "X-Mailer: PHP/" . phpversion() . "\r\nMIME-Version: 1.0\r\nContent-Type: text/html; charset=ISO-8859-1\r\n");
     }
 
     function sendAdminMail($topic, $text) {
@@ -183,4 +161,5 @@ class Environment {
     function sendModeratorMail($topic, $text) {
         User::getByMode(User::MODERATOR_MODE)->sendMail($topic, $text);
     }
+
 }

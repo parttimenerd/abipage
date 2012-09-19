@@ -1,3 +1,0 @@
-less
-$lessc less/project.less > css/project.css
-$lessc less/project.less --compress > css/project.min.css

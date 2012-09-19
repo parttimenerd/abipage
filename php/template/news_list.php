@@ -1,5 +1,4 @@
 <?php
-
 /*
  * Copyright (C) 2012 Johannes Bechberger
  *
@@ -19,12 +18,12 @@
 
 function tpl_news_list($news, $as_page = true) {
     if ($as_page) {
-        tpl_before("news-list");
+        tpl_before("news");
+        if (Auth::canWriteNews()) {
+            tpl_infobox('', 'Neue Nachricht schreiben', tpl_url("news/write"));
+        }
     }
-    if (Auth::canWriteNews()){
-        tpl_infobox('Neue Nachrichten', ' können <a href="' . tpl_url("news/write") . '">hier</a> geschrieben werden.');
-    }
-    foreach($news as $item){
+    foreach ($news as $item) {
         tpl_news($item);
     }
     if ($as_page) {
@@ -32,8 +31,8 @@ function tpl_news_list($news, $as_page = true) {
     }
 }
 
-function tpl_news($news_item){
-    tpl_item_before($news_item["title"], "newspaper", "news-item");
+function tpl_news($news_item) {
+    tpl_item_before($news_item["title"], "newspaper", "content-item news-item");
     echo formatText($news_item["content"]);
     tpl_item_after_news_item($news_item);
 }
@@ -44,8 +43,8 @@ function tpl_item_after_news_item($news_item) {
     <hr/>
     <div class="item-footer">
         <ul>
-            <li class="time_span_li" style="width: 50%"><?php tpl_time_span($news_item["time"]) ?></li>
-            <li class="user_span_li" style="width: 50%; text-align: right"><?php tpl_user_span($news_item["userid"]) ?></li>
+            <li class="time_span_li"><?php tpl_time_span($news_item["time"]) ?></li>
+            <li class="user_span_li"><?php tpl_user_span($news_item["userid"]) ?></li>
         </ul>
     </div>
     </div>
@@ -54,14 +53,12 @@ function tpl_item_after_news_item($news_item) {
 
 function tpl_write_news($as_page = true) {
     if ($as_page) {
-        tpl_before("write_news");
+        tpl_before("news/write");
     }
-    tpl_item_before_form(array("action" => "POST", "method" => tpl_url("news")), "Nachricht schreiben", "pencil", "write-news");
+    tpl_item_before_form(array("method" => "POST", "action" => tpl_url("news/write")), "Nachricht schreiben", "pencil", "write-news");
     ?>
-    <input type="text" name="title" placeholde="Titel">
-    <texarea name="text" placeholder="Text" data-markdown-preview="news-preview"></texarea>
-    <h4>Vorschau</h4>
-    <div class="preview" id="news-preview"></div>
+    <? tpl_input(array("name" => "title", "placeholder" => "Nachrichtentitel", "required" => "on")) ?>
+    <? tpl_input(array("name" => "text", "value" => "...", "type" => "textarea")) ?>
     <?php
     tpl_item_after_form(array("write" => array("text" => "Schreiben"), "write-email" => array("text" => "Schreiben und als Newsletter versenden", "icon" => "email")));
     if ($as_page) {

@@ -17,21 +17,39 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-class TeacherList {
+class Teacher {
 
-    public static function getTeacherNameList() {
-        global $db;
-        $res = $db->query("SELECT namestr FROM " . DB_PREFIX . "teacher ORDER BY last_name ASC") or die($db->error);
-        $arr = array();
-        if ($res != null) {
-            while ($tarr = $res->fetch_array()) {
-                $arr[] = $tarr["namestr"];
-            }
-        }
-        return $arr;
+    private static $name_list = array();
+    private $id;
+    private $is_male;
+    private $first_name;
+    private $last_name;
+    private $name_str;
+
+    public function __construct($id, $is_male, $first_name, $last_name, $name_str) {
+        $this->id = $id;
+        $this->is_male = $is_male;
+        $this->first_name = $first_name;
+        $this->last_name = $last_name;
+        $this->name_str = $name_str;
     }
 
-    public static function getTeacher() {
+    public static function getNameList() {
+        if (empty(self::$name_list)) {
+            global $db;
+            $res = $db->query("SELECT namestr FROM " . DB_PREFIX . "teacher ORDER BY last_name ASC") or die($db->error);
+            $arr = array();
+            if ($res != null) {
+                while ($tarr = $res->fetch_array()) {
+                    $arr[] = $tarr["namestr"];
+                }
+            }
+            self::$name_list = $arr;
+        }
+        return self::$name_list;
+    }
+
+    public static function getAllTeachers() {
         global $db;
         $res = $db->query("SELECT * FROM " . DB_PREFIX . "teacher") or die($db->error);
         $arr = array();
@@ -41,6 +59,29 @@ class TeacherList {
             }
         }
         return $arr;
+    }
+
+    public static function getFromArray($arr) {
+        return new Teacher($arr["id"], isset($arr["is_male"]) ? $arr["is_male"] : $arr["ismale"], $arr["first_name"], $arr["last_name"], $arr["name_str"]);
+    }
+
+    public static function getFromMySQLResult($result) {
+        if ($result == null)
+            return null;
+        $arr = $result->fetch_array();
+        if ($arr == null)
+            return null;
+        return self::getFromArray($arr);
+    }
+
+    public static function getByID($id) {
+        global $db;
+        return self::getFromMySQLResult($db->query("SELECT * FROM " . DB_PREFIX . "teacher WHERE id=" . inval($id)));
+    }
+
+    public static function getByName($namestr) {
+        global $db;
+        return self::getFromMySQLResult($db->query("SELECT * FROM " . DB_PREFIX . "teacher WHERE namestr=" . cleanInputText($namestr)));
     }
 
     public static function getTeacherWithQuoteRatingAndCount() {
@@ -150,6 +191,26 @@ class TeacherList {
         $ismale = is_numeric($ismale) ? intval($ismale) : ($ismale == "m" ? 1 : 0);
         global $db;
         $db->query("UPDATE " . DB_PREFIX . "teacher SET last_name='" . $last_name . "', ismale=" . $ismale . ", first_name='" . $first_name . "', namestr='" . ($ismale == 1 ? "Herr " : "Frau ") . $last_name . "' WHERE id=" . intval($id)) or die($db->error);
+    }
+
+    public function getID() {
+        return $this->id;
+    }
+
+    public function isMale() {
+        return $this->is_male;
+    }
+
+    public function getFirstName() {
+        return $this->first_name;
+    }
+
+    public function getLastName() {
+        return $this->last_name;
+    }
+
+    public function getNameStr() {
+        return $this->name_str;
     }
 
 }

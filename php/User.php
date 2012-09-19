@@ -24,7 +24,9 @@ class User {
     const EDITOR_MODE = 1;
     const NORMAL_MODE = 0;
     const NO_MODE = -1;
+    const ACCESS_KEY_LENGTH = 10;
 
+    private static $name_list = array();
     private $id;
     private $last_name;
     private $first_name;
@@ -36,20 +38,26 @@ class User {
     private $crypt_str;
     private $visible;
     private $db;
+    private $_has_new_access_key;
 
     public function __construct($id, $first_name, $last_name, $math_course, $math_teacher, $mail_adress, $mode, $activated, $crypt_str, $visible = true, $data = array()) {
         $db = Database::getConnection();
         $this->id = intval($id);
-        $this->first_name = cleanInputText($first_name);
-        $this->last_name = cleanInputText($last_name);
-        $this->math_course = $db->real_escape_string($math_course);
-        $this->math_teacher = $db->real_escape_string($math_teacher);
-        $this->mail_adress = $db->real_escape_string($mail_adress);
+        $this->first_name = $first_name;
+        $this->last_name = $last_name;
+        $this->math_course = $math_course;
+        $this->math_teacher = $math_teacher;
+        $this->mail_adress = $mail_adress;
         $this->mode = !$activated ? self::NO_MODE : intval($mode);
         $this->activated = $activated;
-        $this->crypt_str = $db->real_escape_string($crypt_str);
+        $this->crypt_str = $crypt_str;
         $this->visible = $visible;
         $this->data = !empty($data) ? $data : array();
+        if (!isset($this->data["access_key"])) {
+            $this->updateAccessKey();
+        } else {
+            $this->_has_new_access_key = false;
+        }
         $this->db = Database::getConnection();
     }
 
@@ -83,6 +91,12 @@ class User {
         return User::getFromMySQLResult($db->query("SELECT * FROM " . DB_PREFIX . "user WHERE first_name='" . $namearr[0] . "' AND last_name='" . $namearr[1] . "'"));
     }
 
+    public static function getByNameLike($name) {
+        global $db;
+        $namearr = User::splitName(cleanInputText($name));
+        return User::getFromMySQLResult($db->query("SELECT * FROM " . DB_PREFIX . "user WHERE first_name LIKE '%" . $namearr[0] . "%' OR last_name LIKE '%" . $namearr[1] . "%'"));
+    }
+
     public static function getByID($id) {
         global $db;
         return User::getFromMySQLResult($db->query("SELECT * FROM " . DB_PREFIX . "user WHERE id=" . intval($id)));
@@ -102,7 +116,7 @@ class User {
         }
         return new UserArray($retarr);
     }
-    
+
     public static function getAll() {
         return new UserArray(mysqliResultToArr($this->db->query("SELECT * FROM " . DB_PREFIX . "user")));
     }
@@ -182,9 +196,10 @@ class User {
     public function getUserComment($id) {
         return $this->db->query("SELECT * FROM " . DB_PREFIX . "user_comments WHERE id=" . inval($id));
     }
-    
+
     public static function getUserCommentStatic($id) {
-        return $this->db->query("SELECT * FROM " . DB_PREFIX . "user_comments WHERE id=" . inval($id));
+        global $db;
+        return $db->query("SELECT * FROM " . DB_PREFIX . "user_comments WHERE id=" . inval($id));
     }
 
     public function notifyUserComment($id) {
@@ -218,7 +233,7 @@ class User {
         } else {
             $env->sendModeratorMail("Kommentar von " . self::getStringRep($senduserid) . ($anonymous ? " [Anonym] " : "") . " bei " . $this->getName() . " wartet auf Freischaltung", "Kommentar:\n" . $text);
         }
-        $env->addAction($this->db->insert_id, $this->name, "add_user_comment");
+        Actions::addAction($this->db->insert_id, $this->name, "add_user_comment");
         return array("id" => $db->insert_id, "commented_userid" => $this->id, "commenting_userid" => intval($senduserid), "text" => $ctext, "time" => intval($time), "notified_as_bad" => 0, "reviewed" => ($reviewed ? 1 : 0), "anonymous" => intval($anonymous));
     }
 
@@ -237,13 +252,32 @@ class User {
     }
 
     public static function getStringRep($user) {
-        $user = $user != null ? (is_numeric($commenting_user) ? User::getByID($commenting_user) : $commenting_user) : null;
+        if ($user == $this->id || $user->getID() == $this->id) {
+            return "Me";
+        }
+        $user = $user != null ? (is_numeric($user) ? User::getByID($user) : $user) : null;
         return $user != null ? $user->getName() : "Anonym";
     }
 
     public static function deleteUserComment($id) {
         $db = Database::getConnection();
         $db->query("DELETE FROM " . DB_PREFIX . "user_comments WHERE id=" . intval($id) . " AND commenting_userid!=" . Auth::getUserID()) or die($db->error);
+        Actions::addAction($db->insert_id, $this->name, "delete_user_comment");
+    }
+
+    public static function getNameList() {
+        if (empty(self::$name_list)) {
+            global $db;
+            $res = $db->query("SELECT CONCAT(first_name, ' ', last_name) as namestr FROM " . $this->table . " ORDER BY last_name ASC");
+            $arr = array();
+            if ($res != null) {
+                while ($tarr = $res->fetch_array()) {
+                    $arr[] = $tarr["namestr"];
+                }
+            }
+            self::$name_list = $arr;
+        }
+        return self::$name_list;
     }
 
     public function getID() {
@@ -255,11 +289,11 @@ class User {
     }
 
     public function getFirstName() {
-        return $this->last_name;
+        return $this->first_name;
     }
 
     public function getLastName() {
-        return $this->first_name;
+        return $this->last_name;
     }
 
     public static function splitName($name) {
@@ -392,11 +426,12 @@ class User {
         return isset($this->data["last_visit_time"]) ? $this->data["last_visit_time"] : -1;
     }
 
-    public function sendEmailWhenBeingCommented($send = -1) {
-        if ($send != -1) {
-            $this->data["send_email_when_being_commented"] = cleanValue($send);
-        }
-        return isset($this->data["send_email_when_being_commented"]) ? $this->data["send_email_when_beingCommented"] : false;
+    public function sendEmailWhenBeingCommented() {
+        return isset($this->data["send_email_when_being_commented"]) ? $this->data["send_email_when_being_commented"] : false;
+    }
+
+    public function setSendEmailWhenBeingCommented($send) {
+        $this->data["send_email_when_being_commented"] = $send == true;
     }
 
     public function delete($also_delete_ruc_items = true) {
@@ -424,6 +459,21 @@ class User {
         foreach ($arr as $table => $field)
             $this->db->query("DELETE FROM " . DB_PREFIX . $table . " WHERE $field=$this->id");
         $this->mode = User::NO_MODE;
+        if ($this->mode > User::NO_MODE)
+            $this->sendMail("Account wurde gelöscht", "Ihr Benutzeraccount wurde gelöscht\n\nIhr \"" . $env->title . "\"-Team");
+    }
+
+    public function getAccessKey() {
+        return $this->data["access_key"];
+    }
+
+    public function compareAccessKey($access_key) {
+        return $this->_has_new_access_key || $this->getAccessKey() == $access_key;
+    }
+
+    public function updateAccessKey() {
+        $this->data["access_key"] = Auth::random_string(self::ACCESS_KEY_LENGTH);
+        $this->_has_new_access_key = true;
     }
 
 }

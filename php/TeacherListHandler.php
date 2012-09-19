@@ -20,7 +20,7 @@
 class TeacherListHandler extends ToroHandler {
 
     public function get() {
-        tpl_teacherlist(TeacherList::getTeacher());
+        tpl_teacherlist(Teacher::getAllTeachers());
     }
 
     public function post() {          
@@ -29,16 +29,16 @@ class TeacherListHandler extends ToroHandler {
                 if (preg_match("/^[0-9]+$/", $key)) {
                     if (isset($_POST["edit"]) && isset($_POST[$key . "last_name"]) &&
                             isset($_POST[$key . "first_name"]) && isset($_POST[$key . "sex"])) {
-                        TeacherList::edit($_POST[$key], $_POST[$key . "last_name"], $_POST[$key . "sex"], $_POST[$key . "first_name"]);
+                        Teacher::edit($_POST[$key], $_POST[$key . "last_name"], $_POST[$key . "sex"], $_POST[$key . "first_name"]);
                     } else if (isset($_POST["delete"]) && Auth::canDeleteTeacher()) {
-                        TeacherList::delete($key);
+                        Teacher::delete($key);
                     }
                 }
             }
-            TeacherList::updateQuotes();
+            Teacher::updateQuotes();
         }
         if (isset($_POST["add"]) && isset($_POST["input"]) && Auth::canAddTeacher()) {
-            TeacherList::readTeacherListInput(cleanInputText($_POST["input"]));
+            Teacher::readTeacherListInput(cleanInputText($_POST["input"]));
         }
         return $this->get();
     }

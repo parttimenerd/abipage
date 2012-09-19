@@ -19,9 +19,9 @@
 
 class DebugDBWrapper {
     private $db;
-    private $buffer = "";
     private $count = 0;
     private $time = 0;
+    private $queries = array();
     
     public function __construct($db){
         $this->db = $db;
@@ -38,23 +38,23 @@ class DebugDBWrapper {
     public function query($query){
         $this->count++;
         $time = microtime(true);
-        $res = $this->db->query($query) or die($this->db->error . "<br/>\n " . debug_print_backtrace());
-        $this->addMsg($this->count . ". query ", $query, microtime(true) - $time); 
+        $res = $this->db->query($query) or Logger::log($this->db->error, E_USER_ERROR);
+        $time = round(microtime(true) - $time, 6);
+        $this->queries[] = array("num" => count($this->queries), "query" => $query, "time" => $time, "backtrace" => Logger::debug_backtrace(1));
+        $this->time += $time;
         return $res;
     }
     
-    private function addMsg($title, $msg, $time){
-        $this->time += $time;
-        $this->buffer .= ($this->buffer != "" ? "\n" : "") . '<tr><td>' . $title .  "</td><td>" . (round($time * 10000) / 10) . "ms</td><td>" . $msg . "</td></tr>";
+    public function getQueries(){
+        $queries = array();
+        foreach ($this->queries as $key => $value) {
+            $queries[] = array_merge($value, array("perc" => round($value["time"] / $this->time * 100, 3)));
+        }
+        return array("time" => $this->time, "queries" => $queries);
     }
     
-    public function printBuffer(){
-        $this->buffer .= ($this->buffer != "" ? "\n" : "") . "<td>Summe der Queries</td><td>" . (round($this->time * 10000) / 10) . "ms</td><td></td>";
-        ?>
-        <table>
-            <?= $this->buffer ?>
-        </table>
-        <?
+    public function getTime(){
+        return $this->time;
     }
 }
 ?>

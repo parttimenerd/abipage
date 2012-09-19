@@ -34,7 +34,13 @@ class RumorList extends RatableUserContentList {
         $text = cleanInputText($text, $this->db);
         PiwikHelper::addTrackGoalJS("Rumor written");
         $this->db->query("INSERT INTO " . $this->table . "(id, text, userid, isanonymous, time, rating, response_to, data) VALUES(NULL, '" . $text . "', " . $senduser->getID() . ", " . ($anonymous ? 1 : 0) . ", " . intval($time) . ", 0, " . intval($response_to) . ", '')") or die($this->db->error);
-        $env->addAction($this->db->insert_id, $senduser->getName(), "add_rumor");
+        $id = $this->db->insert_id;
+        Actions::addAction($id, $senduser->getName(), "add_rumor");
+        return $id;
+    }
+
+    protected function appendSearchAfterPhraseImpl($cphrase) {
+        $this->appendToWhereApp(" AND (MATCH(text) AGAINST('" . $cphrase . "') OR text LIKE '%" . $cphrase . "%')");
     }
 
 }

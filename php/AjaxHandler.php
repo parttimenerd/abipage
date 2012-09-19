@@ -24,13 +24,17 @@ class AjaxHandler extends ToroHandler {
         $slug = $slug != "" ? substr($slug, 1) : "";
         switch ($slug) {
             case "last_actions":
-                if (isset($_GET["last_id"]) && $store->last_action_id > intval($_GET["last_id"])) {
-                    tpl_actions($env->getLastActions($_GET["last_id"]));
+                if (isset($_GET["id"])) {
+                    jsonAjaxResponse(function() {
+                                $actions_arr = Actions::getLastActions($_GET["id"]);
+                                tpl_actions($actions_arr);
+                                return array("last_action_id" => $actions_arr->getLastActionID());
+                            });
                 }
                 break;
         }
     }
-    
+
     public function post($slug = "") {
         global $env, $store;
         $slug = $slug != "" ? substr($slug, 1) : "";

@@ -421,7 +421,7 @@ Options -MultiViews
 # ----------------------------------------------------------------------
 
 # You can add custom pages to handle 500 or 403 pretty easily, if you like.
-ErrorDocument 404 /abipage/404.php
+ErrorDocument 404 /abipage2/setupsetupsetupsetupsetupsetup404.php
 
 
 
@@ -546,5 +546,6 @@ RewriteCond %{REQUEST_URI} !^(index\.php)
 RewriteCond %{REQUEST_URI} !^(.*smf.*)
 RewriteCond %{REQUEST_URI} !^(.*forum.*)
 RewriteCond %{REQUEST_URI} !^(.*piwik.*)
-RewriteCond %{REQUEST_URI} !^(.*mediawiki.*)
+RewriteCond %{REQUEST_URI} !^(.*wiki.*)
+RewriteCond %{REQUEST_URI} !^(.*beta.*)
 RewriteRule ^(.*)$ index.php/$1 [L]

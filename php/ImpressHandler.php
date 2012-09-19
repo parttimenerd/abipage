@@ -24,3 +24,11 @@ class ImpressHandler extends ToroHandler {
     }
 
 }
+
+class PrivacyPolicyHandler extends ToroHandler {
+
+    public function get() {
+        tpl_privacy_policy();
+    }
+
+}

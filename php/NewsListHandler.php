@@ -20,17 +20,31 @@
 class NewsListHandler extends ToroHandler {
 
     public function get($slug = "") {
-        if ($slug == "/write")
+        if (strlen($slug) <= 1)
             tpl_news_list(NewsList::getNews());
-        elseif (strlen($slug) <= 1)
-            tpl_write_news();
+        elseif ($slug == "/write") {
+            if (!Auth::canWriteNews()) {
+                tpl_403();
+            } else {
+                tpl_write_news();
+            }
+        }
         else
-           tpl_news_list(NewsList::getNewsByPhrase(substr($slug, 1))); 
+            tpl_news_list(NewsList::getNewsByPhrase(substr($slug, 1)));
     }
 
     public function post($slug = "") {
-        if ($slug == "/write" && Auth::canWriteNews() && isset($_POST["title"]) && isset($_POST["text"]) && strlen($_POST["text"]) > 5 && strlen($_POST["title"]) > 3) {
-            NewsList::writeNews($_POST["title"], $_POST["text"], isset($_POST["write-email"]));
+        if (!Auth::canWriteNews()) {
+            tpl_403();
+            return;
+        }
+        if ($slug == "/write") {
+            if (isset($_POST["title"]) && isset($_POST["text"]) && strlen($_POST["text"]) > 5 && strlen($_POST["title"]) > 3) {
+                NewsList::writeNews($_POST["title"], $_POST["text"], isset($_POST["write-email"]));
+            } else {
+                $this->get($slug);
+                return;
+            }
         }
         return $this->get();
     }
