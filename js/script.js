@@ -19,10 +19,10 @@
 function rating(id, rating){
     fillStars(id, rating);
     ajax({
-        data: $.param({
+        data: {
             rating: rating, 
             id: id
-        }),
+        },
         func: function(data){
             $("#" + id + "rating .average").replaceWith(data["html"]);
             rated_items.push(id);
@@ -82,7 +82,6 @@ function loadItems(){
             url: rating_url2,
             data: $.param({
                 'page': page, 
-                'sort': sort_str, 
                 'phrase': phrase
             }),
             success: function(html){
@@ -279,33 +278,44 @@ if ($("#drop_area").length != 0){
             xhr.upload.onprogress = function(e) {
                 if (e.lengthComputable) {
                     percent = Math.round((e.loaded * 100) / e.total); 
-                    progressbar.attr("style", "width: " + percent + "%; visibility: visible");
                     if (percent < 90){
                         progressbar.html(byteToMiB(e.loaded, 2) + "MiB von " + byteToMiB(e.total, 2) + "MiB hochgeladen");
+                        progressbar.attr("style", "width: " + percent + "%; visibility: visible");
                     } else {
                         progressbar.html("Erzeugung von Vorschaubildern...");
+                        progressbar.attr("style", "width: 100%; visibility: visible");
                     }
                 }
             };
 			
             xhr.open("post", rating_url2, true);
             xhr.overrideMimeType('text/plain; charset=x-user-defined-binary');
+            // Set appropriate headers
+            //xhr.setRequestHeader("Content-Type", "multipart/form-data");
+            //xhr.setRequestHeader("description", $(".descr").val() == "" ? "" : $(".descr").serialize().split("=", 2)[1]);
+            //xhr.setRequestHeader("send", "");
+            //xhr.setRequestHeader("X-File-Name", "uploaded_file");
+            //xhr.setRequestHeader("X-File-Size", file.size);
+            //xhr.setRequestHeader("X-File-Type", file.type);
             var fd = new FormData;
             fd.append("uploaded_file", file);
             fd.append("description", $(".descr").val());
             fd.append("category", $("input.img_category").val());
             fd.append("access_key", access_key);
+            // Send the file (doh)
             progress.attr("style", "display: visible");
             xhr.send(fd);
 
             xhr.onreadystatechange = function(){
-                if (xhr.status == 200){
+                if (xhr.status == 200 && xhr.readyState == 4){
+                    var json;
                     try {
-                        var json = JSON.parse(xhr.response);
+                        json = JSON.parse(xhr.responseText);
                     } catch (err){
+                        console.log(xhr.responseText);
                         console.log(err);
                     }
-                    if (json != null)
+                    if (json == null)
                         return;
                     if (json["logs"] !== undefined)
                         add_log_object(json["logs"]);
@@ -561,7 +571,7 @@ function ajax(args){
         access_key: access_key,
         ajax: true
     }, args["data"]);
-    if (args["data"] !== undefined && args["data"] === Object(args["data"]))
+    if (args["data"] !== undefined && typeof(args["data"]) != "string")
         args["data"] = $.param(args["data"]);
     $.ajax(args);
 }

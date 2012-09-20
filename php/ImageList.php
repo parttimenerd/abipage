@@ -36,8 +36,8 @@ class ImageList extends RatableUserContentList {
         if ($res != null) {
             $arr = $res->fetch_array();
             $filename = $arr["id"] . '.' . $arr["format"];
-            $file = $env->main_dir . '/' . $env->upload_path . '/' . $filename;
-            $thumbfile = $env->main_dir . '/' . $env->upload_path . '/thumbs/' . $filename;
+            $file = BASE_DIR . $env->main_dir . '/' . $env->upload_path . '/' . $filename;
+            $thumbfile = BASE_DIR . $env->main_dir . '/' . $env->upload_path . '/thumbs/' . $filename;
             parent::deleteItem($cid, $trigger_action);
             if (file_exists($file)) {
                 unlink($file);

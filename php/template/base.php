@@ -120,7 +120,6 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
         if ($subtitle == "") {
             $subtitle = $arr[1];
         }
-        PiwikHelper::addCustomVariableJS(3, "Page name", $class, true);
     }
     ?>
     <!doctype html>
@@ -261,13 +260,13 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
         var has_sidebar = <?= $has_sidebar ? "true" : "false" ?>;
     </script>
     <?= str_replace("&apos;", "'", str_replace("&quot;", '"', $env->footer_appendix)); ?>
-    <? if (defined("UNMINIFIED_SOURCE") && UNMINIFIED_SOURCE != false): ?>
+    <? if (defined("UNMINIFIED_SOURCE") && UNMINIFIED_SOURCE !== false): ?>
         <script src="<?php echo tpl_url("js/libs/handlebars-1.0.0.beta.6.js") ?>"></script>
         <script src="<?php echo tpl_url("js/libs/bootstrap.js") ?>"></script>
         <script src="<?php echo tpl_url("js/plugins.js") ?>"></script>
-        <script src="<?php echo tpl_url("js/script.js") ?>"></script>
         <script src="<?php echo tpl_url("js/application.js") ?>"></script>
-        <script src="<?php echo tpl_url("js/libs/modernizr-2.5.3.js") ?>"></script>
+        <!--<script src="<?php echo tpl_url("js/libs/modernizr-2.5.3.js") ?>"></script>-->
+        <script src="<?php echo tpl_url("js/script.js") ?>"></script>
     <? else: ?>
         <script src="<?php echo tpl_url("js/min/scripts.min.js") ?>"></script>
     <? endif ?>
@@ -278,11 +277,11 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
     <?php if ($env->has_piwik) PiwikHelper::echoJSTrackerCode(true, $document_title) ?>
         <script>
     <?php echo $js ?>
-    $(".tablesorter").ready(function(){
-        $(".tablesorter").tablesorter();
-    });
+        $(".tablesorter").ready(function(){
+            $(".tablesorter").tablesorter();
+        });
     <? if (Auth::canViewLogs()): ?>
-        add_log_object(<?= json_encode(logArray()) ?>);
+            add_log_object(<?= json_encode(logArray()) ?>);
     <? endif ?>
     </script>
     </body>

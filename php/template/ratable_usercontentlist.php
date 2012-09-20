@@ -48,7 +48,7 @@ function tpl_image_list($rucis, $page, $pages, $phrase = "", $as_page = true) {
 
 function tpl_image_upload_item($with_descr = true) {//"enctype" => "multipart/form-data"
     //tpl_item_before_form(array("id" => "file_upload", "enctype" => "multipart/form-data"), "Bild hochladen", "camera", "item-send");
-    tpl_item_before("Bild hochladen", "camera", "item-send");
+    tpl_item_before("Bild hochladen", "camera", "item-send", "drop-image-area");
     ?>     
     <div id="drop_area">
         <p><span>Bild hier ablegen.</span><br/>
@@ -127,8 +127,8 @@ function tpl_quote_list($rucis, $page, $pages, $phrase, $as_page = true) {
 function tpl_write_quote_item() {
     tpl_item_before("Zitat hinzufügen", "pencil", "item-send item-quote-send");
     ?>
-    <input type="text" placeholder="Zitierter Lehrer" name="person" class="teacher_typeahead" list="teacher_datalist" required="on" pattern="([A-ZÄÖÜ.]([a-zßäöü.](-[a-zßäöüA-ZÄÖÜ.])?)+ ?){1,3}"/>
-    <? tpl_datalist("teacher_datalist", Teacher::getNameList()) ?>
+    <input type="text" placeholder="Zitierter Lehrer oder Schüler" name="person" class="teacher_typeahead" list="teacher_datalist" required="on" pattern="([A-ZÄÖÜ.]([a-zßäöü.](-[a-zßäöüA-ZÄÖÜ.])?)+ ?){1,3}"/>
+    <? tpl_datalist("teacher_datalist", array_merge(Teacher::getNameList(), User::getNameList())) ?>
     <textarea name="text" placeholder="Zitat" require="on"></textarea>
     <input type="hidden" name="response_to" value="-1"/>
     <?php
@@ -281,7 +281,7 @@ function tpl_rating(RatableUserContentItem $ruci) {
             </span>
             <?php
         }
-        $show_av = !$can_rate || is_numeric($this->own_rating);
+        $show_av = !$can_rate || is_numeric($ruci->own_rating);
         tpl_average($show_av ? $ruci->rating : -1, $show_av ? $ruci->rating_count : -1, $ruci->data);
         ?>
     </span>

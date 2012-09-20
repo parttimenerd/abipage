@@ -1,2 +1,2 @@
-npm install -g less jshint recess uglify-js cssmin
-gem install watchr
+npm install -g less coffee-script uglify-js cssmin
+gem install watchr colored win32console

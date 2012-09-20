@@ -37,7 +37,7 @@ class PreferencesHandler extends ToroHandler {
                     "fourofour_subtitle" => array("default" => '"Alles auf Erden lässt sich finden, wenn man nur zu suchen sich nicht verdrießen lässt." - Philemon, Fragmente', "label" => "404-Seite"),
                     "fiveoo_subtitle" => array("default" => '', "label" => "500-Seite"),
                     "images_subtitle" => array("default" => "Schöne, witzige oder sonst wie interessante Bilder", "label" => "Bilderseite"),
-                    "quotes_subtitle" => array("default" => "Schöne, komische oder sonstwie erwähnenswerte Zitate von Lehrern", "label" => "Zitateseite"),
+                    "quotes_subtitle" => array("default" => "Schöne, komische oder sonstwie erwähnenswerte Zitate von Lehrern und Schülern", "label" => "Zitateseite"),
                     "rumors_subtitle" => array("default" => "Gerüchte, Halbwahrheiten und pointierte Fakten", "label" => "Stimmt es...-Seite"),
                     "userall_subtitle" => array("default" => '"We must not contradict, but instruct him that contradicts us; for a madman is not cured by another running mad also." - Antisthenes', "label" => "Schülerlistemseite"),
                     "polls_subtitle" => array("default" => 'Umfragen zu den wirklich wichtigen Themen des Schulalltags', "label" => "Umfragenseite"),

@@ -1,5 +1,7 @@
 require 'watchr'
-require 'zlib';
+require 'colored'
+require 'win32console'
+require 'open3'
 script = Watchr::Script.new
 
 script.watch('less/.*\.less$') do |f| 
@@ -9,27 +11,57 @@ script.watch('less/.*\.less$') do |f|
   print " done in #{((Time.now - time) * 1000).round}ms...";
   time = Time.now
   print " and compress them..."
-  system("cssmin css/project.css --compress > css/project.min.css");
+  runCommand("cssmin css/project.css --compress > css/project.min.css");
   puts " done in #{((Time.now - time) * 1000).round}ms...";
 end
 script.watch('js/(lib/)?[a-z]+\.js') do |f|
-  minimizeJSFile f[0]
-  print " concenate... "
-  concentateJSFiles()
-  puts ' done...'
+  begin
+    minimizeJSFile f[0]
+    print " concenate... "
+    concentateJSFiles()
+    puts ' done...'
+  rescue Exception => ex
+      puts ex.to_s.red
+  end
 end
-
+script.watch('coffee/(lib/)?[a-z]+\.coffee') do |f|
+    if (compileCoffeeScriptFile f[0])
+	    puts
+	    minimizeJSFile f[0].gsub("coffee", "js")
+	    print " concenate... "
+	    concentateJSFiles()
+	    puts ' done...'
+    end
+end
 def minimizeJSFile(filename)
   print 'Minimize ' + filename + '...';
   time = Time.now
-  system('uglifyjs -o js/min/' + File.basename(filename).gsub(".js", ".min.js") + ' ' +  filename );
+  name_app = filename =~ /(lib\/)/ ? "lib/" : ""
+  system('uglifyjs -o js/min/' + name_app + File.basename(filename).gsub(".js", ".min.js") + ' ' +  filename );
   print " done in #{((Time.now - time) * 1000).round}ms...";
 end
-
+def compileCoffeeScriptFile(filename)
+  print 'Compile ' + filename + '...';
+  time = Time.now
+  if runCommand('coffee --compile --output js/ coffee/') # + filename + ' -o ' + filename.gsub("coffee", "js")
+    print " done in #{((Time.now - time) * 1000).round}ms...".green
+    return true
+  end
+  return false
+end
+def runCommand(cmd)
+  res = %x[#{cmd} 2>&1].inspect
+  if (res.length > 10 && res !~ /(path.exists is now called)/)
+    puts 
+    puts res.split('\n')[0][1..-1].red
+    return false
+  end
+  return true
+end
 def concentateJSFiles
     not_concenate = ["js/libs/jquery-1.7.2.js", "js/libs/modernizr-2.5.3.min.js", "js/libs/jquery.wysiwyg.js"]
     not_concenate_min = not_concenate.map {|x| "js/min/" + File.basename(x).gsub(".js", ".min.js")}
-    files = Dir.glob("js/min/*.js") - ["js/min/scripts.min.js"] - not_concenate_min
+    files = Dir.glob("js/min/*.js") + Dir.glob("js/min/lib/*.js") - ["js/min/scripts.min.js"] - not_concenate_min
     File.open( "js/min/scripts.min.js", "w" ) do |f_out|
         files.each do |f_name|
             f_out.puts("\n//@ sourceMappingURL=#{f_name}.map")
@@ -41,7 +73,8 @@ def concentateJSFiles
     bool = false
     (Dir.glob("js/libs/*.js") + Dir.glob("js/*.js") - not_concenate).each do |f|
         basename = File.basename(f)
-	if !files.include? 'js/min/' + File.basename(f).gsub(".js", ".min.js")
+	name_app = f =~ /(lib\/)/ ? "lib/" : ""
+	if !files.include? 'js/min/' + name_app + File.basename(f).gsub(".js", ".min.js")
              minimizeJSFile f
 	     puts
 	     bool = true

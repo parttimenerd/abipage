@@ -91,7 +91,8 @@ abstract class RatableUserContentList {
             $res = $this->db->query("SELECT " . $this->table . ".rating AS rating, " . $this->table . ".*" . $ano_app . ", (SELECT " . $this->table . "_ratings.rating FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id AND userid=" . $user->getID() . ") AS own_rating, (SELECT COUNT(*) FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id) AS rating_count FROM " . $this->table . ", " . DB_PREFIX . "user u " . $this->from_app . " WHERE u.id = userid AND u.activated = 1 " . ($this->response_allowed ? ("AND " . $this->table . ".response_to = -1") : "") . $this->where_app . " ORDER BY " . $this->order_by . " " . $this->order_direction . " LIMIT " . $start . ", " . $this->items_per_page) or die($this->db->error);
             if ($res != null) {
                 while ($result = $res->fetch_array()) {
-                    $result["response_to"] = -1;
+                    if (isset($result["response_to"]))
+                        $result["response_to"] = -1;
                     $result["type"] = $this->type;
                     $arr[$result["id"]] = new RatableUserContentItem($result);
                 }
@@ -140,19 +141,21 @@ abstract class RatableUserContentList {
     public function updateRating($id) {
         $cid = intval($id);
         $res = $this->db->query("SELECT COUNT(*) as count, rating FROM " . $this->table . "_ratings WHERE itemid=" . $cid . " GROUP BY rating");
-        $data = array("rating");
+        $rating_data = array();
         $avg = 0;
         $count = 0;
         if ($res) {
             while ($arr = $res->fetch_array()) {
-                $data["rating"][intval($arr["rating"])] = array("count" => $arr["count"]);
+                $rating_data[intval($arr["rating"])] = array("count" => $arr["count"]);
                 $count += $arr["count"];
                 $avg += $arr["rating"] * $arr["count"];
             }
             $avg /= $count;
             for ($i = 1; $i <= 5; $i++)
-                $data["rating"][$i]["ratio"] = $data["rating"][$i]["count"] / $count;
+                if (isset($rating_data[$i]))
+                    $rating_data[$i]["ratio"] = $rating_data[$i]["count"] / $count;
         }
+        $data = array("rating" => $rating_data);
         $this->db->query("UPDATE " . $this->table . " SET rating=" . $avg . ", data='" . json_encode($data) . "' WHERE id=" . $cid) or die($this->db->error);
         return array($avg, $count, $data);
     }
@@ -168,7 +171,7 @@ abstract class RatableUserContentList {
             $edit = false;
             $this->db->query("INSERT INTO " . $this->table . "_ratings(userid, itemid, rating) VALUES(" . $user->getID() . ", " . $cid . ", " . intval($rating) . ")") or die($this->db->error);
         }
-        return array("rating" => $this->updateRating($id), "edit" => $edit);
+        return array("rating" => $this->updateRating($id), "edited" => $edit);
     }
 
     public function deleteItem($id, $trigger_action = true) {

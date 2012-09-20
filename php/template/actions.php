@@ -93,15 +93,15 @@ function tpl_action($action, $with_time = true, $before_html = '', $after_html =
             $url = tpl_userlink(intval($action["person"]));
             echo " registriert";
             break;
-        case "delete_images":
+        case "delete_image":
             $url = tpl_url('images');
             echo '<a href="' . $url . '">Bild</a> gelöscht';
             break;
-        case "delete_quotes":
+        case "delete_quote":
             $url = tpl_url('quotes');
             echo '<a href="' . $url . '">Zitat</a> gelöscht';
             break;
-        case "delete_rumors":
+        case "delete_rumor":
             $url = tpl_url('rumors');
             echo '<a href="' . $url . '">Stimmt es...</a> Beitrag gelöscht';
             break;
