@@ -58,7 +58,7 @@ function tpl_write_news($as_page = true) {
     tpl_item_before_form(array("method" => "POST", "action" => tpl_url("news/write")), "Nachricht schreiben", "pencil", "write-news");
     ?>
     <? tpl_input(array("name" => "title", "placeholder" => "Nachrichtentitel", "required" => "on")) ?>
-    <? tpl_input(array("name" => "text", "value" => "...", "type" => "textarea")) ?>
+    <? tpl_input(array("name" => "text", "value" => "", "type" => "textarea")) ?>
     <?php
     tpl_item_after_form(array("write" => array("text" => "Schreiben"), "write-email" => array("text" => "Schreiben und als Newsletter versenden", "icon" => "email")));
     if ($as_page) {

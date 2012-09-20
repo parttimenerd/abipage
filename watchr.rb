@@ -59,7 +59,7 @@ def runCommand(cmd)
   return true
 end
 def concentateJSFiles
-    not_concenate = ["js/libs/jquery-1.7.2.js", "js/libs/modernizr-2.5.3.min.js", "js/libs/jquery.wysiwyg.js"]
+    not_concenate = ["js/libs/jquery-1.7.2.js", "js/libs/modernizr-2.5.3.min.js"]
     not_concenate_min = not_concenate.map {|x| "js/min/" + File.basename(x).gsub(".js", ".min.js")}
     files = Dir.glob("js/min/*.js") + Dir.glob("js/min/lib/*.js") - ["js/min/scripts.min.js"] - not_concenate_min
     File.open( "js/min/scripts.min.js", "w" ) do |f_out|

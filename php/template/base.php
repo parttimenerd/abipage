@@ -134,7 +134,7 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
             <link href="<?php echo tpl_url("css/project.min.css") ?>" rel="stylesheet"/>   
             <link href="<?php echo tpl_url("css/style.css") ?>" rel="stylesheet"/>
             <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
-            <script>window.jQuery || document.write('<script src="<?php echo tpl_url("js/jquery-1.7.2.js") ?>"><\/script>')</script>
+            <script>window.jQuery || document.write('<script src="<?php echo tpl_url("js/lib/jquery-1.7.2.js") ?>"><\/script>')</script>
             <link rel = "shortcut icon" href = "<?php echo tpl_url($env->favicon) ?>"/>
             <!--Le HTML5 shim, for IE6-8 support of HTML5 elements-->
             <!--[if lt IE 9]>
@@ -270,16 +270,12 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
     <? else: ?>
         <script src="<?php echo tpl_url("js/min/scripts.min.js") ?>"></script>
     <? endif ?>
-    <? if ($editor_needed): ?>
-        <script src="<?php echo tpl_url("js/libs/jquery.wysiwyg.js") ?>"></script>
-        <link href="<?php echo tpl_url("css/jquery.wysiwyg.css") ?>" rel="stylesheet"/>
-    <? endif ?>
     <?php if ($env->has_piwik) PiwikHelper::echoJSTrackerCode(true, $document_title) ?>
         <script>
     <?php echo $js ?>
-        $(".tablesorter").ready(function(){
-            $(".tablesorter").tablesorter();
-        });
+    $(".tablesorter").ready(function(){
+    $(".tablesorter").tablesorter();
+    });
     <? if (Auth::canViewLogs()): ?>
             add_log_object(<?= json_encode(logArray()) ?>);
     <? endif ?>

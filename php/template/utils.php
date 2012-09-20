@@ -280,6 +280,7 @@ function tpl_input($args = array("name" => "default", "value" => "", "placeholde
         $str .= ' required="' . $args["required"] . '" ';
     switch ($type) {
         case "textarea":
+            /*
             ?>
             <div class="textarea_container" id="<?= $id ?>">
                 <ul class="nav nav-tabs">
@@ -309,6 +310,7 @@ function tpl_input($args = array("name" => "default", "value" => "", "placeholde
 //                echo '<textarea ' . $str . ' class="textarea">' . $value . '</textarea>';
             $editor_needed = true;
             break;
+             */
         case "codearea":
             echo '<textarea ' . $str . ' class="codearea">' . $value . '</textarea>';
             break;
