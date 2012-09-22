@@ -113,7 +113,7 @@ function tpl_user_comment($user, $comment) {
                 ?>
             </li>
             <li class="delete_span_li"> 
-                <? if (Auth::canDeleteUserComment() && !Auth::isSameUser($user) && !Auth::isSameUser(!$comment["anonymous"] ? $comment["commenting_userid"] : -1)): ?>
+                <? if (Auth::canDeleteUserComment() && !Auth::isSameUser($user) && !Auth::isSameUser($comment["commenting_userid"])): ?>
                     <span class="del_item"><?php tpl_icon("delete", "Löschen", "deleteUserComment('" . $comment["id"] . "')") ?></span>
                 <? endif; ?>
             </li>
