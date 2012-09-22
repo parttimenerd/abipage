@@ -36,6 +36,7 @@ function tpl_usermanagement($userarr, $as_page = true, $urlapp = "") {
                     <th>Mathlehrer</th>
                     <th>Modus</th>
                     <th>Aktiviert</th>
+                    <th>Sichtbar</th>
                     <th>Link</th>
                     <th>Einstellungen</th>
                 </tr>
@@ -56,6 +57,7 @@ function tpl_usermanagement($userarr, $as_page = true, $urlapp = "") {
                         <td><?php echo $user->getMathTeacher() ?></td>
                         <td><?php echo tpl_usermode_to_text($user->getMode()) ?></td>
                         <td><?php echo $user->isActivated() ? "Ja" : "Nein" ?></td>
+                        <td><?php echo $user->isVisible() ? "Ja" : "Nein" ?></td>
                         <td><a href="<?= tpl_url('user/' . $user->getName()) ?>">Link</a></td>
                         <td><a href="<?= tpl_url('user/' . $user->getName() . '/preferences') ?>">Einstellungen</a></td>
                     </tr>
@@ -72,10 +74,10 @@ function tpl_usermanagement($userarr, $as_page = true, $urlapp = "") {
         <?php endif ?>
         <input type="password" name="password" style="width: 150px" placeholder="Neues Passwort"/>
         <button class="btn" type="submit" name="setpassword">Passwort setzen</button>
-        (mit E-Mail Benachrichtigung der jeweiligen Benutzer)
+        (mit E-Mail Benachrichtigung der jeweiligen Benutzer)<br/>
         <? if (Auth::canSetUserVisibility()): ?>
-        <input type="checkbox" checked="checked" name="visible"/>
-        <button class="btn" name="setvisible">Sichtbar?</button>
+        <input type="checkbox" checked="checked" name="visible" value="true" style="margin-right: 10px"/>Sichtbar?
+        <button class="btn" name="setvisible">Sichtbarkeit setzen</button>
         <? endif ?>
     </form>
     <?

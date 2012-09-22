@@ -19,7 +19,7 @@
 function tpl_admin($userarr, $comments) {
     global $env;
     tpl_before('admin');
-    $uspace = get_dir_size($env->main_dir . '/' . $env->upload_path);
+    $uspace = get_upload_dir_size();
     tpl_item_before("Uploadordner", "");
     ?>
     <table>
@@ -66,21 +66,21 @@ function tpl_admin($userarr, $comments) {
                 <tbody>
                     <?php
                     foreach ($comments as $comment):
-                        $same = Auth::isSameUser($comment["commenting_userid"])
+                        $same = Auth::isSameUser($comment["commenting_userid"]);
                         ?>
                         <tr>
                             <td>
                                 <? if (!$same): ?>
                                     <input type="checkbox" value="true" name="<?php echo $comment["id"] ?>"/>
-            <? endif; ?>
+                                <? endif; ?>
                             </td>
                             <td><?php echo $comment["id"] ?></td>
                             <td><?php echo $comment["text"] ?></td>
-                            <td><?php if (!$same) tpl_userlink($comment["commented_userid"]) ?></td>
+                            <td><?php tpl_userlink($comment["commented_userid"]) ?></td>
                             <td><?php tpl_userlink($comment["commenting_userid"]) ?></td>
                             <td><?php tpl_time_span($comment["time"]) ?></td>
                         </tr>
-        <?php endforeach ?>
+                    <?php endforeach ?>
                 </tbody>
             </table>
             Ausgewählte Kommentare 

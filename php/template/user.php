@@ -93,7 +93,7 @@ function tpl_user_comment($user, $comment) {
     <div class="item-footer">
         <ul>
             <li><? tpl_time_span($comment["time"]) ?></li>
-            <li><? tpl_user_span((Auth::isModerator() && !Auth::isSameUser($user)) || !$comment["isanonymous"] ? $comment["commenting_userid"] : -1) ?></li>
+            <li><? tpl_user_span((Auth::isModerator() && !Auth::isSameUser($user)) || !$comment["anonymous"] ? $comment["commenting_userid"] : -1) ?></li>
             <li><? if (Auth::isSameUser($user)): ?>
                     <span class="notify_as_bad">
                         <?php if ($comment["notified_as_bad"]) { ?>

@@ -262,4 +262,8 @@ class Auth {
     public static function canEditUserPolls(){
         return Auth::isEditor();
     }
+    
+    public static function canViewDashboard(){
+        return Auth::isModerator();
+    }
 }

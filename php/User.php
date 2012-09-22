@@ -87,13 +87,13 @@ class User {
 
     public static function getByName($name) {
         global $db;
-        $namearr = User::splitName(cleanInputText($name));
+        $namearr = User::splitName(sanitizeInputText($name));
         return User::getFromMySQLResult($db->query("SELECT * FROM " . DB_PREFIX . "user WHERE first_name='" . $namearr[0] . "' AND last_name='" . $namearr[1] . "'"));
     }
 
     public static function getByNameLike($name) {
         global $db;
-        $namearr = User::splitName(cleanInputText($name));
+        $namearr = User::splitName(sanitizeInputText($name));
         return User::getFromMySQLResult($db->query("SELECT * FROM " . DB_PREFIX . "user WHERE first_name LIKE '%" . $namearr[0] . "%' OR last_name LIKE '%" . $namearr[1] . "%'"));
     }
 
@@ -104,7 +104,7 @@ class User {
 
     public static function getByEMailAdress($mail_adress) {
         global $db;
-        return User::getFromMySQLResult($db->query("SELECT * FROM " . DB_PREFIX . "user WHERE mail_adress=" . cleanInputText($mail_adress)));
+        return User::getFromMySQLResult($db->query("SELECT * FROM " . DB_PREFIX . "user WHERE mail_adress=" . sanitizeInputText($mail_adress)));
     }
 
     public static function getByMode($mode) {
@@ -158,7 +158,7 @@ class User {
         $query .= ", mode=" . intval($this->getMode());
         $query .= ", activated=" . ($this->isActivated() ? 1 : 0);
         $query .= ", visible=" . ($this->isVisible() ? 1 : 0);
-        $query .= ", data='" . cleanValue(json_encode($this->data)) . "'";
+        $query .= ", data='" . sanitizeValue(json_encode($this->data)) . "'";
         $query .= " WHERE id=" . intval($this->id);
         $this->db->query($query) or die($this->db->error);
         /*   $query = "UPDATE " . DB_PREFIX . "user SET";
@@ -194,12 +194,12 @@ class User {
     }
 
     public function getUserComment($id) {
-        return $this->db->query("SELECT * FROM " . DB_PREFIX . "user_comments WHERE id=" . inval($id));
+        return mysqliResultToArr($this->db->query("SELECT * FROM " . DB_PREFIX . "user_comments WHERE id=" . intval($id)), true);
     }
 
     public static function getUserCommentStatic($id) {
         global $db;
-        return $db->query("SELECT * FROM " . DB_PREFIX . "user_comments WHERE id=" . inval($id));
+        return mysqliResultToArr($db->query("SELECT * FROM " . DB_PREFIX . "user_comments WHERE id=" . intval($id)), true);
     }
 
     public function notifyUserComment($id) {
@@ -220,7 +220,7 @@ class User {
         if ($time == -1) {
             $time = time();
         }
-        $ctext = cleanInputText($text);
+        $ctext = sanitizeInputText($text);
         $db = Database::getConnection();
         $reviewed = $env->review_user_comments_automatically && ReviewText::checkText($text);
 
@@ -233,7 +233,7 @@ class User {
         } else {
             $env->sendModeratorMail("Kommentar von " . self::getStringRep($senduserid) . ($anonymous ? " [Anonym] " : "") . " bei " . $this->getName() . " wartet auf Freischaltung", "Kommentar:\n" . $text);
         }
-        Actions::addAction($this->db->insert_id, $this->name, "add_user_comment");
+        Actions::addAction($this->db->insert_id, $this->getName(), "add_user_comment");
         return array("id" => $db->insert_id, "commented_userid" => $this->id, "commenting_userid" => intval($senduserid), "text" => $ctext, "time" => intval($time), "notified_as_bad" => 0, "reviewed" => ($reviewed ? 1 : 0), "anonymous" => intval($anonymous));
     }
 

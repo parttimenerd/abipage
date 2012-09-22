@@ -30,16 +30,17 @@ class ImagesHandler extends RatableUserContentHandler {
             $exif = $env->uploadImage($id);
             if ($exif) {
                 $this->list->setExif($id, $exif);
-                if (isset($_POST["send_anonymous"]))
-                    PiwikHelper::addTrackGoalJS("Anonymous contribution");
-                PiwikHelper::addTrackGoalJS("Image uploaded", $_POST["description"]);
-                return $id;
             }
+            if (isset($_POST["send_anonymous"]))
+                PiwikHelper::addTrackGoalJS("Anonymous contribution");
+            PiwikHelper::addTrackGoalJS("Image uploaded", $_POST["description"]);
+            return $id;
         }
         return false;
     }
 
     protected function configListFromSlugParamsImpl($params) {
-       }
+        
+    }
 
 }

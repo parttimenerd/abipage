@@ -47,14 +47,15 @@ function tpl_image_list($rucis, $page, $pages, $phrase = "", $as_page = true) {
 }
 
 function tpl_image_upload_item($with_descr = true) {//"enctype" => "multipart/form-data"
+    global $env;
     //tpl_item_before_form(array("id" => "file_upload", "enctype" => "multipart/form-data"), "Bild hochladen", "camera", "item-send");
     tpl_item_before("Bild hochladen", "camera", "item-send", "drop-image-area");
     ?>     
     <div id="drop_area">
         <p><span>Bild hier ablegen.</span><br/>
-            Das Bild darf maximal 3MB groß sein und sollte die Dateiendung .png, .jpg, .jpeg, .bmp oder .gif haben.</p>
+            Das Bild darf maximal <?= $env->max_upload_pic_size ?>MB groß sein und sollte die Dateiendung .png, .jpg, .jpeg, .bmp oder .gif haben.</p>
     </div>	
-    <input type="hidden" name="MAX_FILE_SIZE" value="3000000"/>
+    <input type="hidden" name="MAX_FILE_SIZE" value="<?= $env->max_upload_pic_size * 1048576 ?>"/>
     <!--<input name="uploaded_file" id="file_input" type="file"/>-->
     <?php
     if ($with_descr) {
@@ -87,7 +88,9 @@ function tpl_image_item(RatableUserContentItem $ruci) {
         <div class="descr_text">
             <?= str_replace('&lt;br/>', "", formatText($ruci->description)) ?>
         </div>
-        <div class="descr_ctime"> Aufnahmedatum: <?= date("d.m.y H:i", $ruci->capture_time) ?> </div>
+        <? if ($ruci->capture_time > 10): ?>
+            <div class="descr_ctime"> Aufnahmedatum: <?= date("d.m.y H:i", $ruci->capture_time) ?> </div>
+        <? endif; ?>
         <? if ($ruci->category != ""): ?>
             <div class="descr_category"> Kategorie: <?= $ruci->category ?> </div>
         <? endif; ?>

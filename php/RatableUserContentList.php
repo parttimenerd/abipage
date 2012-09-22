@@ -228,7 +228,7 @@ abstract class RatableUserContentList {
     }
 
     public function appendSearchAfterPhrase($phrase) {
-        $phrase = cleanInputText($phrase);
+        $phrase = sanitizeInputText($phrase);
         if ($phrase != "" && $phrase != null)
             $this->appendSearchAfterPhraseImpl($phrase);
         return $this;
@@ -244,7 +244,7 @@ abstract class RatableUserContentList {
             $id = $user_str == "me" ? Auth::getUserID() : intval($user_str);
             $this->appendToWhereApp(" AND u.id = " . $id);
         } else {
-            $namearr = User::splitName(cleanInputText($user_str));
+            $namearr = User::splitName(sanitizeInputText($user_str));
             $this->appendToWhereApp(" AND (u.first_name LIKE '%" . $namearr[0] . "%' OR u.last_name LIKE '%" . $namearr[1] . "%')" . $ano_app);
         }
         return $this;

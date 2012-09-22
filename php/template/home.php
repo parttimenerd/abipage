@@ -25,7 +25,7 @@ function tpl_home($news = array(), ActionArray $actions = null) {
         "images" => array("lead" => "Bilder"),
         "user/all" => array("lead" => "Schüler")
     );
-        if ($env->user_polls_open)
+    if ($env->user_polls_open)
         $tiles["userpolls"] = array("lead" => "Umfragen");
     if ($env->has_forum)
         $tiles[$env->forum_url] = array("lead" => "Forum");
@@ -38,6 +38,11 @@ function tpl_home($news = array(), ActionArray $actions = null) {
     tpl_item_after();
     if (!empty($news))
         tpl_news_list($news, false);
+    if (Auth::canViewDashboard() && ($env->hasNotActivatedUsers() || $env->hasNotReviewedUserComments())) {
+        tpl_item_before("", "", "alert alert-info");
+        ?><a href="<?= tpl_url("admin") ?>">Es existieren Benutzerkommentare oder Benutzer, deren Freischaltung noch vorgenommen muss.<?
+        tpl_item_after();
+    }
     ?><hr class="hidden-desktop"/><?
     if ($actions != null)
         tpl_actions_page($actions, false, "hidden-desktop");
@@ -59,7 +64,7 @@ function tpl_home_no_user() {
 }
 
 function tpl_tiles($tiles, $width, $class = "") {
-    echo '<div class="row tile_container ' . $class  . '">';
+    echo '<div class="row tile_container ' . $class . '">';
     foreach ($tiles as $href => $arr)
         tpl_tile($href, $arr, $width, $class);
     echo '</div>';

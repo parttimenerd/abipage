@@ -58,14 +58,14 @@ function formatPostArray() {
     return $arr;
 }
 
-function cleanInputText($input, $db = null) {
+function sanitizeInputText($input, $db = null) {
     if ($db == null) {
         global $db;
     }
     return $db->real_escape_string(formatInputText($input));
 }
 
-function cleanValue($var, $type = "") {
+function sanitizeValue($var, $type = "") {
     if ($var == null)
         return null;
     if ($var == "")
@@ -79,7 +79,7 @@ function cleanValue($var, $type = "") {
             return $var == "true";
         if (is_bool($var))
             return $var;
-        return cleanInputText($var);
+        return sanitizeInputText($var);
     } else {
         switch ($type) {
             case "int":
@@ -89,7 +89,7 @@ function cleanValue($var, $type = "") {
             case "":
             case "string":
             default:
-                return cleanInputText($var);
+                return sanitizeInputText($var);
         }
     }
 }
@@ -163,8 +163,8 @@ $upload_dir_size = -1;
 
 function get_upload_dir_size() {
     global $upload_dir_size, $env;
-    if ($upload_dir_size == -1) {
-        $upload_dir_size = get_dir_size($env->main_dir . '/' . $env->upload_path);
+    if ($upload_dir_size == -1 || $upload_dir_size == null) {
+        $upload_dir_size = get_dir_size(BASE_DIR . $env->main_dir . '/' . $env->upload_path);
     }
     return $upload_dir_size;
 }
@@ -206,10 +206,11 @@ function issetAndNotEmptyArr($keyarr, $arr) {
     return true;
 }
 
-function resizeImage($newWidth, $originalFile, $targetFile = "") {
+function resizeImage($newWidth, $originalFile, $targetFile = "", $orginal_file_type = "") {
     global $env;
     $exts = array("jpeg", "bmp", "png", "gif", "jpg");
-    if (empty($newWidth) || empty($originalFile) || !in_array(pathinfo($originalFile, PATHINFO_EXTENSION), $exts)) {
+    $ext = $orginal_file_type == "" ? pathinfo($originalFile, PATHINFO_EXTENSION) : $orginal_file_type;
+    if (empty($newWidth) || empty($originalFile) || !in_array($ext, $exts)) {
         return false;
     }
     if ($targetFile == "") {
@@ -217,7 +218,6 @@ function resizeImage($newWidth, $originalFile, $targetFile = "") {
     } else if (!in_array(pathinfo($targetFile, PATHINFO_EXTENSION), $exts)) {
         return false;
     }
-    $ext = pathinfo($originalFile, PATHINFO_EXTENSION);
     $func = "imagecreatefrom";
     switch ($ext) {
         case "jpg":
@@ -250,9 +250,12 @@ function resizeImage($newWidth, $originalFile, $targetFile = "") {
     return true;
 }
 
-function mysqliResultToArr($result) {
+function mysqliResultToArr($result, $single = false) {
     $ret_arr = array();
     if ($result != null) {
+        if ($single){
+            return $result->fetch_array();
+        }
         while ($arr = $result->fetch_array())
             $ret_arr[] = $arr;
     }
@@ -323,7 +326,7 @@ function findInSlugArr($arr, $param, $type, $not_arr = array(), $single = false)
             $a = $arr[$i];
             $val = $arr[$i + 1];
             if ($a == $param && $val != "" && isType($val, $type) && !$before_is_not)
-                return cleanValue($val, $type);
+                return sanitizeValue($val, $type);
             $before_is_not = array_search($a, $not_arr, true) !== false;
         }
     }

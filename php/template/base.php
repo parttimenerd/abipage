@@ -260,40 +260,36 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
         var has_sidebar = <?= $has_sidebar ? "true" : "false" ?>;
     </script>
     <script>
-    <?php echo $js ?>
     $(".tablesorter").ready(function(){
-    $(".tablesorter").tablesorter();
+        $(".tablesorter").tablesorter();
     });
+                $("body").ready(function(){
     <? if (Auth::canViewLogs()): ?>
-        $("body").ready(function(){
-        add_log_object(<?= json_encode(logArray()) ?>);
-        });
+                   add_log_object(<?= json_encode(logArray()) ?>);
     <? endif ?>
+                $(".tablesorter").tablesorter();
+    <?php echo $js ?>
+                });
+                max_file_size = <?= $env->max_upload_pic_size * 1048576 ?>;
     </script>
     <?= str_replace("&apos;", "'", str_replace("&quot;", '"', $env->footer_appendix)); ?>
     <? if (defined("UNMINIFIED_SOURCE") && UNMINIFIED_SOURCE !== false): ?>
         <script src="<?php echo tpl_url("js/libs/handlebars-1.0.0.beta.6.js") ?>"></script>
         <script src="<?php echo tpl_url("js/libs/bootstrap.js") ?>"></script>
+        <? if ($editor_needed): ?>
+            <script src="<?php echo tpl_url("js/libs/jquery.wysiwyg.js") ?>"></script>
+        <? endif ?>
         <script src="<?php echo tpl_url("js/plugins.js") ?>"></script>
         <script src="<?php echo tpl_url("js/application.js") ?>"></script>
         <!--<script src="<?php echo tpl_url("js/libs/modernizr-2.5.3.js") ?>"></script>-->
         <script src="<?php echo tpl_url("js/script.js") ?>"></script>
     <? else: ?>
+        <? if ($editor_needed): ?>
+            <script src="<?php echo tpl_url("js/min/jquery.wysiwyg.min.js") ?>"></script>
+        <? endif ?>
         <script src="<?php echo tpl_url("js/min/scripts.min.js") ?>"></script>
     <? endif ?>
     <?php if ($env->has_piwik) PiwikHelper::echoJSTrackerCode(true, $document_title) ?>
-<<<<<<< HEAD
-        <script>
-    <?php echo $js ?>
-    $(".tablesorter").ready(function(){
-    $(".tablesorter").tablesorter();
-    });
-    <? if (Auth::canViewLogs()): ?>
-            add_log_object(<?= json_encode(logArray()) ?>);
-    <? endif ?>
-    </script>
-=======
->>>>>>> Fix log view bug
     </body>
     </html>
     <?php

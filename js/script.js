@@ -222,7 +222,7 @@ if ($("#drop_area").length != 0){
         file = files[0]
 		
 		
-        if (file.size < 3500000 && (/image/i).test(file.type)){
+        if (file.size < max_file_size && (/image/i).test(file.type)){
             droparea_html = $("#drop_area").html();
             $("#drop_area").html("");
             /*

@@ -112,6 +112,7 @@ Das Copyright an den Beiträgen geht mit dem Hochladen bzw. Schreiben auf dieser
                     "wiki_url" => array("default" => URL . "/mediawiki", "label" => "Url des Mediawikis")
             )),
             "Bilder" => array("rows" => array(
+                    "max_upload_pic_size" => array("default" => "8", "label" => "Maximalgröße eines hochzuladenden Bildes in MiB"),
                     "pic_width" => array("default" => "2400", "label" => "Breite der Bilder in Pixel"),
                     "pic_quality" => array("default" => "85", "label" => "Bildqualität in %"),
                     "pic_format" => array("default" => "jpg", "label" => "Bildformat"),
@@ -132,6 +133,7 @@ Wenn ja, sollte Piwik installiert sein und diese Website hinzugefügt worden sei
                     "number_of_news_shown_at_the_home_page" => array("default" => "1", "label" => "Anzahl der Nachrichten, die auf der Hauptseite angezeigt werden", "type" => "number")
             )),
             "Weitere Einstellungen" => array("id" => "more_prefs", "rows" => array(
+                    "wysiwyg_editor_enabled" => array("default" => "false", "type" => "checkbox", "label" => "Wird ein visueller Editor auf dieser und der 'Nachrichten schreiben'-Seite verwendet?"),
                     "items_per_page" => array("default" => "30", "label" => "Angezeigte Einträge pro Seite"),
                     "images_per_page" => array("default" => "5", "label" => "Angezeigte Bilder pro Seite"),
                     "footer_appendix" => array("default" => "", "label" => "Code, der nach dem Footer eingefügt wird", "type" => "codearea"),

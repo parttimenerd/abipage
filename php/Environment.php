@@ -115,6 +115,29 @@ class Environment {
         return $arr;
     }
 
+    public function hasNotActivatedUsers() {
+        global $db;
+        $res = $db->query("SELECT count(*) AS n FROM " . DB_PREFIX . "user WHERE activated=0");
+        if ($res != null) {
+            $arr = $res->fetch_array();
+            if ($arr["n"] > 0)
+                return true;
+        }
+        return false;
+    }
+
+    public function hasNotReviewedUserComments() {
+        global $db;
+        $res = $db->query("SELECT count(*) AS n FROM " . DB_PREFIX . "user_comments 
+		WHERE reviewed=0 ORDER BY time DESC");
+        if ($res != null) {
+            $arr = $res->fetch_array();
+            if ($arr["n"] > 0)
+                return true;
+        }
+        return false;
+    }
+
     public function getIDUsernameDictionary() {
         $arr = array();
         $db = Database::getConnection();
@@ -131,16 +154,18 @@ class Environment {
             $filename = basename($_FILES['uploaded_file']['name']);
             $ext = strtolower(substr($filename, strpos($filename, '.') + 1));
             //$arr = explode("/", $_FILES["uploaded_file"]["type"]);
-            if (in_array($ext, $img_types) && ($_FILES["uploaded_file"]["size"] < 4000000)) {
+            if (in_array($ext, $img_types) && ($_FILES["uploaded_file"]["size"] < $this->max_upload_pic_size * 1048576)) {
                 $newname_wo_ext = $this->main_dir . '/' . $this->upload_path . '/' . $new_filename_wo_ext;
                 $newname = $newname_wo_ext . '.' . $ext;
                 if (!file_exists($newname)) {
-                    if ((move_uploaded_file($_FILES['uploaded_file']['tmp_name'], $newname))) {
-                        $exif = read_exif_data($newname, 'ANY_TAG', false);
-                        resizeImage($this->resize_original_image ? $this->pic_width : -1, $newname, $newname_wo_ext . '.' . $this->pic_format);
-                        resizeImage($this->thumbnail_width, $newname, $this->main_dir . '/' . $this->upload_path . '/thumbs/' . $new_filename_wo_ext . '.' . $this->pic_format);
-                        return $exif;
+                    $exif = null;
+                    if ($ext == "jpg" || $ext == "jpeg") {
+                        $exif = read_exif_data($_FILES['uploaded_file']['tmp_name'], 'ANY_TAG', false);
+                        $exif["FileName"] = $new_filename_wo_ext . '.' . $ext;
                     }
+                    resizeImage($this->resize_original_image ? $this->pic_width : -1, $_FILES['uploaded_file']['tmp_name'], $newname_wo_ext . '.' . $this->pic_format, $ext);
+                    resizeImage($this->thumbnail_width, $_FILES['uploaded_file']['tmp_name'], $this->main_dir . '/' . $this->upload_path . '/thumbs/' . $new_filename_wo_ext . '.' . $this->pic_format, $ext);
+                    return $exif;
                 }
             }
         }

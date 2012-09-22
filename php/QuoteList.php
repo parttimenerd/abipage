@@ -31,8 +31,8 @@ class QuoteList extends RatableUserContentList {
             $time = time();
         }
         $tid = intval($teacherid);
-        $person = cleanInputText($person, $this->db);
-        $text = cleanInputText($text, $this->db);
+        $person = sanitizeInputText($person, $this->db);
+        $text = sanitizeInputText($text, $this->db);
         if ($tid == -1) {
             $res = $this->db->query("SELECT id FROM " . DB_PREFIX . "teacher WHERE namestr LIKE '%" . $person . "'");
             if ($res) {

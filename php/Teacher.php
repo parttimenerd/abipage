@@ -76,12 +76,12 @@ class Teacher {
 
     public static function getByID($id) {
         global $db;
-        return self::getFromMySQLResult($db->query("SELECT * FROM " . DB_PREFIX . "teacher WHERE id=" . inval($id)));
+        return self::getFromMySQLResult($db->query("SELECT * FROM " . DB_PREFIX . "teacher WHERE id=" . intval($id)));
     }
 
     public static function getByName($namestr) {
         global $db;
-        return self::getFromMySQLResult($db->query("SELECT * FROM " . DB_PREFIX . "teacher WHERE namestr=" . cleanInputText($namestr)));
+        return self::getFromMySQLResult($db->query("SELECT * FROM " . DB_PREFIX . "teacher WHERE namestr=" . sanitizeInputText($namestr)));
     }
 
     public static function getTeacherWithQuoteRatingAndCount() {
@@ -119,9 +119,9 @@ class Teacher {
 
     public static function addTeacher($last_name, $is_male, $first_name = "") {
         global $db;
-        $last_name = cleanInputText($last_name);
+        $last_name = sanitizeInputText($last_name);
         $is_male = intval($is_male);
-        $first_name = cleanInputText($first_name);
+        $first_name = sanitizeInputText($first_name);
         $res = $db->query("SELECT last_name FROM " . DB_PREFIX . "teacher WHERE last_name='" . $last_name . "' AND ismale=" . $is_male . " AND first_name='" . $first_name . "'") or die($db->error);
         if ($res->num_rows == 0) {
             $namestr = ($is_male ? "Herr " : "Frau ") . $last_name;
@@ -186,8 +186,8 @@ class Teacher {
     }
 
     public static function edit($id, $last_name, $ismale, $first_name = "") {
-        $last_name = cleanInputText($last_name);
-        $first_name = cleanInputText($first_name);
+        $last_name = sanitizeInputText($last_name);
+        $first_name = sanitizeInputText($first_name);
         $ismale = is_numeric($ismale) ? intval($ismale) : ($ismale == "m" ? 1 : 0);
         global $db;
         $db->query("UPDATE " . DB_PREFIX . "teacher SET last_name='" . $last_name . "', ismale=" . $ismale . ", first_name='" . $first_name . "', namestr='" . ($ismale == 1 ? "Herr " : "Frau ") . $last_name . "' WHERE id=" . intval($id)) or die($db->error);

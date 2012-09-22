@@ -264,7 +264,7 @@ function tpl_datalist($id, $stringarr) {
  * @param array $args name, value, placeholder, js_onchange (only with type = "color"), type
  */
 function tpl_input($args = array("name" => "default", "value" => "", "placeholder" => "", "onchange" => "")) {
-    global $editor_needed;
+    global $editor_needed, $env;
     if ($args["name"] == "default")
         Logger::log("Use this function correct!!!", LOG_INFO);
     $name = $args["name"];
@@ -280,24 +280,24 @@ function tpl_input($args = array("name" => "default", "value" => "", "placeholde
         $str .= ' required="' . $args["required"] . '" ';
     switch ($type) {
         case "textarea":
-            /*
-            ?>
-            <div class="textarea_container" id="<?= $id ?>">
-                <ul class="nav nav-tabs">
-                    <li class="active"><a href="#<?= $name ?>_editor" data-toggle="tab">Editor</a></li>
-                    <li><a href="#<?= $name ?>_code" data-toggle="tab">Code</a></li>
-                </ul>
-                <div class="tab-content">
-                    <div class="tab-pane active" id="<?= $name ?>_editor">
-                        <textarea class="textarea" onchange="$('#<?= $name ?>_code textarea').val($(this).wysiwyg('getContent'));"><?= $value ?></textarea>
-                    </div>
-                    <div class="tab-pane" id="<?= $name ?>_code">
-                        <textarea <?= $str ?> onkeyup="$('#<?= $name ?>_editor .textarea').wysiwyg('setContent', $(this).val());"><?= $value ?></textarea>
+            if ($env->wysiwyg_editor_enabled) {
+                ?>
+                <div class="textarea_container" id="<?= $id ?>">
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a href="#<?= $name ?>_editor" data-toggle="tab">Editor</a></li>
+                        <li><a href="#<?= $name ?>_code" data-toggle="tab">Code</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="<?= $name ?>_editor">
+                            <textarea class="textarea" onchange="$('#<?= $name ?>_code textarea').val($(this).wysiwyg('getContent'));"><?= $value ?></textarea>
+                        </div>
+                        <div class="tab-pane" id="<?= $name ?>_code">
+                            <textarea <?= $str ?> onkeyup="$('#<?= $name ?>_editor .textarea').wysiwyg('setContent', $(this).val());"><?= $value ?></textarea>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <?
-            tpl_add_js('$("#' . $name . '_editor textarea.textarea").wysiwyg({
+                <?
+                tpl_add_js('$("#' . $name . '_editor textarea.textarea").wysiwyg({
                             css: "' . tpl_url("css/style.css") . '",
                             i18n: {lang: "de"},
                             rmUnwantedBr: true,
@@ -308,9 +308,9 @@ function tpl_input($args = array("name" => "default", "value" => "", "placeholde
                             removeHeadings: true
                         }); ');
 //                echo '<textarea ' . $str . ' class="textarea">' . $value . '</textarea>';
-            $editor_needed = true;
-            break;
-             */
+                $editor_needed = true;
+                break;
+            }
         case "codearea":
             echo '<textarea ' . $str . ' class="codearea">' . $value . '</textarea>';
             break;

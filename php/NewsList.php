@@ -32,14 +32,14 @@ class NewsList {
 
     public static function getNewsByPhrase($phrase, $max_length) {
         global $db;
-        $phrase = cleanInputText($phrase);
+        $phrase = sanitizeInputText($phrase);
         $limit_str = $max_length > 0 ? (" LIMIT 0, " . $max_length) : "";
         return mysqliResultToArr($db->query("SELECT * FROM " . DB_PREFIX . "news WHERE MATCH(title, content) AGAINST('" . $phrase . "') OR title LIKE '%" . $phrase . "%' OR content LIKE '%" . $phrase . "%' ORDER BY time DESC" . $limit_str));
     }
 
     public static function writeNews($title, $content, $send_emails = true) {
         global $db, $env;
-        $ctitle = cleanInputText($title);
+        $ctitle = sanitizeInputText($title);
         $ccontent = $db->real_escape_string($content);
         $db->query("INSERT INTO " . DB_PREFIX . "news(id, title, content, time, userid) VALUES(NULL, '$ctitle', '$ccontent', " . time() . ", " . Auth::getUserID() . ")");
         Actions::addAction($db->insert_id, Auth::getUserName(), "write_news");

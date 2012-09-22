@@ -88,7 +88,7 @@ class Poll {
     public static function create($type, $question, $position, $data = array()) {
         global $db;
         $type = intval($type);
-        $question = cleanInputText($question);
+        $question = sanitizeInputText($question);
         $position = intval($position);
         $data = json_encode($data);
         $db->query("INSERT INTO " . self::$table . "(id, type, question, position, data) VALUES(NULL, $type, '$question', $position, '$data')");
@@ -122,7 +122,7 @@ class Poll {
 
     public function updateDB() {
         global $db;
-        $db->query("UPDATE " . self::$table . " SET type=" . intval($this->type) . ", question='" . cleanInputText($this->question) . "', position=" . intval($this->position) . ", date='" . json_encode($data) . "') WHERE id=" . $this->id);
+        $db->query("UPDATE " . self::$table . " SET type=" . intval($this->type) . ", question='" . sanitizeInputText($this->question) . "', position=" . intval($this->position) . ", date='" . json_encode($data) . "') WHERE id=" . $this->id);
     }
 
     public function submitAnswer($answer) {

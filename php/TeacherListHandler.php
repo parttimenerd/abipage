@@ -38,7 +38,7 @@ class TeacherListHandler extends ToroHandler {
             Teacher::updateQuotes();
         }
         if (isset($_POST["add"]) && isset($_POST["input"]) && Auth::canAddTeacher()) {
-            Teacher::readTeacherListInput(cleanInputText($_POST["input"]));
+            Teacher::readTeacherListInput(sanitizeInputText($_POST["input"]));
         }
         return $this->get();
     }

@@ -51,12 +51,12 @@ class ImageList extends RatableUserContentList {
     }
 
     public function setDescription($id, $descr) {
-        $this->db->query("UPDATE " . $this->table . " SET description = '" . cleanInputText($descr) . "' WHERE id=" . intval($id)) or die($this->db->error);
+        $this->db->query("UPDATE " . $this->table . " SET description = '" . sanitizeInputText($descr) . "' WHERE id=" . intval($id)) or die($this->db->error);
         return $this;
     }
     
     public function setCategory($id, $category) {
-        $this->db->query("UPDATE " . $this->table . " SET category = '" . cleanInputText($category) . "' WHERE id=" . intval($id)) or die($this->db->error);
+        $this->db->query("UPDATE " . $this->table . " SET category = '" . sanitizeInputText($category) . "' WHERE id=" . intval($id)) or die($this->db->error);
         return $this;
     }
     
@@ -80,8 +80,8 @@ class ImageList extends RatableUserContentList {
         if (!$user) {
             $user = Auth::getUser();
         }
-        $descr = cleanInputText($descr);
-        $category = cleanInputText($category);
+        $descr = sanitizeInputText($descr);
+        $category = sanitizeInputText($category);
         $this->db->query("INSERT INTO " . $this->table . "(id, userid, description, category, capture_time, format, time, rating, data) VALUES(NULL, " . $user->getID() . ", '" . $descr . "', '" . $category . "', 0, '" . $env->pic_format . "', " . $time . ", 0, '')") or die($this->db->error);
         $id = $this->db->insert_id;
         Actions::addAction($id, $user->getName(), "upload_image");
