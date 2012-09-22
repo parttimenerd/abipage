@@ -110,7 +110,7 @@ class Auth {
     }
 
     public static function getCookieID() {
-        return isset($_COOKIE["abipage_id"]) ? intval($_COOKIE["abipage_id"]) : $_COOKIE["abipage_id"];
+        return isset($_COOKIE["abipage_id"]) ? intval($_COOKIE["abipage_id"]) : -1;
     }
 
     public static function login($name, $pwd) {
