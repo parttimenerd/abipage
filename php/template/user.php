@@ -105,15 +105,15 @@ function tpl_user_comment($user, $comment) {
                 <? elseif (Auth::isModerator()):
                     $apps = array();
                     if ($comment["isanonymous"])
-                       $apps[] = "Anonym abgesendet";
+                        $apps[] = "Anonym abgesendet";
                     if ($comment["notified_as_bad"])
-                       $apps[] = "Als schlecht markiert";
-                    echo !empty($apps) ? ('<span class="mod_info">[' . join("; ", $apps) . ']</span>') : "";
+                        $apps[] = "Als schlecht markiert";
+                    echo!empty($apps) ? ('<span class="mod_info">[' . join("; ", $apps) . ']</span>') : "";
                 endif;
                 ?>
             </li>
-            <? if (Auth::canDeleteUserComment() && !Auth::isSameUser($user) && !Auth::isSameUser(!$comment["anonymous"] ? $comment["commenting_userid"] : -1)): ?>
-                <li class="delete_span_li"> 
+            <li class="delete_span_li"> 
+                <? if (Auth::canDeleteUserComment() && !Auth::isSameUser($user) && !Auth::isSameUser(!$comment["anonymous"] ? $comment["commenting_userid"] : -1)): ?>
                     <span class="del_item"><?php tpl_icon("delete", "Löschen", "deleteUserComment('" . $comment["id"] . "')") ?></span>
                 <? endif; ?>
             </li>

@@ -62,35 +62,32 @@ var is_loading = false;
 var phrase = "";
 var last_item = null;
 var chocolat_options = {};
-var page = 1;
+var _page = page;
 
 if (window.rating_url !== undefined){
     var rating_url2 = rating_url;
 }
 
 function loadItems(){
-    if (page < max_page && is_loading == false){
-        is_loading = true;
-        page++;
+    if (window._page <= max_page){
         /*if (chocolat_options != {}){
 			last_item = $(".imagelist .item").last();
 		} else {
 			last_item = $(".content .item").last();
 		}*/
-        $.ajax({
-            type: "POST",
+        ajax({
+            type: "GET",
             url: rating_url2,
-            data: $.param({
-                'page': page, 
-                'phrase': phrase
-            }),
-            success: function(html){
-                addLoadedItemsHTML(html);
+            data: {
+                'page': window._page + 1, 
+                'phrase': phrase,
+                'ajax': true
             },
-            error: function(html){
-                addLoadedItemsHTML(html.responseText);
+            func: function(data){
+                addLoadedItemsHTML(data["html"]);
             }
         });
+        window._page++;
     }
 }
 

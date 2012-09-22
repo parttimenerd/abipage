@@ -51,6 +51,9 @@ class RatableUserContentHandler extends ToroHandler {
         }
         $phrase = isset($_GET["phrase"]) ? $_GET["phrase"] : "";
         $this->list->appendSearchAfterPhrase($phrase);
+        if (isset($_GET["page"]))
+            $this->list->setStart($this->items_per_page * (intval($_GET["page"]) - 1));
+
         $arr = $this->list->getItems();
         $ajax = isset($params["ajax"]) || isset($_GET["ajax"]);
         if ($ajax)
@@ -122,6 +125,8 @@ class RatableUserContentHandler extends ToroHandler {
             $phrase = isset($_POST["phrase"]) ? $_POST["phrase"] : "";
             $this->configListFromSlug($slug);
             $this->list->appendSearchAfterPhrase($phrase);
+            if (isset($_GET["page"]))
+                $this->list->setStart($this->items_per_page * (intval($_GET["page"]) - 1));
             $arr = $this->list->getItems();
             call_user_func($this->tpl_list_func_name, $arr["items"], $arr["page"], $this->list->getPageCount(), $phrase, false);
         }
