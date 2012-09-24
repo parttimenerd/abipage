@@ -9,3 +9,4 @@ PC worker: Designed by Bart Laugs
 Owl: Designed by Andrea Gourley
 Email: Designed by Ahmed Hamzawy
 Newspaper: Designed by Connie Shu
+Rotate image (counter clockwise): Based on an icon designed by Christopher Tomkins-Tinch

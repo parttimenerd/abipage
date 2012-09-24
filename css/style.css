@@ -15,7 +15,7 @@ body { margin: 0; font-size: 1em; line-height: 1.4; }
 ::selection { background: orange; color: #fff; text-shadow: none; }
 
 a { color: #00e; }
-a:visited { color: #551a8b; }
+a:visited { color: #00e; }
 a:hover { color: #06e; }
 a:focus { outline: thin dotted; }
 a:hover, a:active { outline: 0; }
@@ -347,8 +347,10 @@ table {
 }*/
 .item-footer .progress {
     width: auto;
-    margin-left: 30%;
-    visibility:  hidden;
+    display: none;
+    width: 70%;
+    float: right;
+    margin-top: -1.4em;
 }
 .item-footer .progress .bar {
     text-align: left;
@@ -374,7 +376,7 @@ table {
     width: 30%;
 }
 .pref_table .right_column {
-     width: 70%;
+    width: 70%;
 }
 
 .notified_as_bad .item-content, .notified_as_bad hr {
@@ -512,6 +514,13 @@ table {
     cursor: pointer;
 }
 
+.imagelist .item-content a {
+    text-align: center;    
+}
+
+#drop-image-area .hide_when_unused {
+    display: none;
+}
 /* =============================================================================
    Media Queries
    ========================================================================== */

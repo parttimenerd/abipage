@@ -395,11 +395,11 @@ function tpl_no_subnav() {
                 <?php
             }
 
-            function tpl_item_after_send($title = "Senden", $name = "send", $onclick = "", $footerhtmlapp = "") {
+            function tpl_item_after_send($title = "Senden", $name = "send", $onclick = "", $footerhtmlapp = "", $classapp = "") {
                 ?>
             </div>
-            <hr/>
-            <div class="item-footer">
+            <hr class="<?= $classapp ?>"/>
+            <div class="item-footer <?= $classapp ?>">
                 <button class="btn" <?php echo $onclick == "" ? 'type="submit"' : "" ?> name="<?php echo $name ?>" onclick="<?php echo $onclick ?>"><?php echo $title ?></button>
                 <?php echo $footerhtmlapp ?>
             </div>

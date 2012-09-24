@@ -51,18 +51,19 @@ function tpl_image_upload_item($with_descr = true) {//"enctype" => "multipart/fo
     //tpl_item_before_form(array("id" => "file_upload", "enctype" => "multipart/form-data"), "Bild hochladen", "camera", "item-send");
     tpl_item_before("Bild hochladen", "camera", "item-send", "drop-image-area");
     ?>     
-    <div id="drop_area">
-        <p><span>Bild hier ablegen.</span><br/>
-            Das Bild darf maximal <?= $env->max_upload_pic_size ?>MB groß sein und sollte die Dateiendung .png, .jpg, .jpeg, .bmp oder .gif haben.</p>
-    </div>	
+    <div id="drop_area" onclick="$('#file_input').click()">
+        <p><span>Bild hier ablegen</span><br/>
+            <span class="sub">oder zum Auswählen hier klicken</span></p><br/>
+        Das Bild darf maximal <?= $env->max_upload_pic_size ?>MB groß sein und sollte die Dateiendung .png, .jpg, .jpeg, .bmp oder .gif haben.</p>
+    </div>
     <input type="hidden" name="MAX_FILE_SIZE" value="<?= $env->max_upload_pic_size * 1048576 ?>"/>
-    <!--<input name="uploaded_file" id="file_input" type="file"/>-->
+    <input type="file" id="file_input" multiple accept="image/*" style="display:none" onchange="handleFiles(this.files)">
     <?php
     if ($with_descr) {
         ?>
-        <hr/>
-        <textarea name="description" class="descr" placeholder="Kurze, aussagekräftige Bildbeschreibung" require="on"></textarea>
-        <input name="category" list="category_list" class="img_category" placeholder='Kategorie in die dieses Bild einsortiert wird, z.B. "Studienfahrt Barcelona"'/>
+        <hr class="hide_when_unused"/>
+        <textarea class="hide_when_unused" name="description" class="descr" placeholder="Kurze, aussagekräftige Bildbeschreibung" require="on"></textarea>
+        <input class="hide_when_unused" name="category" list="category_list" class="img_category" placeholder='Kategorie in die dieses Bild einsortiert wird, z.B. "Studienfahrt Barcelona"'/>
         <?
         $list = new ImageList();
         tpl_datalist("category_list", $list->getCategories());
@@ -73,7 +74,7 @@ function tpl_image_upload_item($with_descr = true) {//"enctype" => "multipart/fo
     <?php
     tpl_item_after_send("Hochladen", "send", "uploadImage()", "<div class='progress'>
     <div class='bar' style=\"width: 0%;\"></div>
-</div>");
+</div>", "hide_when_unused");
 }
 
 function tpl_image_item(RatableUserContentItem $ruci) {

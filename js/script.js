@@ -208,25 +208,27 @@ if ($("#drop_area").length != 0){
     var dropArea = $(".item-send")[0],
     file = null,
     file_content = "",
+    file_type = "",
     droparea_html = "",
-    progress = $(".item-send .progress");
+    droparea_onclick = null,
+    progress = $(".item-send .progress"),
     progressbar = $(".item-send .progress .bar");
 	
-    function traverseFiles (files) {
-        var li,
-        fileInfo;
+    function handleFiles (files) {
+        if (!files.length)
+            return;
+        
+        var li, fileInfo;
 		
         file = files[0]
 		
 		
         if (file.size < max_file_size && (/image/i).test(file.type)){
             droparea_html = $("#drop_area").html();
+            droparea_onclick = $("#drop_area").attr("onclick");
+            $("#drop_area").attr("onclick", "");
             $("#drop_area").html("");
-            /*
-				If the file is an image and the web browser supports FileReader,
-				present a preview in the file list
-				 
-			*/
+            $("#drop-image-area .hide_when_unused").attr("style", "display: block");
             if (typeof FileReader !== "undefined") {
                 $("#drop_area").html('<img />');
                 img = $("#drop_area img");
@@ -237,6 +239,7 @@ if ($("#drop_area").length != 0){
                         $("#file_input").val(file);
                         file_content = evt.target.result;
                         $(".item-send .descr").focus();
+                        file_type = file.type;
                     };
                 }(img));
                 reader.readAsDataURL(file);
@@ -244,16 +247,22 @@ if ($("#drop_area").length != 0){
         }
     }
 	
-    dropArea.ondragenter = function () {
+    dropArea.ondragenter = function (evt) {
+        evt.stopPropagation();
+        evt.preventDefault();
         return false;
     };
 	
-    dropArea.ondragover = function () {
+    dropArea.ondragover = function (evt) {
+        evt.stopPropagation();
+        evt.preventDefault();
         return false;
     };
 	
     dropArea.ondrop = function (evt) {
-        traverseFiles(evt.dataTransfer.files);
+        evt.stopPropagation();
+        evt.preventDefault();
+        handleFiles(evt.dataTransfer.files);
         return false;
     };
 	
@@ -270,17 +279,17 @@ if ($("#drop_area").length != 0){
                 var xhr = new XMLHttpRequest();
             } else {
                 var xhr = new ActiveXObject("Microsoft.XMLHTTP");
-            }
-			
+            }		
+            progress.attr("style", "display: block");
             xhr.upload.onprogress = function(e) {
                 if (e.lengthComputable) {
                     percent = Math.round((e.loaded * 100) / e.total); 
+                    progressbar.attr("style", "width: " + percent + "%; display: inline");
                     if (percent < 90){
                         progressbar.html(byteToMiB(e.loaded, 2) + "MiB von " + byteToMiB(e.total, 2) + "MiB hochgeladen");
-                        progressbar.attr("style", "width: " + percent + "%; visibility: visible");
                     } else {
                         progressbar.html("Erzeugung von Vorschaubildern...");
-                        progressbar.attr("style", "width: 100%; visibility: visible");
+                        progressbar.attr("style", "width: 100%; display: inline");
                     }
                 }
             };
@@ -294,11 +303,11 @@ if ($("#drop_area").length != 0){
             //xhr.setRequestHeader("X-File-Name", "uploaded_file");
             //xhr.setRequestHeader("X-File-Size", file.size);
             //xhr.setRequestHeader("X-File-Type", file.type);
-            var fd = new FormData;
             fd.append("uploaded_file", file);
             fd.append("description", $(".descr").val());
             fd.append("category", $("input.img_category").val());
             fd.append("access_key", access_key);
+            fd.append("rotation", img_rotation);
             // Send the file (doh)
             progress.attr("style", "display: visible");
             xhr.send(fd);
@@ -320,10 +329,13 @@ if ($("#drop_area").length != 0){
                         $(".item-send").after(json["data"]["html"]);
                         $(".item-send .descr").val("");
                         $("#drop_area").html(droparea_html);
-                        progress.attr("style", "visibility: hidden");
+                        $("#drop_area").attr("onclick", droparea_onclick); 
+                        progress.attr("style", "display: none");
                         progressbar.attr("style", "width: 0%");
+                        $("#drop-image-area .hide_when_unused").attr("style", "");
                         file = null;
                         file_content = ""; 
+                        $('.imagelist a.item-content').Chocolat(chocolat_options);
                     }
                 }
             };

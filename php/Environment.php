@@ -148,7 +148,7 @@ class Environment {
         return $arr;
     }
 
-    public function uploadImage($new_filename_wo_ext) {
+    public function uploadImage($new_filename_wo_ext, $rotation = 0) {
         $img_types = array("jpeg", "gif", "png", "bmp", "jpg");
         if ((!empty($_FILES["uploaded_file"])) && ($_FILES['uploaded_file']['error'] == 0)) {
             $filename = basename($_FILES['uploaded_file']['name']);

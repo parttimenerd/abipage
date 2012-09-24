@@ -14,7 +14,7 @@ script.watch('less/.*\.less$') do |f|
   runCommand("cssmin css/project.css --compress > css/project.min.css");
   puts " done in #{((Time.now - time) * 1000).round}ms...";
 end
-script.watch('js/(lib/)?[a-z]+\.js') do |f|
+script.watch('js/(lib/)?[a-z.]+\.js') do |f|
   begin
     minimizeJSFile f[0]
     print " concenate... "
