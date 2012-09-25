@@ -62,7 +62,7 @@ var is_loading = false;
 var phrase = "";
 var last_item = null;
 var chocolat_options = {};
-var _page = page;
+var _page = 1;
 
 if (window.rating_url !== undefined){
     var rating_url2 = rating_url;

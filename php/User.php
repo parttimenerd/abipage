@@ -252,7 +252,7 @@ class User {
     }
 
     public static function getStringRep($user) {
-        if ($user == $this->id || $user->getID() == $this->id) {
+        if ($user == Auth::getUser() || (is_numeric($user) && $user->getID() == Auth::getUserID())) {
             return "Me";
         }
         $user = $user != null ? (is_numeric($user) ? User::getByID($user) : $user) : null;
