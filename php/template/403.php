@@ -17,6 +17,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * Outputs the '403 Forbidden' page with the suitable header
+ * 
+ * @global Environment $env
+ */
 function tpl_403() {
     global $env;
     header('HTTP/1.0 404 Forbidden');

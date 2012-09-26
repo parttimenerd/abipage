@@ -35,7 +35,7 @@ class Environment {
             $res = $db->query("SELECT * FROM " . DB_PREFIX . "preferences") or die($db->error);
             if ($res == null) {
                 $prefs = new PreferencesHandler();
-                $prefs->fillDBWithDefaultValues();
+                $prefs->updateDB();
             }
             while ($arr = $res->fetch_array()) {
                 $var = $arr["value"];
@@ -66,7 +66,7 @@ class Environment {
         while ($user = User::getFromMySQLResult($res)) {
             $arr[] = $user;
         }
-        return $arr;
+        return new UserArray($arr);
     }
 
     //HACK implement search
@@ -101,7 +101,7 @@ class Environment {
         while ($user = User::getFromMySQLResult($res)) {
             $arr[] = $user;
         }
-        return $arr;
+        return new UserArray($arr);
     }
 
     public function getNotReviewedUserComments() {

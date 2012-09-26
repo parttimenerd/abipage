@@ -16,6 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * Outputs the home page for user who are logged in
+ * 
+ * @global Environment $env
+ * @param array $news news items to be echoed
+ * @param ActionArray $actions actions to be shown on the home page to users of non desktop devices
+ */
 function tpl_home($news = array(), ActionArray $actions = null) {
     global $env;
     tpl_before("home", $env->title, $env->subtitle);
@@ -49,20 +56,26 @@ function tpl_home($news = array(), ActionArray $actions = null) {
     tpl_after();
 }
 
+/**
+ * Outputs the home page for user who aren't logged in, shows only the mainpage text
+ * 
+ * @global Environment $env
+ */
 function tpl_home_no_user() {
     global $env;
     tpl_before("home", $env->title, $env->subtitle);
-    $tiles = array(
+    /*$tiles = array(
         "login" => array("lead" => "Anmelden", "sub" => array("text" => "Passwort vergessen?", "href" => "forgot_password")),
         "register" => array("lead" => "Registrieren")
     );
-    //tpl_tiles($tiles, 6);
+    tpl_tiles($tiles, 6);*/
     tpl_item_before();
     echo formatText($env->mainpage_text);
     tpl_item_after();
     tpl_after();
 }
 
+/**
 function tpl_tiles($tiles, $width, $class = "") {
     echo '<div class="row tile_container ' . $class . '">';
     foreach ($tiles as $href => $arr)
@@ -83,4 +96,4 @@ function tpl_tile($href_part, $arr, $width, $class = "") {
         </div>
     </a>
     <?
-}
+}*/

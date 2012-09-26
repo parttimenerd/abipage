@@ -16,6 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * Outputs the teachers page
+ * 
+ * @param array $teacherarr teachers
+ */
 function tpl_teacherlist($teacherarr) {
     tpl_before("teacherlist", "Lehrerliste");
     tpl_item_before_form(array());

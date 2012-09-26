@@ -33,15 +33,18 @@ if (!defined('DB_NAME')) {
     $site->serve();
 } else {
 
-    define("TITLE", $env->title);  
-    
+    define("TITLE", $env->title);
+
     if (!Auth::canVisitSiteWhenUnderConstruction() && $env->is_under_construction) {
-        tpl_under_construction();
-        $site = new ToroApplication('login', 'LoginHandler');
-        $site->serve();
+        if (isset($_POST["login"])) {
+            $handler = new LoginHandler();
+            $handler->get();
+        } else {
+            tpl_under_construction();
+        }
         exit;
     }
-    
+
     if (!Auth::canSeeDebugOutput() && !Auth::canViewLogs() && (!defined("DEBUG") || !DEBUG)) {
         error_reporting(0);
     }
@@ -50,5 +53,4 @@ if (!defined('DB_NAME')) {
     Auth::updateLastVisitTime();
 
     $store->updateDB();
-
 }

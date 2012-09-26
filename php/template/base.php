@@ -16,10 +16,35 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * JavaScript code to append to the JS code in the footer 
+ * @var string
+ */
 $js = "";
+/**
+ * Has the page to be echoed with the actions sidebar?
+ * @var boolean
+ */
 $has_sidebar = false;
+/**
+ * Must the footer include the visual editor sources?
+ * @var boolean
+ */
 $editor_needed = false;
 
+/**
+ * Outputs the header of the page
+ * 
+ * @global Environment $env
+ * @global KeyValueStore $store
+ * @global boolean $has_sidebar has the page to be echoed a sidebar?
+ * @param string $class css class of the content of the page, has also to be it's url part (i.e. 'user' for the user page)
+ * @param string $title title of the page, only used when no title is stored for the current css class
+ * @param string $subtitle subtitle of the page, only used when no title is stored for the current css class
+ * @param mixed $subnav false or null if the page needs a search bar, else an array("phrase" => ...)
+ * @param boolean $sidebar has the page to be echoed with the actions sidebar?
+ * @param string $header_icon the icon shown in the title (e.g. 'owl' for the 404 page owl)
+ */
 function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $sidebar = false, $header_icon = "") {
     global $env, $store;
     $usermenu = null;
@@ -201,7 +226,7 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
         <div class="container">
             <?
             tpl_enable_javascript();
-            tpl_html5_please()
+//            tpl_html5_please()
             ?>
             <!--[if lt IE 10]><p class=chromeframe>Your browser is <em>ancient!</em> <a href="http://browsehappy.com/">Upgrade to a different browser</a>.</p><![endif]-->
             <header class="jumbotron subhead" id="overview">
@@ -210,9 +235,9 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
                     <?php echo $subtitle ?></p>
                 <?php
                 global $has_sidebar;
-                if (($subnav != null && count($subnav) == 4) || $sidebar) {
+                if (($subnav && count($subnav) == 4) || $sidebar) {
                     $has_sidebar = true;
-                    tpl_subnav($subnav["url_part"], $subnav["page"], $subnav["pagecount"], $subnav["phrase"]);
+                    tpl_subnav($subnav["phrase"]);
                 } /* else if ($class == "user"){ //HACK
                   $has_sidebar = true;
                   tpl_no_subnav();
@@ -222,6 +247,14 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
                 }
             }
 
+            /**
+             * Outputs the footer of the page
+             * 
+             * @global Environment $env
+             * @global string $js JavaScript code to be appended to JS code in the footer
+             * @global boolean $has_sidebar has the page to be echoed with the actions sidebar?
+             * @global boolean $editor_needed needs the page to include the visual editor sources
+             */
             function tpl_after() {
                 ?>         </div> <?php
                 global $env, $js, $has_sidebar, $editor_needed;
@@ -265,7 +298,7 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
     });
                 $("body").ready(function(){
     <? if (Auth::canViewLogs()): ?>
-                   add_log_object(<?= json_encode(logArray()) ?>);
+                                           add_log_object(<?= json_encode(logArray()) ?>);
     <? endif ?>
                 $(".tablesorter").tablesorter();
     <?php echo $js ?>
@@ -295,6 +328,12 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
     <?php
 }
 
+/**
+ * Outputs the end of the header and the begin of the content container and according to the $has_sidebar global the actions sidebar
+ * 
+ * @global boolean $has_sidebar has the page to be echoed with the actions sidebar?
+ * @global Environment $env
+ */
 function tpl_no_subnav() {
     global $has_sidebar, $env;
     ?>
@@ -308,7 +347,14 @@ function tpl_no_subnav() {
                 <?php
             }
 
-            function tpl_subnav($url_part, $page, $pagecount, $phrase) {
+            /**
+             * Outputs the end of the header and the begin of the content container with an search sidebar and according to the $has_sidebar global the actions sidebar
+             * 
+             * @global boolean $has_sidebar has the page to be echoed with the actions sidebar?
+             * @global Environment $env
+             * @param string $phrase the search phrase
+             */
+            function tpl_subnav($phrase) {
                 global $has_sidebar, $env;
                 ?>
                 <div class="subnav">
@@ -323,6 +369,16 @@ function tpl_no_subnav() {
                         <?php
                     }
 
+                    /**
+                     * Outputs the item container header, if one of the paramters is "" this paramter will be ignored and the corresponding html will not be echoed
+                     * 
+                     * @param string $title title of the item, if empty string, no header is echoed
+                     * @param string $icon title icon
+                     * @param string $classapp css class append to the conainer css class attribute
+                     * @param string $id id of item container
+                     * @param string $link link of the title
+                     * @param string $link_title title of the link of the title
+                     */
                     function tpl_item_before($title = "", $icon = "", $classapp = "", $id = "", $link = "", $link_title = "") {
                         ?>
                         <div class="well item <?php echo $classapp ?>" id="<?php echo $id ?>" style="width: auto">
@@ -339,6 +395,15 @@ function tpl_no_subnav() {
                                 <?php
                             }
 
+                            /**
+                             * Outputs the item container header, if one of the paramters is "" this paramter will be ignored and the corresponding html will not be echoed
+                             * 
+                             * @param array $form_attrs attributes added to the form tag, array(name => value), i.e 'method' => 'POST'
+                             * @param string $title title of the item, if empty string, no header is echoed
+                             * @param string $icon title icon
+                             * @param string $classapp css class append to the conainer css class attribute
+                             * @param string $id id of item container
+                             */
                             function tpl_item_before_form($form_attrs = array(), $title = "", $icon = "", $classapp = "", $id = "") {
                                 $attr = "";
                                 foreach ($form_attrs as $key => $val) {
@@ -356,6 +421,9 @@ function tpl_no_subnav() {
                                             <?php
                                         }
 
+                                        /**
+                                         * Outputs the html code closing the item container
+                                         */
                                         function tpl_item_after() {
                                             ?>
                                         </div>
@@ -363,6 +431,11 @@ function tpl_no_subnav() {
                                 <?php
                             }
 
+                            /**
+                             * Outputs the html code closing the form item container
+                             * 
+                             * @param array $args array of buttons (name => array("text" => ..., ["classapp" => ..., "type" => ..., "icon" => ..., "title" => ...])
+                             */
                             function tpl_item_after_form($args) {
                                 ?>
                             </div>
@@ -379,6 +452,11 @@ function tpl_no_subnav() {
                         <?php
                     }
 
+                    /**
+                     * Outputs the html code closing the item container with buttons in the footer
+                     * 
+                     * @param array $args array of buttons (name => array("text" => ..., ["classapp" => ..., "type" => ..., "icon" => ..., "title" => ...])
+                     */
                     function tpl_item_after_buttons($args) {
                         ?>
                     </div>
@@ -395,6 +473,15 @@ function tpl_no_subnav() {
                 <?php
             }
 
+            /**
+             * Outputs the html code closing the item container with one send button in the footer
+             * 
+             * @param string $title text on the button
+             * @param string $name name attribute of the button
+             * @param string $onclick JS code in the onclick attribute of the button, if empty string, a closing form tag is added and the the type attribute of the button will be "submit"
+             * @param string $footerhtmlapp html echoed after the button in the item footer
+             * @param string $classapp css class appended to class attribute of the footer container tag
+             */
             function tpl_item_after_send($title = "Senden", $name = "send", $onclick = "", $footerhtmlapp = "", $classapp = "") {
                 ?>
             </div>
@@ -408,6 +495,15 @@ function tpl_no_subnav() {
         <?php
     }
 
+    /**
+     * Outputs the html code closing the item container with two buttons in the footer, if both oncklick parameters are empty strings, a closing form tag will be added
+     * and the the type attribute of the button with en empty onclick attribute will be "submit"
+     * 
+     * @param string $title1 text on the first button
+     * @param string $title2 text on the second button
+     * @param string $onclick1 JS code in the onclick attribute of the first button
+     * @param string $onclick2 JS code in the onclick attribute of the second button
+     */
     function tpl_item_after_send_anonymous($title1 = "Senden", $title2 = "Anonym senden", $onclick1 = "", $onclick2 = "") {
         ?>
     </div>
@@ -421,11 +517,22 @@ function tpl_no_subnav() {
     <?php
 }
 
+/**
+ * Add the JavaScript Code to the global js variable and append an semicolon if needed
+ * 
+ * @global string $js JS code to append to the JS code in the footer 
+ * @param string $code JS code
+ */
 function tpl_add_js($code) {
     global $js;
     $js .= ($js != "" ? "\n" : "") . $code . (substr($code, strlen($code) - 1) != ';' ? ';' : '');
 }
 
+/**
+ * Outputs the impress page 
+ * 
+ * @global Environment $env
+ */
 function tpl_impress() {
     global $env;
     tpl_before("impress");
@@ -435,6 +542,11 @@ function tpl_impress() {
     tpl_after();
 }
 
+/**
+ * Outputs the privacy policy page 
+ * 
+ * @global Environment $env
+ */
 function tpl_privacy_policy() {
     global $env;
     tpl_before("privacy");
@@ -444,16 +556,33 @@ function tpl_privacy_policy() {
     tpl_after();
 }
 
-//TODO doesn't work
-function tpl_html5_please() {
-    ?>
-    <div id="h5p-message"></div>
-    <script async>
-        //        Modernizr.html5please = function(opts){ var passes = true; var features = opts.features.split('+'); var feat; for (var i = -1, len = features.length; ++i < len; ){ feat = features[i]; if (Modernizr[feat] === undefined) window.console && console.warn('Modernizr.' + feat + ' test not found'); if (Modernizr[feat] === false) passes = false; } if (passes){ opts.yep && opts.yep(); return passes; } Modernizr.html5please.cb = opts.nope; var script = document.createElement('script'); var ref = document.getElementsByTagName('script')[0]; var url = 'http://api.html5please.com/' + features.join('+') + '.json?callback=Modernizr.html5please.cb' + (opts.options ? ('&' + opts.options) : '') + '&html'; script.src = url; ref.parentNode.insertBefore(script, ref); return false; }; Modernizr.html5please({ features: "svg-css+svg-img+css-transitions+fontface+form-validation+forms+datalist+filereader", options: "texticon", yep: function(){ /* put your own initApp() here */ }, nope: function(a){ document.getElementById("h5p-message").innerHTML=a.html; } })
-    </script>
-    <?
+/**
+ * Outputs the terms of use page
+ * 
+ * @global Environment $env
+ */
+function tpl_terms_of_use() {
+    global $env;
+    tpl_before("terms_of_use");
+    tpl_item_before();
+    echo formatText($env->terms_of_use);
+    tpl_item_after();
+    tpl_after();
 }
 
+////TODO doesn't work
+/*function tpl_html5_please() {
+    ?>
+    <div id="h5p-message"></div>
+//    <script async>
+//        //        Modernizr.html5please = function(opts){ var passes = true; var features = opts.features.split('+'); var feat; for (var i = -1, len = features.length; ++i < len; ){ feat = features[i]; if (Modernizr[feat] === undefined) window.console && console.warn('Modernizr.' + feat + ' test not found'); if (Modernizr[feat] === false) passes = false; } if (passes){ opts.yep && opts.yep(); return passes; } Modernizr.html5please.cb = opts.nope; var script = document.createElement('script'); var ref = document.getElementsByTagName('script')[0]; var url = 'http://api.html5please.com/' + features.join('+') + '.json?callback=Modernizr.html5please.cb' + (opts.options ? ('&' + opts.options) : '') + '&html'; script.src = url; ref.parentNode.insertBefore(script, ref); return false; }; Modernizr.html5please({ features: "svg-css+svg-img+css-transitions+fontface+form-validation+forms+datalist+filereader", options: "texticon", yep: function(){ /* put your own initApp() here */ }, nope: function(a){ document.getElementById("h5p-message").innerHTML=a.html; } })
+//    </script>
+//    <?
+//}
+
+/**
+ * Outputs the noscript container, witch shows a warning to users who haven't enabled JavaScript
+ */
 function tpl_enable_javascript() {
     ?>
     <noscript>

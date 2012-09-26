@@ -25,11 +25,10 @@ class AjaxHandler extends ToroHandler {
         switch ($slug) {
             case "last_actions":
                 if (isset($_GET["id"])) {
-                    jsonAjaxResponse(function() {
-                                $actions_arr = Actions::getLastActions($_GET["id"]);
-                                tpl_actions($actions_arr);
-                                return array("last_action_id" => $actions_arr->getLastActionID());
-                            });
+                    jsonAjaxResponseStart();
+                    $actions_arr = Actions::getLastActions($_GET["id"]);
+                    tpl_actions($actions_arr);
+                    jsonAjaxResponseEndSend(array("last_action_id" => $actions_arr->getLastActionID()));
                 }
                 break;
         }

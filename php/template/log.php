@@ -16,6 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * Outputs the log container and the handlebars template code
+ */
 function tpl_log_container() {
     ?>
     <div id="log" class="resizable">
@@ -26,6 +29,9 @@ function tpl_log_container() {
     tpl_log_hbs_template();
 }
 
+/**
+ * Outputs the handlebars template code
+ */
 function tpl_log_hbs_template() {
     ?>
     <script id="log_table_template" type="text/x-handlebars-template">

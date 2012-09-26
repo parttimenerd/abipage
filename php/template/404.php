@@ -17,6 +17,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * Outputs the '404 Not Found' page with the suitable header
+ * 
+ * @global Environment $env
+ */
 function tpl_404() {
     global $env;
     header('HTTP/1.0 404 Not Found');

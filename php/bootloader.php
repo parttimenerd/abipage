@@ -18,6 +18,9 @@
  */
 
 if (!defined("PHP_DIR")) {
+    /**
+     * @var String
+     */
     define("PHP_DIR", dirname(__FILE__));
 }
 
@@ -30,10 +33,6 @@ $filearr = array();
 
 if (!function_exists('load')) {
 
-
-    /**
-     * Registriert eine Autoload-Methode, die benötigte Klassen dynamisch nachlÃ¤dt
-     */
     function load($classname) {
         global $filearr;
         if (empty($filearr)) {

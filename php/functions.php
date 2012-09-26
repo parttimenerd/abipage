@@ -164,7 +164,7 @@ $upload_dir_size = -1;
 function get_upload_dir_size() {
     global $upload_dir_size, $env;
     if ($upload_dir_size == -1 || $upload_dir_size == null) {
-        $upload_dir_size = get_dir_size(BASE_DIR . $env->main_dir . '/' . $env->upload_path);
+        $upload_dir_size = get_dir_size(BASE_DIR . '/' . $env->upload_path);
     }
     return $upload_dir_size;
 }

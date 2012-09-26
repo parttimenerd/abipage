@@ -16,6 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * Outputs the news list (as a page when as_page is true)
+ * 
+ * @param array $news array of news to bew shown
+ * @param boolean $as_page output as a page?
+ */
 function tpl_news_list($news, $as_page = true) {
     if ($as_page) {
         tpl_before("news");
@@ -31,12 +37,22 @@ function tpl_news_list($news, $as_page = true) {
     }
 }
 
+/**
+ * Outputs a news item
+ * 
+ * @param array $news_item array("title" => ..., "content" => ..., "time" => ..., "userid" => ...)
+ */
 function tpl_news($news_item) {
     tpl_item_before($news_item["title"], "newspaper", "content-item news-item");
     echo formatText($news_item["content"]);
     tpl_item_after_news_item($news_item);
 }
 
+/**
+ * Outputs the clsoing html of a news item with a footer
+ * 
+ * @param array $news_item array("time" => ..., "userid" => ...)
+ */
 function tpl_item_after_news_item($news_item) {
     ?>
     </div>
@@ -51,6 +67,11 @@ function tpl_item_after_news_item($news_item) {
     <?
 }
 
+/**
+ * Outputs the news write form
+ * 
+ * @param boolean $as_page output as page
+ */
 function tpl_write_news($as_page = true) {
     if ($as_page) {
         tpl_before("news/write");

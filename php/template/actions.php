@@ -16,6 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * Outputs the actions sidebar
+ * 
+ * @global Environment $env
+ * @global KeyValueStore $store
+ */
 function tpl_actions_sidebar() {
     global $env, $store;
     ?>
@@ -39,16 +45,24 @@ function tpl_actions_sidebar() {
     <?php
 }
 
+/**
+ * Outputs the actions page
+ * 
+ * @param ActionArray $actions actions to echo
+ * @param type $as_page output as page with header and footer
+ * @param type $class_app css class appendix for the container (i.e. to hide it from desktop users with 'dektop-hidden')
+ */
 function tpl_actions_page(ActionArray $actions, $as_page = true, $class_app = "") {
     if ($as_page) {
         tpl_before("actions");
     }
     echo '<div class="action_list_container ' . $class_app . '">';
-    $actions->each(function($action) {
-                tpl_item_before("", "", "action action_list_item", 'action_' . $action["id"]);
-                tpl_action($action);
-                tpl_item_after();
-            });
+
+    foreach ($actions->getActionArray() as $action) {
+        tpl_item_before("", "", "action action_list_item", 'action_' . $action["id"]);
+        tpl_action($action);
+        tpl_item_after();
+    }
     echo '</div>';
     tpl_add_js('var last_action_id = ' . $actions->getLastActionID());
     if ($as_page) {
@@ -56,12 +70,28 @@ function tpl_actions_page(ActionArray $actions, $as_page = true, $class_app = ""
     }
 }
 
+/**
+ * Output an array of actions as list ('<ul>...</ul>')
+ * 
+ * @param ActionArray $actions actions to echo
+ */
 function tpl_actions(ActionArray $actions) {
-    $actions->each(function($action) {
-                tpl_action($action, true, '<li class="action action_list_item" id="action_' . $action["id"] . '">', '</li>');
-            });
+    echo '<ul>';
+    foreach ($actions->getActionArray() as $action) {
+        tpl_action($action, true, '<li class="action action_list_item" id="action_' . $action["id"] . '">', '</li>');
+    }
+    echo '</ul>';
 }
 
+/**
+ * Output an action item
+ * 
+ * @param array $action action item
+ * @param boolean $with_time print a tpl_timediff_span in front of the action text
+ * @param String $before_html html to be printed before the action text (and the tpl_timediff_span)
+ * @param String $after_html html to be printed after the action text
+ * @return String the url of the linked action item
+ */
 function tpl_action($action, $with_time = true, $before_html = '', $after_html = '') {
     echo $before_html;
     if ($with_time) {

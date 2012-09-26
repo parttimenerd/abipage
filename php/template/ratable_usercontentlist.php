@@ -16,6 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * Outputs the image page
+ * 
+ * @global Environment $env
+ * @param array $rucis array of RatableUserContentItems
+ * @param int $page current page number
+ * @param int $pages number of image pages, that can be shown
+ * @param string $phrase search phrase, written in to the searchbar
+ * @param boolean $as_page output as page?
+ */
 function tpl_image_list($rucis, $page, $pages, $phrase = "", $as_page = true) {
     global $env;
     if ($as_page) {
@@ -46,6 +56,12 @@ function tpl_image_list($rucis, $page, $pages, $phrase = "", $as_page = true) {
     }
 }
 
+/**
+ * Outputs the upload image form
+ * 
+ * @global Environment $env
+ * @param boolean $with_descr allow the user to type in an description and a category for the uploaded page
+ */
 function tpl_image_upload_item($with_descr = true) {//"enctype" => "multipart/form-data"
     global $env;
     //tpl_item_before_form(array("id" => "file_upload", "enctype" => "multipart/form-data"), "Bild hochladen", "camera", "item-send");
@@ -77,6 +93,12 @@ function tpl_image_upload_item($with_descr = true) {//"enctype" => "multipart/fo
 </div>", "hide_when_unused");
 }
 
+/**
+ * Outputs an image item, with description, category and capture date
+ * 
+ * @global Environment $env
+ * @param RatableUserContentItem $ruci item to be echoed
+ */
 function tpl_image_item(RatableUserContentItem $ruci) {
     global $env;
     tpl_item_before("", "", "content-item", $ruci->id);
@@ -100,6 +122,16 @@ function tpl_image_item(RatableUserContentItem $ruci) {
     tpl_item_after_ruc($ruci);
 }
 
+/**
+ * Outputs the quote page
+ * 
+ * @global Environment $env
+ * @param array $rucis array of RatableUserContentItems
+ * @param int $page current page number
+ * @param int $pages number of image pages, that can be shown
+ * @param string $phrase search phrase, written in to the searchbar
+ * @param boolean $as_page output as page?
+ */
 function tpl_quote_list($rucis, $page, $pages, $phrase, $as_page = true) {
     global $env;
     if ($as_page) {
@@ -128,6 +160,9 @@ function tpl_quote_list($rucis, $page, $pages, $phrase, $as_page = true) {
     }
 }
 
+/**
+ * Outputs the write quote form
+ */
 function tpl_write_quote_item() {
     tpl_item_before("Zitat hinzufügen", "pencil", "item-send item-quote-send");
     ?>
@@ -139,8 +174,13 @@ function tpl_write_quote_item() {
     tpl_item_after_send_anonymous("Hinzufügen", "Anonym hinzufügen", "sendQuote(false, -1, '')", "sendQuote(true, -1, '')");
 }
 
-function tpl_write_quote_response_item_hbs($title = "item-response-template") {
-    ?><script id="<?= $title ?>" type="text/x-handlebars-template"><?
+/**
+ * Outputs the quote response item handlebars template code
+ * 
+ * @param string $id id of the template
+ */
+function tpl_write_quote_response_item_hbs($id = "item-response-template") {
+    ?><script id="<?= $id ?>" type="text/x-handlebars-template"><?
     tpl_item_before("", "", "item-send item-quote-send");
     ?>
         <input type="hidden" name="person" class="teacher_typeahead" value="{{teacher}}"/>
@@ -151,6 +191,11 @@ function tpl_write_quote_response_item_hbs($title = "item-response-template") {
     ?></script><?
 }
 
+/**
+ * Outputs a quote item
+ * 
+ * @param RatableUserContentItem $ruci quote item
+ */
 function tpl_quote_item(RatableUserContentItem $ruci) {
     if ($ruci->isResponse()) {
         tpl_item_before("", "", "content-item", $ruci->id, "", "");
@@ -161,6 +206,16 @@ function tpl_quote_item(RatableUserContentItem $ruci) {
     tpl_item_after_ruc($ruci);
 }
 
+/**
+ * Outputs the rumor page
+ * 
+ * @global Environment $env
+ * @param array $rucis array of RatableUserContentItems
+ * @param int $page current page number
+ * @param int $pages number of image pages, that can be shown
+ * @param string $phrase search phrase, written in to the searchbar
+ * @param boolean $as_page output as page?
+ */
 function tpl_rumor_list($rucis, $page, $pages, $phrase, $as_page = true) {
     global $env;
     if ($as_page) {
@@ -189,6 +244,9 @@ function tpl_rumor_list($rucis, $page, $pages, $phrase, $as_page = true) {
     }
 }
 
+/**
+ * Outputs the write rumor form
+ */
 function tpl_write_rumor_item() {
     tpl_item_before("Beitrag schreiben", "pencil", "item-send item-rumor-send");
     ?>
@@ -198,8 +256,13 @@ function tpl_write_rumor_item() {
     tpl_item_after_send_anonymous("Absenden", "Anonym absenden", "sendRumor(false, -1)", "sendRumor(true, -1)");
 }
 
-function tpl_write_rumor_response_item_hbs($title = "item-response-template") {
-    ?><script id="<?= $title ?>" type="text/x-handlebars-template"><?
+/**
+ * Outputs the rumor response item handlebars template code
+ * 
+ * @param string $id id of the template
+ */
+function tpl_write_rumor_response_item_hbs($id = "item-response-template") {
+    ?><script id="<?= $id ?>" type="text/x-handlebars-template"><?
     tpl_item_before("", "", "item-send item-rumor-send");
     ?>
         <textarea name="text" placeholder="..., dass " require="on">..., dass </textarea>
@@ -209,12 +272,22 @@ function tpl_write_rumor_response_item_hbs($title = "item-response-template") {
     ?></script><?
 }
 
+/**
+ * Outputs a rumor item
+ * 
+ * @param RatableUserContentItem $ruci rumor item
+ */
 function tpl_rumor_item(RatableUserContentItem $ruci) {
     tpl_item_before("", "", "content-item", $ruci->id);
     echo formatText($ruci->text);
     tpl_item_after_ruc($ruci);
 }
 
+/**
+ * Outputs the html code closing a RatableUserContent item container with an footer
+ * 
+ * @param RatableUserContentItem $ruci
+ */
 function tpl_item_after_ruc(RatableUserContentItem $ruci) {
     ?>
     </div>
@@ -238,6 +311,11 @@ function tpl_item_after_ruc(RatableUserContentItem $ruci) {
         tpl_response_to_div($ruci);
 }
 
+/**
+ * Outputs the responses container of the RatableUserContentItem
+ * 
+ * @param RatableUserContentItem $ruci
+ */
 function tpl_response_to_div(RatableUserContentItem $ruci) {
     ?>
     <div id="responses_to_<?= $ruci->id ?>" class="responses" to="<?= $ruci->id ?>">
@@ -259,18 +337,33 @@ function tpl_response_to_div(RatableUserContentItem $ruci) {
     <?
 }
 
+/**
+ * Outputs the item reponse span with an response button of this item
+ * 
+ * @param RatableUserContentItem $ruci item
+ */
 function tpl_item_response_to_span(RatableUserContentItem $ruci) {
     ?>
     <span class="response_to_item"><button class="btn" onclick="responseToItem('<?= $ruci->getMakeResponseToID() ?>', '<?= $ruci->hasPersonVal() ? $ruci->person : '' ?>')"><?php tpl_icon("speech_bubbles", "Antworten") ?> Antworten</span>
     <?
 }
 
+/**
+ * Outputs the delete span of the item
+ * 
+ * @param RatableUserContentItem $ruci item
+ */
 function tpl_item_delete_span(RatableUserContentItem $ruci) {
     ?>
     <span class="del_item"><?php tpl_icon("delete", "Löschen", "deleteItem('" . $ruci->id . "')") ?></span>
     <?php
 }
 
+/**
+ * Outputs the rating span of this item
+ * 
+ * @param RatableUserContentItem $ruci item
+ */
 function tpl_rating(RatableUserContentItem $ruci) {
     $can_rate = !Auth::isSameUser($ruci->userid);
     ?>
@@ -292,6 +385,13 @@ function tpl_rating(RatableUserContentItem $ruci) {
     <?php
 }
 
+/**
+ * Outputs the average rating span
+ * 
+ * @param int $rating current average rating
+ * @param int $count number of ratings
+ * @param array $data unused addional data
+ */
 function tpl_average($rating, $count = -1, $data = array()) {
     ?>
     <span class="average">

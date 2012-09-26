@@ -16,6 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * Outputs the Piwik Javscript Tracker code
+ * 
+ * @param string $site_id piwik id of the website
+ * @param string $url url of the website
+ * @param array $lines array of addional code lines added to the tracker code
+ * @param boolean $with_init also output the tracker init code?
+ * @param string $document_title title of the current document
+ */
 function tpl_piwik_js_tracker_code($site_id, $url, $lines, $with_init = true, $document_title = "") {
     ?>
     <!-- Piwik -->

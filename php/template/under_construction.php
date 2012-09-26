@@ -16,6 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * Outputs the under construction page
+ * 
+ * @global Environment $env
+ */
 function tpl_under_construction() {
     global $env;
     ?>

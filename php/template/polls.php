@@ -17,8 +17,10 @@
  */
 
 /**
+ * Outputs an array of polls as the polls page
  * 
- * @param array $polls array([typestr] => [array of polls]) 
+ * @param array $polls polls array([typestr] => [array of polls])
+ * @param boolean $show_results show poll results?
  */
 function tpl_polls($polls, $show_results = false) {
     tpl_before("polls");
@@ -66,10 +68,21 @@ function tpl_polls($polls, $show_results = false) {
     tpl_after();
 }
 
+/**
+ * Outputs an array of polls with their results as the polls page, alias of tpl_polls($polls, true)
+ * 
+ * @param array $polls polls array([typestr] => [array of polls])
+ */
 function tpl_poll_results($polls) {
     tpl_polls($polls, true);
 }
 
+/**
+ * Outputs a poll
+ * 
+ * @param Poll $poll
+ * @return null
+ */
 function tpl_poll(Poll $poll) {
     if ($poll == null)
         return;
@@ -90,6 +103,12 @@ function tpl_poll(Poll $poll) {
         </span></span><?
     }
 
+    /**
+     * Outputs the result of a poll as an content item
+     * 
+     * @param Poll $poll
+     * @return null
+     */
     function tpl_poll_result(Poll $poll) {
         if ($poll == null)
             return;
@@ -112,6 +131,11 @@ function tpl_poll(Poll $poll) {
     tpl_item_after();
 }
 
+/**
+ * Outputs the edit polls of poll management page
+ * 
+ * @param array $polls polls to be edited, polls can also be added with in this page
+ */
 function tpl_edit_polls($polls) {
     tpl_before("polls/edit");
     $i_polls = $polls;
@@ -143,6 +167,13 @@ function tpl_edit_polls($polls) {
     tpl_after();
 }
 
+/**
+ * Output the edit polls pane of poll type
+ * 
+ * @param int $type type of the polls
+ * @param array $polls polls to bew shown in this pane
+ * @param boolean $active is this pane marked as active in the tab container
+ */
 function tpl_edit_polls_pane($type, $polls, $active = false) {
     $typestr = Poll::getStringRepOfType($type);
         ?>
@@ -160,6 +191,11 @@ function tpl_edit_polls_pane($type, $polls, $active = false) {
     <?
 }
 
+/**
+ * Outputs the poll
+ * 
+ * @param Poll $poll
+ */
 function tpl_edit_poll(Poll $poll) {
     $id = $poll->getID();
     tpl_item_before("", $id, "form-horizontal edit_poll_item");
@@ -174,6 +210,9 @@ function tpl_edit_poll(Poll $poll) {
     tpl_item_after();
 }
 
+/**
+ * Outputs the edit new poll handlebars template, needed to create new polls within the poll edit or management page
+ */
 function tpl_edit_poll_hbs() {
     ?><script id="edit_poll_item_template" type="text/x-handlebars-template"><?
     tpl_item_before("", '{{type}}', "form-horizontal edit_poll_item");

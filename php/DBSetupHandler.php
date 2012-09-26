@@ -92,7 +92,7 @@ class DBSetupHandler extends ToroHandler {
                     User::create($_POST["root_name"], $_POST["root_mathcourse"], $_POST["root_mathteacher"], $_POST["root_mailadress"], $_POST["root_pwd"], User::ADMIN_MODE, 1);
                     Auth::login($_POST["root_name"], $_POST["root_pwd"]);
                     $prefs = new PreferencesHandler();
-                    $prefs->fillDBWithDefaultValues();
+                    $prefs->updateDB();
                     global $env;
                     $env = new Environment();
                     $prefs->get();

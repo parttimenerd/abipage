@@ -17,6 +17,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * Outputs the '500 Internal Server Error' page with the suitable header
+ * 
+ * @global Environment $env
+ */
 function tpl_500() {
     global $env;
     header('HTTP/1.0 500 Internal Server Error');

@@ -17,7 +17,11 @@
  */
 
 /**
-  $val_arr = array("value" => array("value" => "", "label" => "", "type" => "textarea|inputfield|checkbox|password|usermode|color|email", "css_class" => "", "js_onchange" => ""))
+ * Outputs a flat table
+ * 
+ * @param array $val_arr array("value" => array("value" => "", "label" => "", "type" => "textarea|inputfield|checkbox|password|usermode|color|email", "css_class" => "", "js_onchange" => ""))
+ * @param string $css_class css class of the table
+ * @see tpl_input
  */
 function tpl_pref_table($val_arr, $css_class = "") {
     ?>
@@ -36,6 +40,15 @@ function tpl_pref_table($val_arr, $css_class = "") {
     <?php
 }
 
+/**
+ * Outputs a categorized table
+ * 
+ * @param array $val_arr array("category" => array("type" => "table|table-list|list|dl-horizontal", "rows" => array("value" => array("value" => "", "label" => "", "type" => "textarea|inputfield|checkbox|password|usermode|color|email", "css_class" => "", "js_onchange" => ""))))
+ * @param int $id id of the t
+ * @param string $css_class css class of the table
+ * @see tpl_pref_table_category_part
+ * @see tpl_input
+ */
 function tpl_pref_table_categorized($val_arr, $id = "", $css_class = "") {
     if ($id == "")
         $id = Auth::random_string(10);
@@ -49,6 +62,14 @@ function tpl_pref_table_categorized($val_arr, $id = "", $css_class = "") {
     <?php
 }
 
+/**
+ * Outputs a part of a categorized table
+ * 
+ * @param int $container_id id of the container
+ * @param string $category_title category
+ * @param array $val_arr array("rows" => array("value" => array("value" => "", "label" => "", "type" => "textarea|inputfield|checkbox|password|usermode|color|email", "css_class" => "", "js_onchange" => "")))
+ * @see tpl_input
+ */
 function tpl_pref_table_category_part($container_id, $category_title, $val_arr) {
     $id = isset($val_arr["id"]) ? $val_arr["id"] : $category_title;
     $mode = isset($val_arr["mode"]) ? $val_arr["mode"] : "";
@@ -115,6 +136,13 @@ function tpl_pref_table_category_part($container_id, $category_title, $val_arr) 
     <?php
 }
 
+/**
+ * Outputs the setup page
+ * 
+ * @param array $val_arr array of preference inputs
+ * @param string $error_str error string, if an error occured during the setup
+ * @see tpl_input
+ */
 function tpl_dbsetup($val_arr, $error_str = "") {
     //tpl_before("", "Setup");
     ?>
@@ -136,6 +164,14 @@ function tpl_dbsetup($val_arr, $error_str = "") {
     //tpl_after();
 }
 
+/**
+ * Outputs the preferences page
+ * 
+ * @param array $val_arr array of the preference value, categorized
+ * @see tpl_pref_table_categorized
+ * @see tpl_pref_table_category
+ * @see tpl_input
+ */
 function tpl_preferences($val_arr) {
     tpl_before("preferences", "Einstellungen");
     if (Auth::canModifyPreferences())

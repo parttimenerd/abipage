@@ -16,6 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * Outputs the userlist page
+ * 
+ * @param array $usernamearr array of user names, array(array("both" => ...), ...)
+ */
 function tpl_userlist($usernamearr) {
     tpl_before("user/all", "Schülerliste", "");
     tpl_item_before("", "", "userlist");
@@ -33,6 +38,11 @@ function tpl_userlist($usernamearr) {
     tpl_after();
 }
 
+/**
+ * Outputs the preferences page of this user
+ * 
+ * @param User $user
+ */
 function tpl_user_prefs(User $user) {
     tpl_before("user/me/preferences");
     tpl_item_before_form(array(), "", "", "userprefs");
@@ -50,7 +60,13 @@ function tpl_user_prefs(User $user) {
     tpl_after();
 }
 
-function tpl_user($user) {
+/**
+ * Outputs the user page of this user
+ * 
+ * @global Environment $env
+ * @param User $user
+ */
+function tpl_user(User $user) {
     global $env;
     if (Auth::isSameUser($user)) {
         tpl_before("user/me");
@@ -70,6 +86,11 @@ function tpl_user($user) {
     tpl_after();
 }
 
+/**
+ * Outputs the write comment form
+ *  
+ * @global Environment $env
+ */
 function tpl_user_write_comment() {
     global $env;
     tpl_item_before("Kommentar schreiben", "pencil", "write_comment");
@@ -84,6 +105,12 @@ function tpl_user_write_comment() {
     tpl_item_after_send_anonymous("Absenden", "Anonym absenden", "sendUserComment(false)", "sendUserComment(true)");
 }
 
+/**
+ * Outputs a user comment
+ * 
+ * @param mixed $user user or user id
+ * @param array $comment user comment
+ */
 function tpl_user_comment($user, $comment) {
     tpl_item_before("", "", $comment["notified_as_bad"] ? " notified_as_bad" : "", $comment["id"]);
     echo $comment["text"];
@@ -123,17 +150,10 @@ function tpl_user_comment($user, $comment) {
     <?php
 }
 
+/**
+ * Outputs the user page, with results
+ * TODO to be developed
+ */
 function tpl_user_page() {
     
-}
-
-function tpl_item_after_user($time, $user) {
-    ?>
-    </div>
-    <div class="item-footer">
-        <?php tpl_time_span($time) ?>
-        <?php tpl_user_span($user) ?>
-    </div>
-    </div>
-    <?php
 }

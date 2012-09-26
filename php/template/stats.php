@@ -16,6 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * Ouputs the statictics page
+ * 
+ * @param array $teacher_with_quote_rating_and_count array of teacher arrays with their quote stats, array("ismale" => ..., "last_name" => ..., "quote_count" => ..., "perc" => ..., "quote_rating" => ...)
+ * @param array $teacher_with_rumor_rating_and_count array of teacher arrays with their rumor stats, array("ismale" => ..., "last_name" => ..., "rumor_count" => ..., "perc" => ..., "rumor_rating" => ...)
+ */
 function tpl_stats_page($teacher_with_quote_rating_and_count, $teacher_with_rumor_rating_and_count) {
     tpl_before("stats", "Statistik");
     $tarr = $teacher_with_quote_rating_and_count;

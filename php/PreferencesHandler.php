@@ -17,11 +17,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * Handles the preferences page
+ */
 class PreferencesHandler extends ToroHandler {
 
+    /**
+     * Contains the preferences, organized in arrays to simply their presentation on the page
+     * @var array
+     */
     private $pref_vals_visu = array();
+
+    /**
+     * Contains the preferences in a flat array
+     * @var array
+     */
     private $pref_vals = array();
 
+    /**
+     * Fills the pref-vals_visu and the pref_vals array with the current preferences
+     */
     public function __construct() {
         parent::__construct();
         $this->pref_vals_visu = array(
@@ -154,6 +169,8 @@ Wenn ja, sollte Piwik installiert sein und diese Website hinzugefügt worden sei
                     "show_logs" => array("default" => "false", "label" => "Werden die Loggingnachrichten den Admins angezeigt?", "type" => "checkbox"),
                     "auto_update_interval" => array("default" => "15000", "label" => "Pause zwischen zwei Aktualisierungsvorgängen von z.B. der Aktionenspalte in Millisekunden", "type" => "number")
             )));
+        $this->loadDefaultVals();
+        $this->updatePrefVisuArr();
         foreach ($this->pref_vals_visu as $key => $arr) {
             if (isset($arr["rows"]))
                 $arr = $arr["rows"];
@@ -163,6 +180,12 @@ Wenn ja, sollte Piwik installiert sein und diese Website hinzugefügt worden sei
         }
     }
 
+    /**
+     * Returns the default value of the preference
+     * 
+     * @param String $var preference name
+     * @return mixed default value
+     */
     public function getDefault($var) {
         $val = $this->pref_vals[$var]["default"];
         if ($val == "false" || $val == "true") {
@@ -171,12 +194,16 @@ Wenn ja, sollte Piwik installiert sein und diese Website hinzugefügt worden sei
         return $val;
     }
 
+    /**
+     * Has the preference a default value?
+     * @param String $var preference name
+     * @return boolean
+     */
     public function hasDefault($var) {
         return isset($this->pref_vals[$var]);
     }
 
     public function get() {
-        $this->loadDefaultVals();
         $this->updatePrefVisuArr();
         tpl_preferences($this->pref_vals_visu);
     }
@@ -190,7 +217,7 @@ Wenn ja, sollte Piwik installiert sein und diese Website hinzugefügt worden sei
                     $this->pref_vals[$key]["default"] = str_replace("\'", "&apos;", str_replace('\"', "&quot;", $_POST[$key]));
                 }
             }
-            $this->fillDBWithDefaultValues();
+            $this->updateDB();
             global $env;
             $env = new Environment();
             $this->get();
@@ -202,12 +229,21 @@ Wenn ja, sollte Piwik installiert sein und diese Website hinzugefügt worden sei
         }
     }
 
+    /**
+     * Updates the pref_val_visu array with the current values of the pref_vals array
+     */
     public function updatePrefVisuArr() {
         foreach ($this->pref_vals as $key => $value) {
             $this->setPrefVisuVal($key, $value);
         }
     }
 
+    /**
+     * Set the value of the preference in the pref_visu_vals array
+     * 
+     * @param string $name preference name
+     * @param mixed $value new value
+     */
     private function setPrefVisuVal($name, $value) {
         foreach ($this->pref_vals_visu as $key => $arr) {
             if (isset($arr["rows"])) {
@@ -228,7 +264,10 @@ Wenn ja, sollte Piwik installiert sein und diese Website hinzugefügt worden sei
         }
     }
 
-    public function fillDBWithDefaultValues() {
+    /**
+     * Updates the database with the new preference values
+     */
+    public function updateDB() {
         $db = Database::getConnection();
         foreach ($this->pref_vals as $key => $value) {
             $value["default"] = str_replace("'", "&apos;", str_replace('"', "&quot;", $value["default"]));
@@ -241,6 +280,9 @@ Wenn ja, sollte Piwik installiert sein und diese Website hinzugefügt worden sei
         }
     }
 
+    /**
+     * Loads the default values of the preferences from the database into the pref_vals array
+     */
     private function loadDefaultVals() {
         $db = Database::getConnection();
         $res = $db->query("SELECT * FROM " . DB_PREFIX . "preferences");

@@ -16,6 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * Outputs an infobox
+ * 
+ * @param string $strong_text bold text
+ * @param string $message_text info text
+ * @param string $href link url of this infobox, if non empty string, the infobox will be surrounded by a link tag with this url
+ */
 function tpl_infobox($strong_text, $message_text, $href = "") {
     ?>
     <?= $href != "" ? ('<a href="' . $href . '">') : '' ?>
@@ -29,6 +36,13 @@ function tpl_infobox($strong_text, $message_text, $href = "") {
     <?php
 }
 
+/**
+ * Outputs the user mode combobox
+ * 
+ * @param string $name name attribute
+ * @param int $preset_modenum active mode
+ * @param boolean $echo_all show all user modes
+ */
 function tpl_usermode_combobox($name, $preset_modenum = User::NORMAL_MODE, $echo_all = false) {
     $arr = array(
         User::NORMAL_MODE => "Normal",
@@ -49,6 +63,12 @@ function tpl_usermode_combobox($name, $preset_modenum = User::NORMAL_MODE, $echo
     <?php
 }
 
+/**
+ * Return the string representation of the user mode
+ * 
+ * @param int $mode user mode
+ * @return string string representation
+ */
 function tpl_usermode_to_text($mode) {
     $arr = array(
         User::ADMIN_MODE => "Administrator",
@@ -60,7 +80,13 @@ function tpl_usermode_to_text($mode) {
     return $arr[isset($arr[$mode]) ? $mode : User::NORMAL_MODE];
 }
 
-function tpl_get_user_subtitle($user) {
+/**
+ * Returns the subtitle of the user
+ * 
+ * @param User $user
+ * @return string subtitle
+ */
+function tpl_get_user_subtitle(User $user) {
     $html = "";
     if ($user->getMathCourse() > 0) {
         $html .= "Mathekurs: " . $user->getMathCourse();
@@ -77,6 +103,13 @@ function tpl_get_user_subtitle($user) {
     return $html;
 }
 
+/**
+ * Outputs the time span of the timestamp
+ * 
+ * @param int $time unix time stamp
+ * @param boolean $with_icon show clock icon?
+ * @param string $class content of the css class attribute of the span
+ */
 function tpl_time_span($time, $with_icon = true, $class = "time") {
     ?>
     <span class="<?php echo $class ?>"><?php if ($with_icon) tpl_icon("clock") ?> <?php echo date("d.m.y H:i", $time) ?></span>
@@ -102,6 +135,12 @@ function tpl_user_span($user_id = -1, $with_icon = true) {
     <?php
 }
 
+/**
+ * Returns the full url for the given relative url
+ * 
+ * @param string $relative_url
+ * @return string full url
+ */
 function tpl_url($relative_url) {
     if (substr($relative_url, 0, 4) != "http") {
         return URL . '/' . str_replace(' ', '_', $relative_url);
@@ -110,8 +149,22 @@ function tpl_url($relative_url) {
     }
 }
 
+/**
+ * array("id" => "username", ...)
+ * 
+ * @var array
+ */
 $id_username_dic = array();
 
+/**
+ * Outputs the userlink for a given user
+ * 
+ * @global array $id_username_dic array("id" => "username", ...)
+ * @global Environment $env
+ * @param mixed $id_or_name name of id of the user
+ * @param boolean $last_name_first is the last name shown before the first name?
+ * @return string url of the user page
+ */
 function tpl_userlink($id_or_name, $last_name_first = false) {
     global $id_username_dic, $env;
     if ($id_or_name != "") {
@@ -137,6 +190,16 @@ function tpl_userlink($id_or_name, $last_name_first = false) {
     }
 }
 
+/**
+ * Outputs or return the user last visit time span, if the current user is the same as the given user
+ * 
+ * @global array $id_username_dic array("id" => "username", ...)
+ * @global Environment $env
+ * @param mixed $name_or_id name of id of the user 
+ * @param boolean $brackets show brackets arround the time?
+ * @param type $does_echo output the time span?
+ * @return string|boolean false, if the current user can't see the last visit time of the user, else html string if $does_echo is false
+ */
 function tpl_user_last_visit($name_or_id, $brackets = true, $does_echo = false) {
     global $id_username_dic, $env;
     if (is_numeric($name_or_id)) {
@@ -162,6 +225,14 @@ function tpl_user_last_visit($name_or_id, $brackets = true, $does_echo = false) 
     return false;
 }
 
+/**
+ * Outputs or returns a time difference span
+ * 
+ * @param int $timediff time difference
+ * @param boolean $does_echo output the html code?
+ * @param boolean $only_time output/return only time span
+ * @return string htlm code if $does_echo is false
+ */
 function tpl_timediff_span($timediff, $does_echo = true, $only_time = false) {
     $text = "";
     $arr = array(
@@ -190,6 +261,12 @@ function tpl_timediff_span($timediff, $does_echo = true, $only_time = false) {
     }
 }
 
+/**
+ * Outputs the text
+ * 
+ * @param string $text
+ * @param boolean $format_with_markdown format the text as Markdown
+ */
 function tpl_text($text, $format_with_markdown = false) {
     if ($format_with_markdown) {
         $text = Markdown($text);
@@ -197,6 +274,14 @@ function tpl_text($text, $format_with_markdown = false) {
     echo $text;
 }
 
+/**
+ * Output the color selector
+ * 
+ * @param string $name name of the input
+ * @param string $default_value value of the input
+ * @param string $js_onchange onchange JavaScript code of the input
+ * @param string $id id of the input
+ */
 function tpl_color_selector($name, $default_value = "#ff0000", $js_onchange = "", $id = "") {
     if ($id == "") {
         $id = $name . rand(0, 100);
@@ -235,6 +320,16 @@ function tpl_color_selector($name, $default_value = "#ff0000", $js_onchange = ""
     <?php
 }
 
+/**
+ * Outputs the icon
+ * 
+ * @param string $name name of the icon
+ * @param string $title value of the title attribute of the icon img tag
+ * @param string $onclick value of the onclick attribute of the icon img tag
+ * @param string $class_app value appended to the css class attribute of the icon img tag
+ * @param boolean $has_container is it surrounded by an container?
+ * @param string $format format of the icon
+ */
 function tpl_icon($name, $title = "", $onclick = "", $class_app = "", $has_container = false, $format = "svg") {
     if ($has_container)
         echo '<div class="icon-container ' . $name . ' ' . $class_app . '">';
@@ -243,12 +338,26 @@ function tpl_icon($name, $title = "", $onclick = "", $class_app = "", $has_conta
         echo '</div>';
 }
 
+/**
+ * Outputs an popover
+ * 
+ * @param string $text popover text
+ * @param string $title title of the popover
+ * @param string $content content of the popover
+ * @param string $class content of the css class attribute of the popover
+ */
 function tpl_popover($text, $title, $content, $class = "") {
     ?>
     <a href="#" rel="popover" data-content="<?php echo $content ?>" data-original-title="<?php echo $title ?>" class="<?php echo $class ?>"><?php echo $text ?></a>
     <?php
 }
 
+/**
+ * Outputs a datalist html element
+ * 
+ * @param string $id id of the datalist
+ * @param array $stringarr data line array
+ */
 function tpl_datalist($id, $stringarr) {
     ?>
     <datalist <?= $id != "" ? ('id="' . $id . '"') : "" ?>>
@@ -260,8 +369,9 @@ function tpl_datalist($id, $stringarr) {
 }
 
 /**
+ * Outputs an html input element
  * 
- * @param array $args name, value, placeholder, js_onchange (only with type = "color"), type
+ * @param array $args array("value" => "", "label" => "", "type" => "textarea|inputfield|checkbox|password|usermode|color|email", "css_class" => "", "js_onchange" => "")
  */
 function tpl_input($args = array("name" => "default", "value" => "", "placeholder" => "", "onchange" => "")) {
     global $editor_needed, $env;

@@ -16,10 +16,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-function tpl_admin($userarr, $comments) {
+/**
+ * Outputs the admin dashboard
+ * 
+ * @global Environment $env
+ * @param UserArray $userarr users to show in the user management table
+ * @param array $comments comments (comment = array('id' => ...)) to show in the user management table
+ */
+function tpl_admin(UserArray $userarr, $comments) {
     global $env;
     tpl_before('admin');
-    $uspace = get_upload_dir_size();
+    $uspace = @get_upload_dir_size();
     tpl_item_before("Uploadordner", "");
     ?>
     <table>

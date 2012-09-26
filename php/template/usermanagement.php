@@ -16,7 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-function tpl_usermanagement($userarr, $as_page = true, $urlapp = "") {
+/**
+ * Outputs the user management table
+ * 
+ * @param UserArray $userarr users to be shown in the table
+ * @param boolean $as_page output as page?
+ * @param string $urlapp '<form action="?' . $urlapp . '"'
+ */
+function tpl_usermanagement(UserArray $userarr, $as_page = true, $urlapp = "") {
     if ($as_page) {
         tpl_before("usermanagement");
         tpl_item_before();

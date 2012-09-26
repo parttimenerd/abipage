@@ -17,6 +17,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * Outputs the register page
+ * 
+ * @global Environment $env
+ */
 function tpl_register() {
     global $env;
     tpl_before("register");
@@ -41,6 +46,9 @@ function tpl_register() {
     tpl_after();
 }
 
+/**
+ * Outputs welcome wait for activation page
+ */
 function tpl_welcome_wait_for_activation() {
     tpl_before("", "Willkommen");
     tpl_item_before();
@@ -52,6 +60,9 @@ function tpl_welcome_wait_for_activation() {
     tpl_after();
 }
 
+/**
+ * Outputs the login page
+ */
 function tpl_login() {
     $id = Auth::getCookieID();
     $namestr = "";
@@ -71,6 +82,9 @@ function tpl_login() {
     tpl_after();
 }
 
+/**
+ * Outputs the forgot password page
+ */
 function tpl_forgot_password() {
     tpl_before("", "Passwort vergessen");
     tpl_item_before_form(array(), "", "", "forgot_password");
@@ -81,6 +95,11 @@ function tpl_forgot_password() {
     tpl_after();
 }
 
+/**
+ * Outputs the new password or password reset page
+ * 
+ * @param string $action_url action url of the form
+ */
 function tpl_new_password($action_url) {
     tpl_before("", "Neues Passwort");
     tpl_item_before_form(array("action" => $action_url), "", "", "new_password");
@@ -89,14 +108,5 @@ function tpl_new_password($action_url) {
     <input type="password" name="pwd_repeat" placeholder="" title="Neues Passwort wiederholen"/><br/>
     <?php
     tpl_item_after_send("Passwort setzen");
-    tpl_after();
-}
-
-function tpl_terms_of_use() {
-    global $env;
-    tpl_before("terms_of_use");
-    tpl_item_before();
-    echo formatText($env->terms_of_use);
-    tpl_item_after();
     tpl_after();
 }
