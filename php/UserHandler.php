@@ -105,12 +105,20 @@ class UserHandler extends ToroHandler {
                 $user->getID() != Auth::getUserID()) {
             $comment = $user->postUserComment($_POST["text"], isset($_POST["send_anonymous"]));
             jsonAjaxResponseStart();
-            if ($comment)
-                tpl_user_comment($user, $comment);
+            $data = array();
+            if ($comment) {
+                if ($comment["reviewed"] === 1) {
+                    tpl_user_comment($user, $comment);
+                    $data = array("reviewed" => true);
+                } else {
+                    tpl_user_comment_not_reviewed_info();
+                    $data = array("reviewed" => false);
+                }
+            }
             if (isset($_POST["send_anonymous"]))
                 PiwikHelper::addTrackGoalJS("Anonymous contribution");
             PiwikHelper::addTrackGoalJS("User commented", $_POST["text"]);
-            jsonAjaxResponseEndSend();
+            jsonAjaxResponseEndSend($data);
         } else if (isset($_POST["deleteComment"]) && Auth::canDeleteUserComment()) {
             User::deleteUserComment(intval($_POST["deleteComment"]));
             jsonAjaxResponse(array("id" => intval($_POST["deleteComment"])));

@@ -298,7 +298,7 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
     });
                 $("body").ready(function(){
     <? if (Auth::canViewLogs()): ?>
-                                           add_log_object(<?= json_encode(logArray()) ?>);
+                                                   add_log_object(<?= json_encode(logArray()) ?>);
     <? endif ?>
                 $(".tablesorter").tablesorter();
     <?php echo $js ?>
@@ -306,6 +306,7 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
                 max_file_size = <?= $env->max_upload_pic_size * 1048576 ?>;
     </script>
     <?= str_replace("&apos;", "'", str_replace("&quot;", '"', $env->footer_appendix)); ?>
+    <?php if ($env->has_piwik) PiwikHelper::echoJSTrackerCode(true, $document_title) ?>
     <? if (defined("UNMINIFIED_SOURCE") && UNMINIFIED_SOURCE !== false): ?>
         <script src="<?php echo tpl_url("js/libs/handlebars-1.0.0.beta.6.js") ?>"></script>
         <script src="<?php echo tpl_url("js/libs/bootstrap.js") ?>"></script>
@@ -322,7 +323,6 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
         <? endif ?>
         <script src="<?php echo tpl_url("js/min/scripts.min.js") ?>"></script>
     <? endif ?>
-    <?php if ($env->has_piwik) PiwikHelper::echoJSTrackerCode(true, $document_title) ?>
     </body>
     </html>
     <?php
@@ -570,15 +570,18 @@ function tpl_terms_of_use() {
     tpl_after();
 }
 
-////TODO doesn't work
-/*function tpl_html5_please() {
+/*
+ * TODO doesn't work
+ */
+
+function tpl_html5_please() {
     ?>
     <div id="h5p-message"></div>
-//    <script async>
-//        //        Modernizr.html5please = function(opts){ var passes = true; var features = opts.features.split('+'); var feat; for (var i = -1, len = features.length; ++i < len; ){ feat = features[i]; if (Modernizr[feat] === undefined) window.console && console.warn('Modernizr.' + feat + ' test not found'); if (Modernizr[feat] === false) passes = false; } if (passes){ opts.yep && opts.yep(); return passes; } Modernizr.html5please.cb = opts.nope; var script = document.createElement('script'); var ref = document.getElementsByTagName('script')[0]; var url = 'http://api.html5please.com/' + features.join('+') + '.json?callback=Modernizr.html5please.cb' + (opts.options ? ('&' + opts.options) : '') + '&html'; script.src = url; ref.parentNode.insertBefore(script, ref); return false; }; Modernizr.html5please({ features: "svg-css+svg-img+css-transitions+fontface+form-validation+forms+datalist+filereader", options: "texticon", yep: function(){ /* put your own initApp() here */ }, nope: function(a){ document.getElementById("h5p-message").innerHTML=a.html; } })
-//    </script>
-//    <?
-//}
+    <script async>
+    Modernizr.html5please = function(opts){ var passes = true; var features = opts.features.split('+'); var feat; for (var i = -1, len = features.length; ++i < len; ){ feat = features[i]; if (Modernizr[feat] === undefined) window.console && console.warn('Modernizr.' + feat + ' test not found'); if (Modernizr[feat] === false) passes = false; } if (passes){ opts.yep && opts.yep(); return passes; } Modernizr.html5please.cb = opts.nope; var script = document.createElement('script'); var ref = document.getElementsByTagName('script')[0]; var url = 'http://api.html5please.com/' + features.join('+') + '.json?callback=Modernizr.html5please.cb' + (opts.options ? ('&' + opts.options) : '') + '&html'; script.src = url; ref.parentNode.insertBefore(script, ref); return false; }; Modernizr.html5please({ features: "svg-css+svg-img+css-transitions+fontface+form-validation+forms+datalist+filereader", options: "texticon", yep: function(){ /* put your own initApp() here */ }, nope: function(a){ document.getElementById("h5p-message").innerHTML=a.html; } })
+    </script>
+    <?
+}
 
 /**
  * Outputs the noscript container, witch shows a warning to users who haven't enabled JavaScript

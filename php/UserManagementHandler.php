@@ -49,6 +49,8 @@ class UserManagementHandler extends ToroHandler {
                             $user->delete();
                         } else if (isset($_POST["setvisible"]) && Auth::canSetUserVisibility()) {
                             $user->setVisible(isset($_POST["visible"]));
+                        }else if (isset($_POST["mark"]) && Auth::canSetUserVisibility()) {
+                            $user->setUserMarkedToHaveHisCommentsBeAlwaysModerated(isset($_POST["is_marked"]));
                         }
                         $user->updateDB();
                     }

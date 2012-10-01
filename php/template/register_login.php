@@ -101,7 +101,7 @@ function tpl_forgot_password() {
  * @param string $action_url action url of the form
  */
 function tpl_new_password($action_url) {
-    tpl_before("", "Neues Passwort");
+    tpl_before("fo", "Neues Passwort");
     tpl_item_before_form(array("action" => $action_url), "", "", "new_password");
     ?>
     <input type="password" name="pwd" placeholder="" title="Neues Passwort"/><br/>

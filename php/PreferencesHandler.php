@@ -116,7 +116,7 @@ Das Copyright an den Beiträgen geht mit dem Hochladen bzw. Schreiben auf dieser
                         "label" => "Datenschutz-Seitentext",
                         "type" => "textarea"
                 ))),
-            "Forum" => array("rows" => array(
+            "Forum" => array("id" => "forum_prefs", "rows" => array(
                     "has_forum" => array("default" => "false", "label" => "Befindet sich ein SMF-Forum in einem Unterpfad des Seitenordners?", "type" => "checkbox"),
                     "forum_path" => array("default" => "smf", "label" => "Pfad des SMF-Forum-Hauptordners relativ zum Seitenhauptordner"),
                     "forum_url" => array("default" => URL . "/smf", "label" => "Url des SMF-Forums")
@@ -136,7 +136,7 @@ Das Copyright an den Beiträgen geht mit dem Hochladen bzw. Schreiben auf dieser
                     "max_uploads_size" => array("default" => "1000", "label" => "Maximale Gesammtgröße der hochgeladenden Bilder in MiB"),
                     "upload_path" => array("default" => "uploads", "label" => "Order in welchem die hochgeladenen Bilder gespeichert werden")
             )),
-            "Piwik" => array("rows" => array(
+            "Piwik" => array("id" => "piwik_prefs", "rows" => array(
                     "has_piwik" => array("default" => "false", "label" => "Wird Piwik als Webanalysis Werkzeug verwendet?
 Wenn ja, sollte Piwik installiert sein und diese Website hinzugefügt worden sein.", "type" => "checkbox"),
                     "piwik_site_id" => array("default" => "", "label" => "Piwik-Seiten-ID"),
@@ -164,7 +164,6 @@ Wenn ja, sollte Piwik installiert sein und diese Website hinzugefügt worden sei
                     "user_characteristics_editable" => array("default" => "false", "label" => "Kann der eigene Steckbrief bearbeitet werden?", "type" => "checkbox"),
                     "user_polls_open" => array("default" => "false", "label" => "Ist die Umfragenseite sichtbar?", "type" => "checkbox"),
                     "system_mail_adress" => array("default" => "", "label" => "Mailadresse der Seite"),
-                    "review_user_comments_automatically" => array("default" => "false", "label" => "Benutzerkommentare automatisch freischalten (nach maschineller Prüfung)", "type" => "checkbox"),
                     "response_allowed" => array("default" => "true", "label" => "Können Kommentare zu Stimmt es...-Beiträgen und Zitaten geschrieben werden?", "type" => "checkbox"),
                     "show_logs" => array("default" => "false", "label" => "Werden die Loggingnachrichten den Admins angezeigt?", "type" => "checkbox"),
                     "auto_update_interval" => array("default" => "15000", "label" => "Pause zwischen zwei Aktualisierungsvorgängen von z.B. der Aktionenspalte in Millisekunden", "type" => "number")

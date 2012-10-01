@@ -101,6 +101,11 @@ class UserArray implements ArrayAccess, Countable {
         return $container;
     }
 
+    /**
+     * 
+     * @param type $offset
+     * @return User
+     */
     public function offsetGet($offset) {
         return $this->container[$offset];
     }

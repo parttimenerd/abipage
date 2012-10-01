@@ -78,7 +78,7 @@ function tpl_admin(UserArray $userarr, $comments) {
                         <tr>
                             <td>
                                 <? if (!$same): ?>
-                                    <input type="checkbox" value="true" name="<?php echo $comment["id"] ?>"/>
+                                    <input type="checkbox" value="true" name="<?php echo $comment["id"] ?>" checked="checked"/>
                                 <? endif; ?>
                             </td>
                             <td><?php echo $comment["id"] ?></td>

@@ -97,6 +97,12 @@ class User {
         return User::getFromMySQLResult($db->query("SELECT * FROM " . DB_PREFIX . "user WHERE first_name LIKE '%" . $namearr[0] . "%' OR last_name LIKE '%" . $namearr[1] . "%'"));
     }
 
+    /**
+     * 
+     * @global type $db
+     * @param type $id
+     * @return User
+     */
     public static function getByID($id) {
         global $db;
         return User::getFromMySQLResult($db->query("SELECT * FROM " . DB_PREFIX . "user WHERE id=" . intval($id)));
@@ -205,36 +211,55 @@ class User {
     public function notifyUserComment($id) {
         $db = Database::getConnection();
         $db->query("UPDATE " . DB_PREFIX . "user_comments SET notified_as_bad=1 WHERE id=" . intval($id));
+        $comment = $this->getUserComment($id);
+        $this->setOtherUserMarkedToHaveHisCommentsBeAlwaysModerated($comment["commenting_userid"], true);
+        $this->updateDB();
     }
 
     public function unnotifyUserComment($id) {
         $db = Database::getConnection();
         $db->query("UPDATE " . DB_PREFIX . "user_comments SET notified_as_bad=0 WHERE id=" . intval($id));
+        $comment = $this->getUserComment($id);
+        $this->setOtherUserMarkedToHaveHisCommentsBeAlwaysModerated($comment["commenting_userid"], false);
+        $this->updateDB();
     }
 
-    public function postUserComment($text, $anonymous, $senduserid = null, $time = -1) {
+    public function postUserComment($text, $anonymous, $senduser_or_id = null, $time = -1) {
         global $env;
-        if ($senduserid == null) {
-            $senduserid = Auth::getUserID();
+        if ($senduser_or_id == null || is_numeric($senduser_or_id)) {
+            if ($senduser_or_id == null)
+                $senduser = Auth::getUser();
+            if (is_numeric($senduser_or_id))
+                $senduser = User::getByID($senduser_or_id);
+        } else {
+            $senduser = $senduser_or_id;
         }
         if ($time == -1) {
             $time = time();
         }
         $ctext = sanitizeInputText($text);
-        $db = Database::getConnection();
-        $reviewed = $env->review_user_comments_automatically && ReviewText::checkText($text);
-
-        $db->query("INSERT INTO " . DB_PREFIX . "user_comments(id, commented_userid, commenting_userid, text, time, notified_as_bad, reviewed, isanonymous)
-					VALUES(NULL, " . $this->id . ", " . intval($senduserid) . ", '" . $ctext . "', " . intval($time) . ", 0, " . ($reviewed ? 1 : 0) . ", " . intval($anonymous) . ")");
+        $reviewed = $this->checkUserComment($text, $anonymous, $senduser);
+        $this->db->query("INSERT INTO " . DB_PREFIX . "user_comments(id, commented_userid, commenting_userid, text, time, notified_as_bad, reviewed, isanonymous)
+					VALUES(NULL, " . $this->id . ", " . intval($senduser->getID()) . ", '" . $ctext . "', " . intval($time) . ", 0, " . ($reviewed ? 1 : 0) . ", " . intval($anonymous) . ")");
         if ($reviewed) {
             if ($this->sendEmailWhenBeingCommented()) {
-                $this->sendUserCommentedMail($anonymous ? null : $senduserid, $text);
+                $this->sendUserCommentedMail($anonymous ? null : $senduser, $text);
             }
         } else {
-            $env->sendModeratorMail("Kommentar von " . self::getStringRep($senduserid) . ($anonymous ? " [Anonym] " : "") . " bei " . $this->getName() . " wartet auf Freischaltung", "Kommentar:\n" . $text);
+            $env->sendModeratorMail("Kommentar von " . self::getStringRep($senduser) . ($anonymous ? " [Anonym] " : "") . " bei " . $this->getName() . " wartet auf Freischaltung", "Kommentar:\n" . $text);
         }
         Actions::addAction($this->db->insert_id, $this->getName(), "add_user_comment");
-        return array("id" => $db->insert_id, "commented_userid" => $this->id, "commenting_userid" => intval($senduserid), "text" => $ctext, "time" => intval($time), "notified_as_bad" => 0, "reviewed" => ($reviewed ? 1 : 0), "anonymous" => intval($anonymous));
+        return array("id" => $this->db->insert_id, "commented_userid" => $this->id, "commenting_userid" => intval($senduser->getID()), "text" => $ctext, "time" => intval($time), "notified_as_bad" => 0, "reviewed" => ($reviewed ? 1 : 0), "anonymous" => intval($anonymous));
+    }
+
+    /**
+     * 
+     * @param type $text
+     * @param type $anonymous
+     * @param User $senduser
+     */
+    public function checkUserComment($text, $anonymous, User $senduser) {
+        return !($senduser->isUserMarkedToHaveHisCommentsBeAlwaysModerated() || $this->isOtherUserMarkedToHaveHisCommentsBeAlwaysModerated($senduser->getID()));
     }
 
     public static function reviewUserComment($id) {
@@ -474,6 +499,32 @@ class User {
     public function updateAccessKey() {
         $this->data["access_key"] = Auth::random_string(self::ACCESS_KEY_LENGTH);
         $this->_has_new_access_key = true;
+    }
+
+    public function isOtherUserMarkedToHaveHisCommentsBeAlwaysModerated($id) {
+        return isset($this->data["marked_users"]) && array_key_exists($this->data["marked_users"][intval($id)]);
+    }
+
+    public function setOtherUserMarkedToHaveHisCommentsBeAlwaysModerated($id, $is_marked) {
+        if (!isset($this->data["marked_users"]))
+            $this->data["marked_users"] = array();
+        if (array_key_exists($this->data["marked_users"][intval($id)])) {
+            if ($is_marked) {
+                unset($this->data["marked_users"][intval($id)]);
+            }
+        } else {
+            if (!$is_marked) {
+                array_push($this->data["marked_users"], intval($id));
+            }
+        }
+    }
+
+    public function isUserMarkedToHaveHisCommentsBeAlwaysModerated() {
+        return isset($this->data["is_marked"]) && $this->data["is_marked"];
+    }
+
+    public function setUserMarkedToHaveHisCommentsBeAlwaysModerated($is_marked) {
+        $this->data["is_marked"] = $is_marked == true;
     }
 
 }

@@ -97,12 +97,12 @@ function tpl_user_write_comment() {
     ?>
     <textarea name="text" id="textarea" placeholder="Kommentar"></textarea>
     <?php
-    if ($env->review_user_comments_automatically)
-        tpl_infobox("", "Die Kommentare müssen maschinell, von einem " . (Auth::isModerator() ? "anderen " : "") . "Moderator oder Administrator freigeschalten werden.");
-    else
-        tpl_infobox("", "Die Kommentare müssen von einem " . (Auth::isModerator() ? "anderen " : "") . "Moderator oder Administrator freigeschalten werden.");
-
+    tpl_infobox("", "Die Kommentare müssen teilweise von einem " . (Auth::isModerator() ? "anderen " : "") . "Moderator oder Administrator freigeschalten werden.");
     tpl_item_after_send_anonymous("Absenden", "Anonym absenden", "sendUserComment(false)", "sendUserComment(true)");
+}
+
+function tpl_user_comment_not_reviewed_info(){
+    tpl_infobox("", "Ihr Kommentar muss noch moderiert werden");
 }
 
 /**

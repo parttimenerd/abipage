@@ -44,6 +44,7 @@ function tpl_usermanagement(UserArray $userarr, $as_page = true, $urlapp = "") {
                     <th>Modus</th>
                     <th>Aktiviert</th>
                     <th>Sichtbar</th>
+                    <th>Werden Kommentare moderiert?</th>
                     <th>Link</th>
                     <th>Einstellungen</th>
                 </tr>
@@ -65,6 +66,7 @@ function tpl_usermanagement(UserArray $userarr, $as_page = true, $urlapp = "") {
                         <td><?php echo tpl_usermode_to_text($user->getMode()) ?></td>
                         <td><?php echo $user->isActivated() ? "Ja" : "Nein" ?></td>
                         <td><?php echo $user->isVisible() ? "Ja" : "Nein" ?></td>
+                        <td><?php echo $user->isUserMarkedToHaveHisCommentsBeAlwaysModerated() ? "Ja" : "Nein" ?></td>
                         <td><a href="<?= tpl_url('user/' . $user->getName()) ?>">Link</a></td>
                         <td><a href="<?= tpl_url('user/' . $user->getName() . '/preferences') ?>">Einstellungen</a></td>
                     </tr>
@@ -84,8 +86,10 @@ function tpl_usermanagement(UserArray $userarr, $as_page = true, $urlapp = "") {
         (mit E-Mail Benachrichtigung der jeweiligen Benutzer)<br/>
         <? if (Auth::canSetUserVisibility()): ?>
         <input type="checkbox" checked="checked" name="visible" value="true" style="margin-right: 10px"/>Sichtbar?
-        <button class="btn" name="setvisible">Sichtbarkeit setzen</button>
+        <button class="btn" name="setvisible">Sichtbarkeit setzen</button><br/>
         <? endif ?>
+        <input type="checkbox" checked="checked" name="is_marked" value="true" style="margin-right: 10px"/>Werden Kommentare moderiert?
+        <button class="btn" name="mark">Setzen</button>
     </form>
     <?
     if ($as_page) {
