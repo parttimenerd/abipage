@@ -110,7 +110,7 @@ class User {
 
     public static function getByEMailAdress($mail_adress) {
         global $db;
-        return User::getFromMySQLResult($db->query("SELECT * FROM " . DB_PREFIX . "user WHERE mail_adress=" . sanitizeInputText($mail_adress)));
+        return User::getFromMySQLResult($db->query("SELECT * FROM " . DB_PREFIX . "user WHERE mail_adress='" . sanitizeInputText($mail_adress) . "'"));
     }
 
     public static function getByMode($mode) {

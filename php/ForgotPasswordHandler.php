@@ -20,26 +20,25 @@
 class ForgotPasswordHandler extends ToroHandler {
 
     public function get($slug = "") {
-        $arr = explode('/', substr($slug, 1));
-        if (count($arr) != 2) {
+        if (count($_GET) != 2) {
             tpl_forgot_password();
         } else {
-            $user = User::getByID(intval($arr[0]));
-            if ($user->getCryptStr() == $arr[1]) {
-                tpl_new_password("forgot_password" . $slug);
+            $user = User::getByID(intval($_GET["id"]));
+            if ($user->getCryptStr() == $_GET["key"]) {
+                tpl_new_password("forgot_password?id=" . intval($_GET["id"]) . "&key=" . $_GET["key"]);
             }
         }
     }
 
     public function post($slug = "") {
         global $env;
-        $arr = explode('/', substr($slug, 1));
-        if (count($arr) != 2) {
+        if (isset($_POST["name_or_email"])) {
             if (isset($_POST["name_or_email"])) {
-                $user = User::getByName($_POST["name_or_email"]) || User::getByEMailAdress($_POST["name_or_email"]);
+                $user = User::getByName($_POST["name_or_email"]);
+                if (!$user)
+                    $user = User::getByEMailAdress($_POST["name_or_email"]);
                 if ($user != null) {
-
-                    $link = tpl_link("forgot_password/" . $user->getID() . "/" . $user->getCryptStr());
+                    $link = tpl_url("forgot_password?id=" . $user->getID() . "&key=" . urlencode($user->getCryptStr()));
                     $text = "<html><body>
 	Hallo " . $user->getName() . ",<br/><br/>
 	sie haben das Zurücksetzen ihres Passworts angefordert, wenn das richtig ist, 
@@ -47,18 +46,19 @@ class ForgotPasswordHandler extends ToroHandler {
 	dann ignorieren sie diese E-Mail bitte einfach.<br/><br/>Ihr \"" . $env->title . "\"-Team
 	</body></html>";
                     $env->sendMail($user->getMailAdress(), "Passwort zurücksetzen", $text);
+                    tpl_forgot_password_mail_send();
                     return;
                 }
             }
         } else {
-            $user = User::getByID(intval($arr[0]));
-            if ($user->getCryptStr() == $arr[1]) {
+            $user = User::getByID(intval($_GET["id"]));
+            if ($user->getCryptStr() == $_GET["key"]) {
                 if (isset($_POST["pwd"]) && $_POST["pwd"] != "" && isset($_POST["pwd_repeat"]) && $_POST["pwd"] == $_POST["pwd_repeat"]) {
                     $user->setPassword($_POST["pwd"]);
                     Auth::login($user->getName(), $_POST["pwd"]);
-                    tpl_main();
+                    tpl_home();
                 } else {
-                    tpl_new_password("forgot_password" . $slug);
+                    tpl_new_password("forgot_password?id=" . intval($_GET["id"]) . "&key=" . $_GET["key"]);
                 }
             }
         }

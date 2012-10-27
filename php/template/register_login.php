@@ -1,5 +1,4 @@
 <?php
-
 /*
  * Copyright (C) 2012 Johannes Bechberger
  *
@@ -66,7 +65,7 @@ function tpl_welcome_wait_for_activation() {
 function tpl_login() {
     $id = Auth::getCookieID();
     $namestr = "";
-    if ($id != -1){
+    if ($id != -1) {
         $user = User::getByID($id);
         if ($user != null)
             $namestr = $user->getName();
@@ -86,12 +85,33 @@ function tpl_login() {
  * Outputs the forgot password page
  */
 function tpl_forgot_password() {
+    $id = Auth::getCookieID();
+    $mailstr = "";
+    if ($id != -1) {
+        $user = User::getByID($id);
+        if ($user != null)
+            $mailstr = $user->getMailAdress();
+    }
     tpl_before("", "Passwort vergessen");
     tpl_item_before_form(array(), "", "", "forgot_password");
     ?>
-    <input type="text" name="name_or_email" title="Name oder E-Mail-Adresse" placeholder="Name oder E-Mail-Adresse"/><br/>
+    <input type="text" name="name_or_email" title="Name oder E-Mail-Adresse" value="<?= $mailstr ?>" placeholder="Name oder E-Mail-Adresse"/><br/>
     <?php
     tpl_item_after_send();
+    tpl_after();
+}
+
+/**
+ * Outputs the page shown to the user after the forgot password page
+ */
+function tpl_forgot_password_mail_send() {
+    tpl_before("", "Passwort vergessen");
+    tpl_item_before_form(array(), "", "", "forgot_password");
+    ?>
+    Eine Mail mit dem Link zum Verändern ihres Passworts wurde gerade abgesckickt.<br/>
+    Sie sollten sie in kürze erhalten.
+    <?php
+    tpl_item_after();
     tpl_after();
 }
 
@@ -104,8 +124,8 @@ function tpl_new_password($action_url) {
     tpl_before("fo", "Neues Passwort");
     tpl_item_before_form(array("action" => $action_url), "", "", "new_password");
     ?>
-    <input type="password" name="pwd" placeholder="" title="Neues Passwort"/><br/>
-    <input type="password" name="pwd_repeat" placeholder="" title="Neues Passwort wiederholen"/><br/>
+    <input type="password" name="pwd" value="" placeholder="Neues Passwort" title="Neues Passwort"/><br/>
+    <input type="password" name="pwd_repeat" value="" placeholder="Neues Passwort wiederholen" title="Neues Passwort wiederholen"/><br/>
     <?php
     tpl_item_after_send("Passwort setzen");
     tpl_after();

@@ -176,7 +176,7 @@ class Environment {
         if (is_a($to, "User"))
             $to = $to->getMailAdress();
         mail($to, $topic, Markdown($text), "From: " . TITLE . "<" . ($this->system_mail_adress != "" ? $this->system_mail_adress : ("info@" . $_SERVER['HTTP_HOST'])) . ">\r\n"
-                . "X-Mailer: PHP/" . phpversion() . "\r\nMIME-Version: 1.0\r\nContent-Type: text/html; charset=ISO-8859-1\r\n");
+                . "X-Mailer: PHP/" . phpversion() . "\r\nMIME-Version: 1.0\r\nContent-Type: text/html; charset=utf8\r\n");
     }
 
     function sendAdminMail($topic, $text) {
