@@ -41,9 +41,9 @@ class ForgotPasswordHandler extends ToroHandler {
                     $link = tpl_url("forgot_password?id=" . $user->getID() . "&key=" . urlencode($user->getCryptStr()));
                     $text = "<html><body>
 	Hallo " . $user->getName() . ",<br/><br/>
-	sie haben das Zurücksetzen ihres Passworts angefordert, wenn das richtig ist, 
-	klicken sie bitte auf diesen <a href=\"$link\">Link</a>, wenn nicht, 
-	dann ignorieren sie diese E-Mail bitte einfach.<br/><br/>Ihr \"" . $env->title . "\"-Team
+	Sie haben das Zurücksetzen ihres Passworts angefordert. Wenn dies richtig ist, 
+	klicken Sie bitte auf diesen <a href=\"$link\">Link</a>, wenn nicht, 
+	dann ignorieren Sie einfach diese E-Mail.<br/><br/>Ihr \"" . $env->title . "\"-Team
 	</body></html>";
                     $env->sendMail($user->getMailAdress(), "Passwort zurücksetzen", $text);
                     tpl_forgot_password_mail_send();
