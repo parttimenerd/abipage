@@ -23,7 +23,7 @@
  * @param boolean $as_page output as page?
  * @param string $urlapp '<form action="?' . $urlapp . '"'
  */
-function tpl_usermanagement($userarr, $as_page = true, $urlapp = "") {
+function tpl_usermanagement(UserArray $userarr, $as_page = true, $urlapp = "") {
     if ($as_page) {
         tpl_before("usermanagement");
         tpl_item_before();
@@ -50,7 +50,7 @@ function tpl_usermanagement($userarr, $as_page = true, $urlapp = "") {
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($userarr as $user): ?>
+                <?php foreach ($userarr->toArray() as $user): ?>
                     <tr>
                         <td>
                             <? if (!Auth::isSameUser($user) && Auth::canEditUser($user)): ?>

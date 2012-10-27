@@ -49,8 +49,7 @@ function tpl_user_prefs(User $user) {
     ?>
     <input type="text" title="Name" placeholder="Name ([Vorname] [Nachname])" name="name" value="<?php echo $user->getName() ?>" pattern="((von )?[A-ZÄÖÜ]([a-zßäöü](-[a-zßäöüA-ZÄÖÜ])?)+ ?){2,3}"/><br/>
     <input type="email" title="E-Mail-Adresse" placeholder="E-Mail-Adresse" name="mail_adress" value="<?php echo $user->getMailAdress() ?>"<?php echo!Auth::isModerator() ? " readonly='readonly'" : "" ?>/><br/>
-    <input type="password" title="Passwort" placeholder="Passwort" name="password" autocomplete="off"/><br/>
-    <input type="password" title="Passwort wiederholen" placeholder="Passwort wiederholen" name="password_repeat"/><br/>
+    <? tpl_new_password_input("register", "password") ?>
     <input type="password" title="Altes Passwort" placeholder="Altes Passwort" name="old_password"/><br/>
     <input type="number" name="math_course" title="Mathekursnummer" placeholder="Mathekursnummer" size="1" value="<?php echo $user->getMathCourse() ?>" min="1" max="20"/><br/>
     <input type="text" name="math_teacher" title="Mathelehrer" placeholder="Mathelehrer" value="<?php echo $user->getMathTeacher() ?>" pattern="((von )?[A-ZÄÖÜ]([a-zßäöü](-[a-zßäöüA-ZÄÖÜ])?)+ ?){2,3}"/><br/>

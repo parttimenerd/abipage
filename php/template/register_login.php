@@ -29,8 +29,7 @@ function tpl_register() {
     ?>
     <input type="text" name="name" title="Name ([Vorname] [Nachname])" placeholder="Name ([Vorname] [Nachname])" autocomplete="on" required="on" pattern="((von )?[A-ZÄÖÜ]([a-zßäöü](-[a-zßäöüA-ZÄÖÜ])?)+ ?){2,3}"/><br/>
     <input type="email" name="mail_adress" title="E-Mail-Adresse" placeholder="E-Mail-Adresse" autocomplete="on" required="on"/><br/>
-    <input type="password" name="password" title="Passwort" placeholder="Passwort" autocomplete="on" required="on"/><br/>
-    <input type="password" name="password_repeat" title="Passwort wiederholen" placeholder="Passwort wiederholen" autocomplete="on" required="on"/><br/>
+    <? tpl_new_password_input("register", "password") ?>
     <input type="number" name="math_course" title="Mathekursnummer, z.B.: 1" placeholder="Mathekursnummer, z.B.: 1" min="1" max="20" required="on"/><br/>
     <input type="text" name="math_teacher" title='Mathelehrer, z.B. "Herr Müller"' placeholder='Mathelehrer, z.B. "Herr Müller"' required="on"/><br/>
     <?php if ($env->has_forum): ?>
@@ -123,10 +122,24 @@ function tpl_forgot_password_mail_send() {
 function tpl_new_password($action_url) {
     tpl_before("fo", "Neues Passwort");
     tpl_item_before_form(array("action" => $action_url), "", "", "new_password");
-    ?>
-    <input type="password" name="pwd" value="" placeholder="Neues Passwort" title="Neues Passwort"/><br/>
-    <input type="password" name="pwd_repeat" value="" placeholder="Neues Passwort wiederholen" title="Neues Passwort wiederholen"/><br/>
-    <?php
+    tpl_new_password_input("send");
     tpl_item_after_send("Passwort setzen");
     tpl_after();
+}
+
+/**
+ * Outputs a password input field with password strength checker
+ * 
+ * @param string $send_button_id
+ * @param string $id_prefix
+ * @param string $placeholder_attr
+ */
+function tpl_new_password_input($send_button_id, $id_prefix = "pwd", $placeholder_attr = "Neues Passwort"){
+    ?>
+    <input type="password" name="pwd" id="<?= $id_prefix ?>pwd" value="" placeholder="<?= $placeholder_attr ?>" title="<?= $placeholder_attr ?>" onkeyup="$('#<?= $id_prefix ?>pwd').val(this.value); testPasswordInput('<?= $id_prefix ?>pwd', '<?= $id_prefix ?>passwordmeter_result', '<?= $send_button_id ?>');"/><br/>
+    <span id="<?= $id_prefix ?>passwordmeter_result"></span>
+    <input type="hidden" name="<?= $id_prefix ?>_repeat" value="" placeholder="<?= $placeholder_attr ?> wiederholen" title="<?= $placeholder_attr ?> wiederholen"/><br/>
+    <input type="checkbox" onchange="$('#<?= $id_prefix ?>pwd')[0].type = this.checked ? 'text' : 'password'">
+    <label class="checkbox_label">Passwort während dem Tippen anzeigen</label>
+    <?
 }

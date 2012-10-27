@@ -624,3 +624,15 @@ function addPoll(type, ele){
         type: type
     }));
 }
+
+function testPasswordInput(idOfInput, idOfResult, idOfSubmit){
+    var ele = $("#" + idOfInput);
+    var res = testPassword(ele.val(), idOfResult, idOfSubmit);
+    if (res <= 10){
+        ele.attr("class", "error");
+    } else if (res > 10 && res < 25){
+        ele.attr("class", "warning");
+    } else {
+        ele.attr("class", "success");
+    } 
+}

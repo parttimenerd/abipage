@@ -316,7 +316,7 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
         <script src="<?php echo tpl_url("js/plugins.js") ?>"></script>
         <script src="<?php echo tpl_url("js/application.js") ?>"></script>
         <!--<script src="<?php echo tpl_url("js/libs/modernizr-2.5.3.js") ?>"></script>-->
-        <script src="<?php echo tpl_url("js/script.js") ?>"></script>
+        <script src="<?php echo tpl_url("js/script.js?100") ?>"></script>
     <? else: ?>
         <? if ($editor_needed): ?>
             <script src="<?php echo tpl_url("js/min/jquery.wysiwyg.min.js") ?>"></script>
@@ -487,7 +487,7 @@ function tpl_no_subnav() {
             </div>
             <hr class="<?= $classapp ?>"/>
             <div class="item-footer <?= $classapp ?>">
-                <button class="btn" <?php echo $onclick == "" ? 'type="submit"' : "" ?> name="<?php echo $name ?>" onclick="<?php echo $onclick ?>"><?php echo $title ?></button>
+                <button class="btn" <?php echo $onclick == "" ? 'type="submit"' : "" ?> name="<?php echo $name ?>" id="<?php echo $name ?>" onclick="<?php echo $onclick ?>"><?php echo $title ?></button>
                 <?php echo $footerhtmlapp ?>
             </div>
             <?php echo $onclick == "" ? "</form>" : "" ?>
