@@ -26,7 +26,7 @@ class ImagesHandler extends RatableUserContentHandler {
     public function post_impl() {
         global $env;
         if (!empty($_FILES["uploaded_file"]) && ($_FILES['uploaded_file']['error'] == 0) && isset($_POST["description"]) && isset($_POST["category"])) {
-            $id = $this->list->addImage($_POST["description"], $_POST["category"]);
+            $id = $this->list->addImage($_POST["description"] != "undefined" ? $_POST["description"] : "", $_POST["category"] != "undefined" ? $_POST["category"] : "");
             $exif = $env->uploadImage($id);
             if ($exif) {
                 $this->list->setExif($id, $exif);

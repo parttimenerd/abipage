@@ -24,6 +24,9 @@ define('SHOW_LOGS_TO_ADMIN', false);
 define("BASE_DIR", __DIR__);
 define("BEGIN_TIME", microtime(true));
 
+if (!DEBUG)
+    error_reporting(0);
+
 require_once dirname(__FILE__) . '/php/bootloader.php';
 
 if (!defined('DB_NAME')) {

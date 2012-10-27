@@ -280,7 +280,7 @@ if ($("#drop_area").length != 0){
             } else {
                 var xhr = new ActiveXObject("Microsoft.XMLHTTP");
             }		
-            progress.attr("style", "display: block");
+            progress.attr("style", "display: inline");
             xhr.upload.onprogress = function(e) {
                 if (e.lengthComputable) {
                     percent = Math.round((e.loaded * 100) / e.total); 
@@ -296,6 +296,7 @@ if ($("#drop_area").length != 0){
 			
             xhr.open("post", rating_url2, true);
             xhr.overrideMimeType('text/plain; charset=x-user-defined-binary');
+            var fd = new FormData();
             // Set appropriate headers
             //xhr.setRequestHeader("Content-Type", "multipart/form-data");
             //xhr.setRequestHeader("description", $(".descr").val() == "" ? "" : $(".descr").serialize().split("=", 2)[1]);
@@ -307,7 +308,7 @@ if ($("#drop_area").length != 0){
             fd.append("description", $(".descr").val());
             fd.append("category", $("input.img_category").val());
             fd.append("access_key", access_key);
-            fd.append("rotation", img_rotation);
+            fd.append("rotation", "");
             // Send the file (doh)
             progress.attr("style", "display: visible");
             xhr.send(fd);

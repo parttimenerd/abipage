@@ -78,8 +78,8 @@ function tpl_image_upload_item($with_descr = true) {//"enctype" => "multipart/fo
     if ($with_descr) {
         ?>
         <hr class="hide_when_unused"/>
-        <textarea class="hide_when_unused" name="description" class="descr" placeholder="Kurze, aussagekräftige Bildbeschreibung" require="on"></textarea>
-        <input class="hide_when_unused" name="category" list="category_list" class="img_category" placeholder='Kategorie in die dieses Bild einsortiert wird, z.B. "Studienfahrt Barcelona"'/>
+        <textarea class="descr hide_when_unused" name="description" placeholder="Kurze, aussagekräftige Bildbeschreibung" require="on"></textarea>
+        <input class="img_category hide_when_unused" name="category" list="category_list" placeholder='Kategorie in die dieses Bild einsortiert wird, z.B. "Studienfahrt Barcelona"'/>
         <?
         $list = new ImageList();
         tpl_datalist("category_list", $list->getCategories());
@@ -115,7 +115,7 @@ function tpl_image_item(RatableUserContentItem $ruci) {
             <div class="descr_ctime"> Aufnahmedatum: <?= date("d.m.y H:i", $ruci->capture_time) ?> </div>
         <? endif; ?>
         <? if ($ruci->category != ""): ?>
-            <div class="descr_category"> Kategorie: <?= $ruci->category ?> </div>
+            <div class="descr_category"> Kategorie: <a href="javascript:search('<?= $ruci->category ?>')"><?= $ruci->category ?></a> </div>
         <? endif; ?>
     </div>
     <?

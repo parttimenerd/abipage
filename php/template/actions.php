@@ -33,7 +33,7 @@ function tpl_actions_sidebar() {
     <div class="span3 sidebar">
         <div class="well">
             <ul class="nav nav-list action_list_container">
-                <li class="nav-header" id="action_header"><a href="<?= tpl_url("actions") ?>">Aktionen</a></li>
+                <li class="nav-header" id="action_header"><a href="<?= tpl_url("actions") ?>" style="color: #333333; text-align: center">Aktionen</a></li>
                 <?php
                 $action_arr = Actions::getLastActions();
                 tpl_actions($action_arr);

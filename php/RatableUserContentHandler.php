@@ -109,7 +109,7 @@ class RatableUserContentHandler extends ToroHandler {
                 jsonAjaxResponseStart();
                 PiwikHelper::addTrackGoalJS("Item deleted");
                 PiwikHelper::echoJSTrackerCode(false);
-                jsonAjaxResponseEndSend();
+                jsonAjaxResponseEndSend(array("id" => intval($_POST["id"])));
             }
         } else if (isset($_POST["send"]) || !empty($_FILES["uploaded_file"]) || isset($_POST["send_anonymous"])) {
             $id = $this->post_impl();

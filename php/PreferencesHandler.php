@@ -203,6 +203,7 @@ Wenn ja, sollte Piwik installiert sein und diese Website hinzugefügt worden sei
     }
 
     public function get() {
+        $this->loadDefaultVals();
         $this->updatePrefVisuArr();
         tpl_preferences($this->pref_vals_visu);
     }

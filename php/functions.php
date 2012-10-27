@@ -236,7 +236,7 @@ function resizeImage($newWidth, $originalFile, $targetFile = "", $orginal_file_t
         $tmp = imagecreatetruecolor($newWidth, $newHeight);
         imagecopyresampled($tmp, $src, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
     } else {
-        $tmp &= $src;
+        $tmp = $src;
     }
     if (file_exists($targetFile)) {
         unlink($targetFile);
