@@ -34,7 +34,7 @@ function tpl_polls($polls, $show_results = false) {
             foreach ($polls as $type => $arr) {
                 if (!empty($arr)) {
                     $typestr = Poll::getStringRepOfType($type);
-                    echo '<li' . ($first ? ' class="active"' : "") . ' data-toggle="tab"><a href="#' . str_replace(" ", "_", $typestr) . '">' . $typestr . '</a></li>';
+                    echo '<li><a data-toggle="tab" href="#' . str_replace(" ", "_", $typestr) . '">' . $typestr . '</a></li>';
                     $first = false;
                 }
             }
@@ -46,7 +46,7 @@ function tpl_polls($polls, $show_results = false) {
             foreach ($polls as $type => $arr) {
                 if (!empty($arr)) {
                     $typestr = Poll::getStringRepOfType($type);
-                    echo '<div class="tab-pane' . ($first ? ' active' : "") . '" id="' . str_replace(" ", "_", $typestr) . '">';
+                    echo '<div style="margin-right: 10px; font-size: 1.1em;" class="tab-pane' . ($first ? ' active' : "") . '" id="' . str_replace(" ", "_", $typestr) . '">';
                     foreach ($arr as $poll) {
                         if ($show_results) {
                             tpl_poll_result($poll);
@@ -92,11 +92,11 @@ function tpl_poll(Poll $poll) {
             switch ($poll->getType()) {
                 case Poll::TEACHER_TYPE:
                 case Poll::USER_TYPE:
-                    ?><input type="text" name="<?= $poll->getID() ?>" class="teacher_typeahead" list="<?= $poll->getID() ?>_datalist" required="on"/><?
-            tpl_datalist($poll->getID() . "_datalist", Poll::TEACHER_TYPE ? Teacher::getNameList() : User::getNameList());
+                    ?><input type="text" name="<?= $poll->getID() ?>" value="<?= $poll->getUserAnswerString() ?>" class="teacher_typeahead" list="<?= $poll->getID() ?>_datalist"/><?
+            tpl_datalist($poll->getID() . "_datalist", $poll->getType() == Poll::TEACHER_TYPE ? Teacher::getNameList() : User::getNameList());
             break;
         default:
-                    ?><input type="number" required="on" name="<?= $this->id ?>" value="<?= $poll->getUserAnswer() != null ? $poll->getUserAnswer() : "" ?>"/><?
+                    ?><input type="number" name="<?= $poll->getID() ?>" value="<?= $poll->getUserAnswerString() ?>"/><?
             break;
     }
             ?>
@@ -120,7 +120,8 @@ function tpl_poll(Poll $poll) {
         if (!empty($data)) {
             echo "<ol>";
             foreach ($data["answers"] as $answer_arr) {
-                echo "<li>" . ($poll->getType() == Poll::TEACHER_TYPE ? Teacher::getByID($answer_arr["answer"])->getNameStr() : User::getByID($answer_arr["answer"])->getName()) . ' [' . $answer_arr["count"] . 'x, ' . $answer_arr["perc"] . ']</li>';
+                echo '<li><span class="poll_string_answer">' . ($poll->answerToString($answer_arr["answer"])) . ' </span><br/>
+                    <span class="poll_answer_info ">[' . $answer_arr["count"] . 'x, ' . round($answer_arr["perc"]) . '%]</span></li>';
             }
             echo "</ol>";
             if ($poll->getType() == Poll::NUMBER_TYPE) {
@@ -200,7 +201,8 @@ function tpl_edit_poll(Poll $poll) {
     $id = $poll->getID();
     tpl_item_before("", $id, "form-horizontal edit_poll_item");
     ?>
-    <input type="hidden" name="<?= $id ?>_action" value="ediz"/>
+    <input type="hidden" name="<?= $id ?>" value="<?= $id ?>"/>
+    <input type="hidden" name="<?= $id ?>_action" value="edit"/>
     <label for="<?= $id ?>_question">Frage</label>
     <input type="text" id="<?= $id ?>_question" name="<?= $id ?>_question" placeholder="Frage?" required="on"/>
     <label for="<?= $id ?>_position">Position</label>
@@ -217,6 +219,7 @@ function tpl_edit_poll_hbs() {
     ?><script id="edit_poll_item_template" type="text/x-handlebars-template"><?
     tpl_item_before("", '{{type}}', "form-horizontal edit_poll_item");
     ?>
+        <input type="hidden" name="{{id}}" value="{{id}}"/>  
         <input type="hidden" name="{{id}}_action" value="add"/>  
         <input type="hidden" name="{{id}}_type" value="{{type}}"/>   
         <label for="{{id}}_question">Frage</label>

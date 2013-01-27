@@ -20,5 +20,12 @@
 /*user_characteristics(id INT AUTO_INCREMENT PRIMARY KEY, userid INT, type TINYINT, topic INT, text TEXT, FULLTEXT(text)) ENGINE = MYISAM") or die("Can't create user_characteristics table: " . self::$db->error);
 user_characteristics_topics(id INT AUTO_INCREMENT PRIMARY KEY, type TINYINT, text TEXT, position INT, FULLTEXT(text)) ENGINE = MYISAM") or die("Can't create user_characteristics_topics table: " . self::$db->error);*/
 
+function tpl_all_usercharacteristics_page($itemarr){
+    
+}
+
+function tpl_usercharacteristics_answer_page($topics){
+    
+}
 
 ?>

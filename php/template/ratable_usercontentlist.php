@@ -41,7 +41,7 @@ function tpl_image_list($rucis, $page, $pages, $phrase = "", $as_page = true) {
     <script>
         var rating_url = "<?php echo tpl_url('images') ?>";
     <?php if ($as_page) echo 'var page = ' . $page . ';' ?>
-        var max_page = pagecount = <?php echo $pages ?>;
+        window.max_page = pagecount = <?php echo $pages ?>;
     <?php echo $phrase == "" ? "" : 'var phrase = "' . $phrase . '";' ?>
         var chocolat_options = {};
     </script>
@@ -146,8 +146,8 @@ function tpl_quote_list($rucis, $page, $pages, $phrase, $as_page = true) {
     <script>
         var rating_url = "<?php echo tpl_url('quotes') ?>";
     <?php if ($as_page) echo 'var page = ' . $page . ';' ?>
+        window.max_page = pagecount = <?php echo $pages ?>;
     <? if ($pages == -1): ?>
-            var max_page = <?php echo $pages ?>;
             var phrase = "<?php echo $phrase ?>";
     <? endif; ?>
     </script>
@@ -230,8 +230,8 @@ function tpl_rumor_list($rucis, $page, $pages, $phrase, $as_page = true) {
     <script>
         var rating_url = "<?php echo tpl_url('rumors') ?>";
     <?php if ($as_page) echo 'var page = ' . $page . ';' ?>
+        window.max_page = pagecount = <?php echo $pages ?>;
     <? if ($pages == -1): ?>
-            var max_page = <?php echo $pages ?>;
             var phrase = "<?php echo $phrase ?>";
     <? endif; ?>
     </script>

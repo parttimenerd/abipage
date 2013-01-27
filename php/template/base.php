@@ -113,6 +113,9 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
             "impress" => array("Impressum", $env->impress_subtitle),
             "humans.txt" => array("humans.txt", "")
         );
+        if (!$env->registration_enabled){
+            unset($menus["register"]);
+        }
     }
     $additional = array();
     $additional["terms_of_use"] = array("Nutzungsbedigungen", $env->terms_of_use_subtitle);
@@ -279,7 +282,7 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
             <?php tpl_icon("up", "Zum Seitenanfang") ?>
         </a>
     </div>
-    </div><!-- /container -->
+    <!--</div> /container -->
     <? if (Auth::canViewLogs()) tpl_log_container() ?>
     <div id="side_bar_helper_div"/>
     <div id="more_helper_div"/>

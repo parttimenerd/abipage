@@ -379,7 +379,14 @@ function tpl_input($args = array("name" => "default", "value" => "", "placeholde
         Logger::log("Use this function correct!!!", LOG_INFO);
     $name = $args["name"];
     $value = isset($args["default"]) ? $args["default"] : (isset($args["value"]) ? $args["value"] : "");
-    $type = isset($args["type"]) ? $args["type"] : (is_numeric($value) ? "number" : "inputfield");
+    $type = "inputfield";
+    if (isset($args["type"])){
+        $type = $args["type"];
+    } else if (is_numeric($value)){
+        $type = "number";
+    } else if ($value == "true" || $value == "false"){
+        $type = "checkbox";
+    }
     $id = isset($args["id"]) ? $args["id"] : $name;
     $str = 'name="' . $args["name"] . '" id="' . $id . '"';
     if (isset($args["placeholder"]) && $args["placeholder"] != "")

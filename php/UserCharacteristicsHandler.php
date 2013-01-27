@@ -18,7 +18,37 @@
  */
 
 class UserCharacteristicsHandler extends ToroHandler {
-	
-    
-    
+
+    public function get($slug = "") {
+        if ($slug == "") {
+            if (Auth::isViewingResults()) {
+                tpl_all_usercharacteristics_page(UserCharacteristicsItem::getAll());
+            } else {
+                tpl_usercharacteristics_answer_page(UserCharacteristicsTopic::getAll());
+            }
+        }
+    }
+
+    public function post($slug = "") {
+        if (isset($_POST["submit"])) {
+            foreach ($_POST as $key => $value) {
+                if (is_numeric($key)) {
+                    $topic = UserCharacteristicsTopic::getByID($key);
+                    if ($topic) {
+                        $topic->submitAnswer($value);
+                    }
+                }
+            }
+            foreach ($_FILES as $key => $value) {
+                if (is_numeric($key)) {
+                    $topic = UserCharacteristicsTopic::getByID($key);
+                    if ($topic) {
+                        $topic->submitImage($value);
+                    }
+                }
+            }
+        }
+        $this->get($slug);
+    }
+
 }

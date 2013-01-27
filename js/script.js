@@ -132,14 +132,16 @@ function search(_phrase){
         },
     });
 }
-
-if (window.max_page !== undefined){
-    $(window).bottom({
-        proximity: 0.2
-    }).bind('bottom', function(){
-        loadItems();
-    });
+function initBottomLoad() {
+    if (window.max_page !== undefined){
+        $(window).bottom({
+            proximity: 0.2
+        }).bind('bottom', function(){
+            loadItems();
+        });
+    }
 }
+setTimeout("initBottomLoad()", 300);
 
 function updateActionsSidebar(){
     if ($(".sidebar").css("display") == "hidden")
@@ -569,7 +571,7 @@ function ajax(args){
         dataType: "json",
         success: func,
         error: function(resp, textStatus){
-            console.error(textStatus);
+            console.error(textStatus, resp.responseText);
             func($.parseJSON(resp.responseText));
         },
         no_return: function(){
@@ -636,3 +638,9 @@ function testPasswordInput(idOfInput, idOfResult, idOfSubmit){
         ele.attr("class", "success");
     } 
 }
+
+setTimeout(function(){
+    $(function () {
+        $('#poll_tabs a:first').tab('show');
+    })
+}, 300);

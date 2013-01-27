@@ -153,6 +153,15 @@ function tpl_user_comment($user, $comment) {
  * Outputs the user page, with results
  * TODO to be developed
  */
-function tpl_user_page() {
+function tpl_user_page($user, $user_characteristics) {
+    
+}
+
+/**
+ * Outputs the user page, with results
+ * TODO to be developed
+ * @param array $array $array[] = array("user" => $user, "user_characteristics" => UserCharacteristicsItem::getAll($user));
+ */
+function tpl_user_pages($array) {
     
 }

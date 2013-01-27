@@ -133,6 +133,11 @@ class Auth {
         self::$user = null;
     }
 
+    /**
+     * Current user, null if no user is logged in
+     * 
+     * @return User
+     */
     public static function getUser() {
         if (is_int(self::$user)) {
             if (!self::verifyByCookie()) {

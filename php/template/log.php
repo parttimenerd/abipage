@@ -21,7 +21,7 @@
  */
 function tpl_log_container() {
     ?>
-    <div id="log" class="resizable">
+    <div id="log" class="resizable" style="left: 0px">
         <div id="log_container">
         </div>
     </div>

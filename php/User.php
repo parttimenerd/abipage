@@ -39,6 +39,7 @@ class User {
     private $visible;
     private $db;
     private $_has_new_access_key;
+    private static $users_by_id_cache;
 
     public function __construct($id, $first_name, $last_name, $math_course, $math_teacher, $mail_adress, $mode, $activated, $crypt_str, $visible = true, $data = array()) {
         $db = Database::getConnection();
@@ -99,13 +100,18 @@ class User {
 
     /**
      * 
-     * @global type $db
-     * @param type $id
+     * @global mysqli $db
+     * @param int $id
+     * @param boolean $force_query
      * @return User
      */
-    public static function getByID($id) {
+    public static function getByID($id, $force_query = false) {
         global $db;
-        return User::getFromMySQLResult($db->query("SELECT * FROM " . DB_PREFIX . "user WHERE id=" . intval($id)));
+        $cid = intval($id);
+        if ($force_query || !isset(self::$users_by_id_cache[$cid]) || self::$users_by_id_cache[$cid] === null) {
+            self::$users_by_id_cache[$cid] = User::getFromMySQLResult($db->query("SELECT * FROM " . DB_PREFIX . "user WHERE id=" . $cid));
+        }
+        return self::$users_by_id_cache[$cid];
     }
 
     public static function getByEMailAdress($mail_adress) {
@@ -123,6 +129,10 @@ class User {
         return new UserArray($retarr);
     }
 
+    /**
+     * 
+     * @return \UserArray
+     */
     public static function getAll() {
         return new UserArray(mysqliResultToArr($this->db->query("SELECT * FROM " . DB_PREFIX . "user")));
     }
@@ -246,7 +256,7 @@ class User {
                 $this->sendUserCommentedMail($anonymous ? null : $senduser, $text);
             }
         } else {
-            $env->sendModeratorMail("Kommentar von " . self::getStringRep($senduser) . ($anonymous ? " [Anonym] " : "") . " bei " . $this->getName() . " wartet auf Freischaltung", "Kommentar:\n" . $text);
+            $env->sendModeratorMail("Kommentar von " . self::getStringRep($senduser, true) . ($anonymous ? " [Anonym] " : "") . " bei " . $this->getName() . " wartet auf Freischaltung", "Kommentar:\n" . $text);
         }
         Actions::addAction($this->db->insert_id, $this->getName(), "add_user_comment");
         return array("id" => $this->db->insert_id, "commented_userid" => $this->id, "commenting_userid" => intval($senduser->getID()), "text" => $ctext, "time" => intval($time), "notified_as_bad" => 0, "reviewed" => ($reviewed ? 1 : 0), "anonymous" => intval($anonymous));
@@ -272,12 +282,12 @@ class User {
     }
 
     public function sendUserCommentedMail($commenting_user, $text) {
-        $user_str = self::getStringRep($commenting_user);
+        $user_str = self::getStringRep($commenting_user, true);
         $this->sendMail("Kommentar von " . $user_str, $user_str . " schrieb folgenden Kommentar: \n" . $text);
     }
 
-    public static function getStringRep($user) {
-        if ($user == Auth::getUser() || (is_numeric($user) && $user->getID() == Auth::getUserID())) {
+    public static function getStringRep($user, $disallow_me = false) {
+        if (!$disallow_me && $user == Auth::getUser() || (is_numeric($user) && $user->getID() == Auth::getUserID())) {
             return "Me";
         }
         $user = $user != null ? (is_numeric($user) ? User::getByID($user) : $user) : null;
@@ -502,7 +512,7 @@ class User {
     }
 
     public function isOtherUserMarkedToHaveHisCommentsBeAlwaysModerated($id) {
-        return isset($this->data["marked_users"]) && array_key_exists($this->data["marked_users"][intval($id)]);
+        return isset($this->data["marked_users"]) && array_key_exists(intval($id), $this->data["marked_users"]);
     }
 
     public function setOtherUserMarkedToHaveHisCommentsBeAlwaysModerated($id, $is_marked) {
@@ -525,6 +535,14 @@ class User {
 
     public function setUserMarkedToHaveHisCommentsBeAlwaysModerated($is_marked) {
         $this->data["is_marked"] = $is_marked == true;
+    }
+
+    /**
+     * 
+     * @return string dir name in which the users own image from its user characteristics page are stored
+     */
+    public function getPictureDirPart() {
+        return strtolower($this->first_name) . "_" . strtolower($this->last_name);
     }
 
 }

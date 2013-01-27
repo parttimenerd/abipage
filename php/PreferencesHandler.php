@@ -45,7 +45,8 @@ class PreferencesHandler extends ToroHandler {
                     "title_sep" => array("default" => " | ", "label" => "Seitentitelteiler"),
                     "subtitle" => array("default" => "Abizeitungsseite", "label" => "Untertitel/Slogan"),
                     "favicon" => array("default" => "favicon.ico", "label" => "Favicon der Seite"),
-                    "is_under_construction" => array("default" => "false", "label" => "Ist die Seite gerade Wartungsmaßnahmen unterzogen?", "type" => "checkbox")
+                    "is_under_construction" => array("default" => "false", "label" => "Ist die Seite gerade Wartungsmaßnahmen unterzogen?", "type" => "checkbox"),
+                    "registration_enabled" => array("default" => "true", "label" => "Können sich neue Benutzer registrieren?", "type" => "checkbox")
             )),
             "Seitenuntertitel" => array("mode" => "table", "rows" => array(
                     "fourothree_subtitle" => array("default" => '"To protect those who are not able to protect themselves is a duty which every one owes to society." - Lord Macnaghten', "label" => "403-Seite"),

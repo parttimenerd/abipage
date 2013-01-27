@@ -19,6 +19,13 @@
 
 class Actions {
 
+    /**
+     * 
+     * @global mysqli $db
+     * @global Enviroment $env
+     * @param int $last_action_id
+     * @return \ActionArray
+     */
     public static function getLastActions($last_action_id = -1) {
         global $db, $env;
         $actions = array();
@@ -31,6 +38,12 @@ class Actions {
         return new ActionArray($actions);
     }
 
+    /**
+     * 
+     * @global mysqli $db
+     * @param int $id
+     * @return array
+     */
     public static function getActionByID($id) {
         global $db;
         $action = null;
@@ -40,17 +53,32 @@ class Actions {
         return $action;
     }
 
+    /**
+     * 
+     * @global mysqli $db
+     * @global KeyValueStore $store
+     * @param int $itemid
+     * @param string $person
+     * @param int $type
+     * @param int $time
+     * @param null|User $user
+     */
     public static function addAction($itemid, $person, $type, $time = -1, $user = null) {
         global $db, $store;
         if ($user == null) {
             $user = Auth::getUser();
+            if ($user == null){
+                $userid = -1;
+            } else {
+                $userid = $user->getID();
+            }
         }
         if ($time == -1) {
             $time = time();
         }
         $person = $db->real_escape_string($person);
         $type = $db->real_escape_string($type);
-        $db->query("INSERT INTO " . DB_PREFIX . "actions(id, userid, itemid, person, type, time) VALUES(NULL, " . $user->getID() . ", " . intval($itemid) . ", '" . $person . "', '" . $type . "', " . $time . ")") or die($db->error);
+        $db->query("INSERT INTO " . DB_PREFIX . "actions(id, userid, itemid, person, type, time) VALUES(NULL, " . $userid . ", " . intval($itemid) . ", '" . $person . "', '" . $type . "', " . $time . ")") or die($db->error);
         $store->last_action_id = $db->insert_id;
         $store->updateDB();
     }

@@ -38,6 +38,9 @@ function formatInputText($text /* , $allow_html = false */) {
 //        }
 //        $text = $htmlpurifier->purify($text);
 //    } else {
+    if ($text instanceof User) {
+        $text = $text->getName();
+    }
     $arr = array("\'" => "&apos;", '\"' => "&quot;");
     foreach ($arr as $search => $replacement)
         $text = str_replace($search, $replacement, $text);

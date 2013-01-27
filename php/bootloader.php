@@ -71,14 +71,18 @@ if (!function_exists('require_dir')) {
          */
         $env = new Environment();
         if (!defined("DEBUG") || !DEBUG) {
-            set_error_handler(function($type, $msg) {
-                        Logger::log($msg, $type);
-                    }, E_ALL);
-            set_exception_handler(function($msg) {
-                        Logger::log($msg, E_ERROR);
-                    });
+
+            function errorHandler($type, $msg) {
+                Logger::log($msg, $type);
+            }
+
+            function exceptionHandler($msg) {
+                Logger::log($msg, E_ERROR);
+            }
+
+            set_error_handler("errorHandler", E_ALL);
+            set_exception_handler("exceptionHandler");
         }
-        
     }
 
     function require_dir($dirpath) {

@@ -83,6 +83,14 @@ class UserArray implements ArrayAccess, Countable {
         $this->container[rand(0, $this->count() - 1)]->sendMail($topic, $text);
     }
 
+    public function exclude(User $user) {
+        $key = array_search($user, $this->container);
+        if ($key) {
+            unset($this->container[$key]);
+        }
+        return $this;
+    }
+
     public function offsetSet($offset, $container) {
         if (is_array($container))
             $container = new self($container);

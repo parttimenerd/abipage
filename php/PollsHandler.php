@@ -38,7 +38,7 @@ class PollsHandler extends ToroHandler {
     public function post($slug = "") {
         if ($slug === "/edit" && Auth::canEditUserPolls() && isset($_POST["edit"])) {
             foreach ($_POST as $key => $value) {
-                if (preg_match("[0-9]+$", $key)) {
+                if (preg_match("/[0-9]+$/", $key)) {
                     switch ($_POST[$key . "_action"]) {
                         case "add":
                             Poll::create($_POST[$key . "_type"], $_POST[$key . "_question"], $_POST[$key . "_position"]);
@@ -59,9 +59,9 @@ class PollsHandler extends ToroHandler {
             }
         } else if (isset($_POST["submit"])) {
             foreach ($_POST as $key => $value) {
-                if ($key != "send") {
+                if (is_numeric($key)) {
                     $poll = Poll::getByID($key);
-                    if ($poll != null)
+                    if ($poll)
                         $poll->submitAnswer($value);
                 }
             }

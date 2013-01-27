@@ -47,7 +47,7 @@ function tpl_home($news = array(), ActionArray $actions = null) {
         tpl_news_list($news, false);
     if (Auth::canViewDashboard() && ($env->hasNotActivatedUsers() || $env->hasNotReviewedUserComments())) {
         tpl_item_before("", "", "alert alert-info");
-        ?><a href="<?= tpl_url("admin") ?>">Es existieren Benutzerkommentare oder Benutzer, deren Freischaltung noch vorgenommen muss.<?
+        ?><a href="<?= tpl_url("admin") ?>">Es existieren Benutzerkommentare oder Benutzer, deren Freischaltung noch vorgenommen muss.</a><?
         tpl_item_after();
     }
     ?><hr class="hidden-desktop"/><?

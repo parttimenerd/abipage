@@ -22,7 +22,7 @@ class UserHandler extends ToroHandler {
     public function get($slug = "") {
         global $env;
         $arr = explode('/', substr($slug, 1));
-        $user = $this->getUserFromSlug($slug);
+        $user = self::getUserFromSlug($slug);
         if (!$user) {
             tpl_userlist($env->getUserNames(false, isset($arr[1]) ? str_replace('_', ' ', $arr[1]) : "", false));
         } else if (count($arr) == 2 && $arr[1] == "preferences" && Auth::canEditUser($user)) {
@@ -34,15 +34,27 @@ class UserHandler extends ToroHandler {
 
     public function get_result($slug = "") {
         global $env;
-        $user = $this->getUserFromSlug($slug);
-        if (!$user) {
-            tpl_userlist($env->getUserNames());
+        if ($slug == "all_pages" || $slug == "/all_pages") {
+            $arr = array();
+            foreach (User::getAll() as $user){
+                $arr[] = array("user" => $user, "user_characteristics" => UserCharacteristicsItem::getAll($user));
+            }
+            tpl_user_pages($arr);
         } else {
-            tpl_user_page($user);
+            $user = self::getUserFromSlug($slug);
+            if (Auth::isSameUser($user)) {
+                $this->get($slug);
+            } else if (!$user) {
+                tpl_userlist($env->getUserNames());
+            } else {
+                //As long as it isn't implemented... TODO implement
+                $this->get($slug);
+                //tpl_user_page($user, UserCharacteristicsItem::getAll($user));
+            }
         }
     }
 
-    private function getUserFromSlug($slug) {
+    public static function getUserFromSlug($slug) {
         if ($slug != "" && $slug != '/' && $slug != "all") {
             $arr = explode('/', substr($slug, 1));
             $slug = $arr[0];
@@ -65,7 +77,7 @@ class UserHandler extends ToroHandler {
 
     public function post($slug) {
         $arr = explode('/', substr($slug, 1));
-        $user = $this->getUserFromSlug($slug);
+        $user = self::getUserFromSlug($slug);
         if (count($arr) == 2 && $arr[1] == "preferences" && Auth::canEditUser($user)) {
             if (isset($_POST["name"]) && $_POST["name"] != "") {
                 $user->setName($_POST["name"]);

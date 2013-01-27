@@ -19,7 +19,6 @@
 
 class Environment {
 
-    private $title = "Test";
     private $title_sep = " - ";
     private $__usernamesarr = array("activated" => null, "also_deactivated" => null);
     private $main_dir;
@@ -148,34 +147,88 @@ class Environment {
         return $arr;
     }
 
-    public function uploadImage($new_filename_wo_ext, $rotation = 0) {
+    /**
+     * 
+     * @param type $new_filename_wo_ext
+     * @param type $name
+     * @param type $dest_dir
+     * @param type $create_thumb
+     * @return array|boolean false if failed, else array with exif data (at minimum with "FileName" (path of the file) key) 
+     */
+    public function uploadImage($new_filename_wo_ext, $name = "uploaded_file", $dest_dir = "", $create_thumb = true) {
+        if ($dest_dir == "") {
+            $dest_dir = $this->upload_path;
+        }
         $img_types = array("jpeg", "gif", "png", "bmp", "jpg");
-        if ((!empty($_FILES["uploaded_file"])) && ($_FILES['uploaded_file']['error'] == 0)) {
-            $filename = basename($_FILES['uploaded_file']['name']);
+        if ((!empty($_FILES[$name])) && ($_FILES[$name]['error'] == 0)) {
+            $filename = basename($_FILES[$name]['name']);
             $ext = strtolower(substr($filename, strpos($filename, '.') + 1));
             //$arr = explode("/", $_FILES["uploaded_file"]["type"]);
-            if (in_array($ext, $img_types) && ($_FILES["uploaded_file"]["size"] < $this->max_upload_pic_size * 1048576)) {
-                $newname_wo_ext = $this->main_dir . '/' . $this->upload_path . '/' . $new_filename_wo_ext;
+            if (in_array($ext, $img_types) && ($_FILES[$name]["size"] < $this->max_upload_pic_size * 1048576)) {
+                $full_img_dir = $this->main_dir . '/' . $dest_dir;
+                $thumb_img_dir = $this->main_dir . '/' . $dest_dir . '/thumbs';
+                $newname_wo_ext = $full_img_dir . '/' . $new_filename_wo_ext;
                 $newname = $newname_wo_ext . '.' . $ext;
-                if (!file_exists($newname)) {
-                    $exif = null;
-                    if ($ext == "jpg" || $ext == "jpeg") {
-                        $exif = read_exif_data($_FILES['uploaded_file']['tmp_name'], 'ANY_TAG', false);
-                        $exif["FileName"] = $new_filename_wo_ext . '.' . $ext;
-                    }
-                    resizeImage($this->resize_original_image ? $this->pic_width : -1, $_FILES['uploaded_file']['tmp_name'], $newname_wo_ext . '.' . $this->pic_format, $ext);
-                    resizeImage($this->thumbnail_width, $_FILES['uploaded_file']['tmp_name'], $this->main_dir . '/' . $this->upload_path . '/thumbs/' . $new_filename_wo_ext . '.' . $this->pic_format, $ext);
-                    return $exif;
+                if (file_exists($newname)) {
+                    unlink($newname);
                 }
+                if (!file_exists($full_img_dir)) {
+                    mkdir($full_img_dir);
+                    if ($create_thumb) {
+                        mkdir($thumb_img_dir);
+                    }
+                }
+                $exif = array();
+                if ($ext == "jpg" || $ext == "jpeg") {
+                    $exif = read_exif_data($_FILES[$name]['tmp_name'], 'ANY_TAG', false);
+                } else {
+                    $exif["DateTime"] = 0;
+                }
+                $exif["FilePath"] = $newname_wo_ext . '.' . $ext;
+                $exif["FileName"] = $new_filename_wo_ext . '.' . $ext;
+                resizeImage($this->resize_original_image ? $this->pic_width : -1, $_FILES[$name]['tmp_name'], $newname_wo_ext . '.' . $this->pic_format, $ext);
+                if ($create_thumb) {
+                    resizeImage($this->thumbnail_width, $_FILES[$name]['tmp_name'], $thumb_img_dir . '/' . $new_filename_wo_ext . '.' . $this->pic_format, $ext);
+                }
+                return $exif;
             }
         }
         return false;
     }
 
+    /**
+     * 
+     * @param User|string $to
+     * @param string $topic
+     * @param string $text
+     */
     function sendMail($to, $topic, $text) {
+        $toName = is_a($to, "User") ? $to->getName() : User::getByEMailAdress($to)->getName();
+        $text = '<html>
+<head>
+<title>' . $this->title . ' | ' . TITLE . '</title>
+</head>
+<body style="margin: 0; font-family: Voltaire, Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 13px; line-height: 18px; color: #333333; background-color: #ffffff;">
+<div style="position: fixed; right: 0; left: 0; z-index: 1030; margin-bottom: 0; top: 0	 ; margin-left: -20px; margin-right: -20px; *position: relative; *z-index: 2; overflow: visible; margin-bottom: 18px;">
+<div style="min-height: 40px; padding-left: 20px; padding-right: 20px; background-color: #2c2c2c; background-image: -moz-linear-gradient(top, #333333, #222222); background-image: -ms-linear-gradient(top, #333333, #222222); background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#333333), to(#222222)); background-image: -webkit-linear-gradient(top, #333333, #222222); background-image: -o-linear-gradient(top, #333333, #222222); background-image: linear-gradient(top, #333333, #222222); background-repeat: repeat-x; filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#333333", endColorstr="#222222", GradientType=0); -webkit-border-radius: 4px; -moz-border-radius: 4px; border-radius: 4px; -webkit-box-shadow: 0 1px 3px rgba(0,0,0,.25), inset 0 -1px 0 rgba(0,0,0,.1); -moz-box-shadow: 0 1px 3px rgba(0,0,0,.25), inset 0 -1px 0 rgba(0,0,0,.1); box-shadow: 0 1px 3px rgba(0,0,0,.25), inset 0 -1px 0 rgba(0,0,0,.1); padding: 5px;  padding-left: 0; padding-right: 0; -webkit-border-radius: 0; -moz-border-radius: 0; border-radius: 0;">
+<div style="width: 940px; margin-left: 30px;">
+<p style="text-decoration: none; float: left; display: block; padding: 0px 20px 12px; margin-left: -20px; font-size: 20px; font-weight: 200; line-height: 1; color: #999999;"> ' . $this->title . ' </p>
+</div></div></div>
+<div style="padding-top: 75px; width: 940px; margin-right: auto; margin-left: auto; *zoom: 1; display: table;">
+<div style="margin-left: 0px; margin-left: 0px; *zoom: 1; display: table;">
+<div>
+<div style="width: auto; min-height: 20px; padding: 19px; margin-bottom: 20px; background-color: #f5f5f5; border: 1px solid #eee; border: 1px solid rgba(0, 0, 0, 0.05); -webkit-border-radius: 4px; -moz-border-radius: 4px; border-radius: 4px; -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05); -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05); box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);">
+<div>               
+Hallo ' . $toName . ',<br/><br/>
+' . $text . '
+<br/><br/>Ihr ' . $this->title . '-Team
+</div></div></div></div></div>
+</body>							
+</html>';
+        var_dump(get_class($to));
         if (is_a($to, "User"))
             $to = $to->getMailAdress();
-        mail($to, $topic, Markdown($text), "From: " . TITLE . "<" . ($this->system_mail_adress != "" ? $this->system_mail_adress : ("info@" . $_SERVER['HTTP_HOST'])) . ">\r\n"
+        mail($to, $topic, $text, "From: " . TITLE . "<" . ($this->system_mail_adress != "" ? $this->system_mail_adress : ("info@" . $_SERVER['HTTP_HOST'])) . ">\r\n"
                 . "X-Mailer: PHP/" . phpversion() . "\r\nMIME-Version: 1.0\r\nContent-Type: text/html; charset=utf8\r\n");
     }
 
@@ -184,7 +237,7 @@ class Environment {
     }
 
     function sendModeratorMail($topic, $text) {
-        User::getByMode(User::MODERATOR_MODE)->sendMail($topic, $text);
+        User::getByMode(User::MODERATOR_MODE)->exclude(Auth::getUser())->sendMail($topic, $text);
     }
 
 }

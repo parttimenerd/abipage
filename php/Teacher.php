@@ -62,7 +62,7 @@ class Teacher {
     }
 
     public static function getFromArray($arr) {
-        return new Teacher($arr["id"], isset($arr["is_male"]) ? $arr["is_male"] : $arr["ismale"], $arr["first_name"], $arr["last_name"], $arr["name_str"]);
+        return new Teacher($arr["id"], isset($arr["is_male"]) ? $arr["is_male"] : $arr["ismale"], $arr["first_name"], $arr["last_name"], $arr["namestr"]);
     }
 
     public static function getFromMySQLResult($result) {
@@ -81,7 +81,7 @@ class Teacher {
 
     public static function getByName($namestr) {
         global $db;
-        return self::getFromMySQLResult($db->query("SELECT * FROM " . DB_PREFIX . "teacher WHERE namestr=" . sanitizeInputText($namestr)));
+        return self::getFromMySQLResult($db->query("SELECT * FROM " . DB_PREFIX . "teacher WHERE namestr='" . sanitizeInputText($namestr) . "'"));
     }
 
     public static function getTeacherWithQuoteRatingAndCount() {
@@ -103,6 +103,7 @@ class Teacher {
 
     public static function getTeacherWithRumorRatingAndCount() {
         global $db;
+        $sum = 0;
         $res = $db->query("SELECT id, first_name, last_name, namestr, ismale, (SELECT count(*) FROM " . DB_PREFIX . "rumors r WHERE r.text LIKE CONCAT('%', last_name, '%') OR r.text LIKE CONCAT('%', namestr, '%')) AS rumor_count, (SELECT avg(r2.rating) FROM " . DB_PREFIX . "rumors r2 WHERE r2.text LIKE CONCAT('%', last_name, '%') OR r2.text LIKE CONCAT('%', namestr, '%')) AS rumor_rating FROM " . DB_PREFIX . "teacher t ORDER BY rumor_count DESC");
         $arr = array();
         if ($res != null) {
@@ -111,8 +112,13 @@ class Teacher {
                 $sum += $tarr["rumor_count"];
             }
             $len = count($arr);
-            for ($i = 0; $i < $len; $i++)
-                $arr[$i]["perc"] = $arr[$i]["rumor_count"] * 100.0 / $sum;
+            if ($sum > 0) {
+                for ($i = 0; $i < $len; $i++)
+                    $arr[$i]["perc"] = $arr[$i]["rumor_count"] * 100.0 / $sum;
+            } else {
+                for ($i = 0; $i < $len; $i++)
+                    $arr[$i]["perc"] = 0;
+            }
         }
         return $arr;
     }
@@ -210,6 +216,10 @@ class Teacher {
     }
 
     public function getNameStr() {
+        return $this->name_str;
+    }
+
+    public function getName() {
         return $this->name_str;
     }
 

@@ -17,8 +17,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-define('DEBUG', isset($_REQUEST["debug"]));
-//define('DEBUG', true);
+//define('DEBUG', isset($_REQUEST["debug"]));
+define('DEBUG', true);
 //define("UNMINIFIED_SOURCE", true);
 define('SHOW_LOGS_TO_ADMIN', false);
 define("BASE_DIR", __DIR__);
@@ -37,6 +37,11 @@ if (!defined('DB_NAME')) {
 } else {
 
     define("TITLE", $env->title);
+    define("POLLS_TABLE", DB_PREFIX . "polls");
+    define("POLL_ANSWERS_TABLE", DB_PREFIX . "poll_answers");
+    define("USERCHARACTERISTIC_ITEMS_TABLE", DB_PREFIX . "user_characteristics");
+    define("USERCHARACTERISTIC_TOPIC_TABLE", DB_PREFIX . "user_characteristics_topics");
+
 
     if (!Auth::canVisitSiteWhenUnderConstruction() && $env->is_under_construction) {
         if (isset($_POST["login"])) {
