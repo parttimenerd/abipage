@@ -96,7 +96,7 @@ function tpl_poll(Poll $poll) {
             tpl_datalist($poll->getID() . "_datalist", $poll->getType() == Poll::TEACHER_TYPE ? Teacher::getNameList() : User::getNameList());
             break;
         default:
-                    ?><input type="number" name="<?= $poll->getID() ?>" value="<?= $poll->getUserAnswerString() ?>"/><?
+                    ?><input type="number" name="<?= $poll->getID() ?>" value="<?= $poll->getUserAnswerString() ?>" pattern="[0-9]+(\.[0-9]+)?"/><?
             break;
     }
             ?>

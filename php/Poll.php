@@ -255,7 +255,7 @@ class Poll {
                 }
                 break;
             case self::NUMBER_TYPE:
-                $canswer = intval($answer);
+                $canswer = floatval($answer);
                 break;
         }
         if ($canswer !== "") {
@@ -410,7 +410,7 @@ class Poll {
      * @return string
      */
     public function __toString() {
-        return "ID: " + $id + "; Type: " + $this->getTypeString() + "; Text: '" + $this->getQuestion() + "'";
+        return "ID: " + $this->id + "; Type: " + $this->getTypeString() + "; Text: '" + $this->getQuestion() + "'";
     }
 
 }

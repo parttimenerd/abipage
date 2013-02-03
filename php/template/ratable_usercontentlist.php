@@ -202,7 +202,7 @@ function tpl_quote_item(RatableUserContentItem $ruci) {
     } else {
         tpl_item_before($ruci->person, "speech_bubbles", "content-item", $ruci->id, "javascript:search('$ruci->person')", 'Nach Zitaten von/mit "' . $ruci->person . '" suchen');
     }
-    echo formatText($ruci->text);
+    echo formatText($ruci->text, false);
     tpl_item_after_ruc($ruci);
 }
 
@@ -279,7 +279,7 @@ function tpl_write_rumor_response_item_hbs($id = "item-response-template") {
  */
 function tpl_rumor_item(RatableUserContentItem $ruci) {
     tpl_item_before("", "", "content-item", $ruci->id);
-    echo formatText($ruci->text);
+    echo formatText($ruci->text, false);
     tpl_item_after_ruc($ruci);
 }
 

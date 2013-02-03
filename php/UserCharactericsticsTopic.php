@@ -26,7 +26,6 @@ class UserCharacteristicsTopic {
     /**
      * Answer is a on line text
      */
-
     const SHORTTEXT_TYPE = 1;
     /**
      * Answer is a block of text
