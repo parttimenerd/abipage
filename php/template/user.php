@@ -22,7 +22,11 @@
  * @param array $usernamearr array of user names, array(array("both" => ...), ...)
  */
 function tpl_userlist($usernamearr) {
+    global $env;
     tpl_before("user/all", "Schülerliste", "");
+    if ($env->user_characteristics_editable) {
+        tpl_all_userpages_infobox();
+    }
     tpl_item_before("", "", "userlist");
     ?>
     <ui>
@@ -36,6 +40,13 @@ function tpl_userlist($usernamearr) {
     <?php
     tpl_item_after();
     tpl_after();
+}
+
+function tpl_all_userpages_infobox() {
+    global $env;
+    if ($env->user_characteristics_editable && Auth::isViewingResults()) {
+        tpl_infobox("", "Gesammelte Benutzerseiten ansehen. Achtung: Laden dieser Seite kann sehr lange dauern.", tpl_url("user/all_pages"));
+    }
 }
 
 /**
@@ -100,7 +111,7 @@ function tpl_user_write_comment() {
     tpl_item_after_send_anonymous("Absenden", "Anonym absenden", "sendUserComment(false)", "sendUserComment(true)");
 }
 
-function tpl_user_comment_not_reviewed_info(){
+function tpl_user_comment_not_reviewed_info() {
     tpl_infobox("", "Ihr Kommentar muss noch moderiert werden");
 }
 
@@ -134,7 +145,7 @@ function tpl_user_comment($user, $comment) {
                         $apps[] = "Anonym abgesendet";
                     if ($comment["notified_as_bad"])
                         $apps[] = "Als schlecht markiert";
-                    echo!empty($apps) ? ('<span class="mod_info">[' . join("; ", $apps) . ']</span>') : "";
+                    echo (!empty($apps) ? ('<span class="mod_info">[' . join("; ", $apps) . ']</span>') : "");
                 endif;
                 ?>
             </li>
@@ -153,8 +164,24 @@ function tpl_user_comment($user, $comment) {
  * Outputs the user page, with results
  * TODO to be developed
  */
-function tpl_user_page($user, $user_characteristics) {
-    
+function tpl_user_page(User $user, $user_characteristics_items, $as_page = true) {
+    if ($as_page) {
+        tpl_before("", $user->getName(), tpl_get_user_subtitle($user));
+    }
+    tpl_all_userpages_infobox();
+    tpl_usercharacteristics_result_page($user, $user_characteristics_items, false);
+    tpl_user_comment_results($user);
+    if ($as_page) {
+        tpl_after();
+    }
+}
+
+function tpl_user_comment_results(User $user) {
+    foreach ($user->getUserComments() as $comment) {
+        tpl_item_before();
+        echo $comment["text"];
+        tpl_item_after();
+    }
 }
 
 /**
@@ -163,5 +190,24 @@ function tpl_user_page($user, $user_characteristics) {
  * @param array $array $array[] = array("user" => $user, "user_characteristics" => UserCharacteristicsItem::getAll($user));
  */
 function tpl_user_pages($array) {
-    
+    global $env;
+    tpl_before("", "Gesammelte Benutzerseite", $env->all_user_page_results_page_subtitle);
+    foreach ($array as $item) {
+        tpl_infobox("", $item["user"]->getName() . " (" . tpl_get_user_subtitle($item["user"]) . ")", tpl_url("user/" . $item["user"]->getName()));
+        tpl_user_page($item["user"], $item["user_characteristics"], false);
+    }
+    tpl_after();
+}
+
+function tpl_user_not_found($given, $suggestions) {
+    global $env;
+    header('HTTP/1.0 404 Not Found');
+    tpl_before("fourofour", $given . " nicht gefunden", $env->fourofour_subtitle, false, null, "owl");
+   
+    tpl_item_before("Meinten sie...");
+    foreach ($suggestions as $username) {
+        ?><a class="suggestion" href="<?= tpl_url("user/" . $username) ?>"><?= $username ?></a><br/><?
+    }
+    tpl_item_after();
+    tpl_after();
 }

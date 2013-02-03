@@ -184,8 +184,8 @@ class Environment {
                 } else {
                     $exif["DateTime"] = 0;
                 }
-                $exif["FilePath"] = $newname_wo_ext . '.' . $ext;
-                $exif["FileName"] = $new_filename_wo_ext . '.' . $ext;
+                $exif["FilePath"] = $newname_wo_ext . '.' . $this->pic_format;
+                $exif["FileName"] = $new_filename_wo_ext . '.' . $this->pic_format;
                 resizeImage($this->resize_original_image ? $this->pic_width : -1, $_FILES[$name]['tmp_name'], $newname_wo_ext . '.' . $this->pic_format, $ext);
                 if ($create_thumb) {
                     resizeImage($this->thumbnail_width, $_FILES[$name]['tmp_name'], $thumb_img_dir . '/' . $new_filename_wo_ext . '.' . $this->pic_format, $ext);
@@ -225,7 +225,6 @@ Hallo ' . $toName . ',<br/><br/>
 </div></div></div></div></div>
 </body>							
 </html>';
-        var_dump(get_class($to));
         if (is_a($to, "User"))
             $to = $to->getMailAdress();
         mail($to, $topic, $text, "From: " . TITLE . "<" . ($this->system_mail_adress != "" ? $this->system_mail_adress : ("info@" . $_SERVER['HTTP_HOST'])) . ">\r\n"

@@ -31,8 +31,8 @@ require_once dirname(__FILE__) . '/php/bootloader.php';
 
 if (!defined('DB_NAME')) {
     $site = new ToroApplication(array(
-                array(".*", "DBSetupHandler")
-            ));
+        array(".*", "DBSetupHandler")
+    ));
     $site->serve();
 } else {
 

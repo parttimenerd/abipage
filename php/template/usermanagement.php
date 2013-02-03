@@ -22,8 +22,10 @@
  * @param UserArray $userarr users to be shown in the table
  * @param boolean $as_page output as page?
  * @param string $urlapp '<form action="?' . $urlapp . '"'
+ * @global Environment $env
  */
 function tpl_usermanagement(UserArray $userarr, $as_page = true, $urlapp = "") {
+   global $env;
     if ($as_page) {
         tpl_before("usermanagement");
         tpl_item_before();
@@ -44,7 +46,10 @@ function tpl_usermanagement(UserArray $userarr, $as_page = true, $urlapp = "") {
                     <th>Modus</th>
                     <th>Aktiviert</th>
                     <th>Sichtbar</th>
-                    <th>Werden Kommentare moderiert?</th>
+                    <th>Kommentare moderiert?</th>
+                    <? if ($env->user_characteristics_editable): ?>
+                        <th>Unbeantwortete Steckbrieffragen</th>
+                    <? endif ?>
                     <th>Link</th>
                     <th>Einstellungen</th>
                 </tr>
@@ -67,6 +72,9 @@ function tpl_usermanagement(UserArray $userarr, $as_page = true, $urlapp = "") {
                         <td><?php echo $user->isActivated() ? "Ja" : "Nein" ?></td>
                         <td><?php echo $user->isVisible() ? "Ja" : "Nein" ?></td>
                         <td><?php echo $user->isUserMarkedToHaveHisCommentsBeAlwaysModerated() ? "Ja" : "Nein" ?></td>
+                        <? if ($env->user_characteristics_editable): ?>
+                        <td><?= $user->getNumberOfUCQuestionsToBeAnswered() ?></td>
+                        <? endif ?>
                         <td><a href="<?= tpl_url('user/' . $user->getName()) ?>">Link</a></td>
                         <td><a href="<?= tpl_url('user/' . $user->getName() . '/preferences') ?>">Einstellungen</a></td>
                     </tr>
@@ -85,8 +93,8 @@ function tpl_usermanagement(UserArray $userarr, $as_page = true, $urlapp = "") {
         <button class="btn" type="submit" name="setpassword">Passwort setzen</button>
         (mit E-Mail Benachrichtigung der jeweiligen Benutzer)<br/>
         <? if (Auth::canSetUserVisibility()): ?>
-        <input type="checkbox" checked="checked" name="visible" value="true" style="margin-right: 10px"/>Sichtbar?
-        <button class="btn" name="setvisible">Sichtbarkeit setzen</button><br/>
+            <input type="checkbox" checked="checked" name="visible" value="true" style="margin-right: 10px"/>Sichtbar?
+            <button class="btn" name="setvisible">Sichtbarkeit setzen</button><br/>
         <? endif ?>
         <input type="checkbox" checked="checked" name="is_marked" value="true" style="margin-right: 10px"/>Werden Kommentare moderiert?
         <button class="btn" name="mark">Setzen</button>

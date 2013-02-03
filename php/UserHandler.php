@@ -22,7 +22,22 @@ class UserHandler extends ToroHandler {
     public function get($slug = "") {
         global $env;
         $arr = explode('/', substr($slug, 1));
-        $user = self::getUserFromSlug($slug);
+        $user = self::getUserFromSlug($slug, true);
+        if ($user === false){
+            $arr = explode('/', substr($slug, 1));
+            $slug = $arr[0];
+            $str = str_replace("_", " ", $slug);
+            $suggestions = User::getNameSuggestions($str);
+            if (count($suggestions) > 1){
+                tpl_user_not_found($str, $suggestions);
+                return;
+            } else if (count($suggestions) == 1){
+                tpl_user(User::getByName($suggestions[0]));
+                return;
+            } else {
+                $user = null;
+            }
+        }
         if (!$user) {
             tpl_userlist($env->getUserNames(false, isset($arr[1]) ? str_replace('_', ' ', $arr[1]) : "", false));
         } else if (count($arr) == 2 && $arr[1] == "preferences" && Auth::canEditUser($user)) {
@@ -35,8 +50,9 @@ class UserHandler extends ToroHandler {
     public function get_result($slug = "") {
         global $env;
         if ($slug == "all_pages" || $slug == "/all_pages") {
+            $userarr = User::getAll()->toArray();
             $arr = array();
-            foreach (User::getAll() as $user){
+            foreach ($userarr as $user){
                 $arr[] = array("user" => $user, "user_characteristics" => UserCharacteristicsItem::getAll($user));
             }
             tpl_user_pages($arr);
@@ -47,14 +63,12 @@ class UserHandler extends ToroHandler {
             } else if (!$user) {
                 tpl_userlist($env->getUserNames());
             } else {
-                //As long as it isn't implemented... TODO implement
-                $this->get($slug);
-                //tpl_user_page($user, UserCharacteristicsItem::getAll($user));
+                tpl_user_page($user, UserCharacteristicsItem::getAll($user));
             }
         }
     }
 
-    public static function getUserFromSlug($slug) {
+    public static function getUserFromSlug($slug, $disallow_namelike = false) {
         if ($slug != "" && $slug != '/' && $slug != "all") {
             $arr = explode('/', substr($slug, 1));
             $slug = $arr[0];
@@ -67,8 +81,13 @@ class UserHandler extends ToroHandler {
             } else {
                 $str = str_replace("_", " ", $slug);
                 $user = User::getByName($str);
-                if ($user == null)
+                if ($user == null){
+                    if (!$disallow_namelike){
                     $user = User::getByNameLike($str);
+                    } else {
+                        return false;
+                    }
+                }
                 return $user;
             }
         }

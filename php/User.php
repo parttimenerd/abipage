@@ -95,7 +95,25 @@ class User {
     public static function getByNameLike($name) {
         global $db;
         $namearr = User::splitName(sanitizeInputText($name));
-        return User::getFromMySQLResult($db->query("SELECT * FROM " . DB_PREFIX . "user WHERE first_name LIKE '%" . $namearr[0] . "%' OR last_name LIKE '%" . $namearr[1] . "%'"));
+        return User::getFromMySQLResult($db->query("SELECT * FROM " . DB_PREFIX . "user WHERE first_name LIKE '%" . $namearr[0] . "%' OR last_name LIKE '%" . $namearr[1] . "%' OR first_name LIKE '%" . $namearr[0] . "%' OR last_name LIKE '%" . $namearr[1] . "%'"));
+    }
+
+    /**
+     * 
+     * @global mysqli $db
+     * @param type $name
+     * @return String[]
+     */
+    public static function getNameSuggestions($name) {
+        global $db;
+        $namearr = User::splitName(sanitizeInputText($name));
+        $res = $db->query("SELECT CONCAT(first_name, ' ', last_name) AS 'name' FROM " . DB_PREFIX . "user WHERE first_name LIKE '%" . $namearr[0] . "%' OR last_name LIKE '%" . $namearr[1] . "%' OR first_name LIKE '%" . $namearr[1] . "%' OR last_name LIKE '%" . $namearr[0] . "%' ORDER BY last_name, first_name ASC");
+        $arr = mysqliResultToArr($res);
+        $retarr = array();
+        foreach ($arr as $line) {
+            $retarr[] = $line["name"];
+        }
+        return $retarr;
     }
 
     /**
@@ -131,10 +149,16 @@ class User {
 
     /**
      * 
-     * @return \UserArray
+     * @return UserArray
      */
     public static function getAll() {
-        return new UserArray(mysqliResultToArr($this->db->query("SELECT * FROM " . DB_PREFIX . "user")));
+        global $db;
+        $res = $db->query("SELECT * FROM " . DB_PREFIX . "user");
+        $retarr = array();
+        while ($user = User::getFromMySQLResult($res)) {
+            $retarr[] = $user;
+        }
+        return new UserArray($retarr);
     }
 
     /**
@@ -518,7 +542,7 @@ class User {
     public function setOtherUserMarkedToHaveHisCommentsBeAlwaysModerated($id, $is_marked) {
         if (!isset($this->data["marked_users"]))
             $this->data["marked_users"] = array();
-        if (array_key_exists($this->data["marked_users"][intval($id)])) {
+        if (array_key_exists(intval($id), $this->data["marked_users"])) {
             if ($is_marked) {
                 unset($this->data["marked_users"][intval($id)]);
             }
@@ -543,6 +567,47 @@ class User {
      */
     public function getPictureDirPart() {
         return strtolower($this->first_name) . "_" . strtolower($this->last_name);
+    }
+
+    /**
+     * 
+     * @global mysqli $db
+     */
+    public function hasNotAllUCQuestionsAnswered() {
+        return $this->getNumberOfUCQuestions() > $this->getNumberOfUCQuestionsAnswered();
+    }
+
+    public function getNumberOfUCQuestionsToBeAnswered() {
+        return $this->getNumberOfUCQuestions() - $this->getNumberOfUCQuestionsAnswered();
+    }
+
+    private static $number_of_uc_questions = -1;
+    private $number_of_uc_questions_answered = -1;
+
+    public function getNumberOfUCQuestions() {
+        global $db;
+        if (self::$number_of_uc_questions == -1) {
+            $countarr = mysqliResultToArr($db->query("SELECT count(*) as count FROM " . USERCHARACTERISTIC_TOPIC_TABLE), true);
+            if (!empty($countarr)) {
+                self::$number_of_uc_questions = intval($countarr[0]);
+            } else {
+                self::$number_of_uc_questions = 0;
+            }
+        }
+        return self::$number_of_uc_questions;
+    }
+
+    public function getNumberOfUCQuestionsAnswered() {
+        global $db;
+        if ($this->number_of_uc_questions_answered == -1) {
+            $countarr = mysqliResultToArr($db->query("SELECT count(*) as count FROM " . USERCHARACTERISTIC_ITEMS_TABLE . " WHERE userid=" . $this->id), true);
+            if (!empty($countarr)) {
+                $this->number_of_uc_questions_answered = intval($countarr[0]);
+            } else {
+                $this->number_of_uc_questions_answered = 0;
+            }
+        }
+        return $this->number_of_uc_questions_answered;
     }
 
 }

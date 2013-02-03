@@ -222,7 +222,7 @@ if ($("#drop_area").length != 0){
         
         var li, fileInfo;
 		
-        file = files[0]
+        file = files[0];
 		
 		
         if (file.size < max_file_size && (/image/i).test(file.type)){

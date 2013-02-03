@@ -146,7 +146,7 @@ class UserCharacteristicsItem {
      */
     public static function getAll($user) {
         global $db;
-        $cuserid = is_object($user) ? $user : intval($user);
+        $cuserid = is_object($user) ? $user->getID() : intval($user);
         $arr = array();
         if ($user === null) {
             $userarr = User::getAll();
@@ -154,7 +154,7 @@ class UserCharacteristicsItem {
                 $arr[$user->getID()] = self::getAll($user);
             }
         } else {
-            $res = $db->query("SELECT * FROM " . USERCHARACTERISTIC_ITEMS_TABLE . " WHERE userid=" . $cuserid . " ORDER BY POSITION ASC");
+            $res = $db->query("SELECT *, (SELECT position FROM " . USERCHARACTERISTIC_TOPIC_TABLE . " WHERE id=topic) as position FROM " . USERCHARACTERISTIC_ITEMS_TABLE . " WHERE userid=" . $cuserid . " ORDER BY position ASC");
             while ($item = self::getFromMySQLResult($res)){
                 $arr[] = $item;
             }
@@ -167,9 +167,33 @@ class UserCharacteristicsItem {
      * @return string
      */
     public function __toString() {
-        return "ID: " + $id + "; Type: " + $this->getTypeString() + "; Text: '" + $this->getQuestion() + "'";
+        return "ID: " + $this->id + "; Type: " + $this->getTypeString() + "; Text: '" + $this->getQuestion() + "'";
     }
 
+    
+    public function getAnswer(){
+        return $this->answer;
+    }
+    
+    public function getID(){
+        return $this->id;
+    }
+    
+    public function getType(){
+        return $this->type;
+    }
+    
+    public function getTopic(){
+        return $this->topic;
+    }
+    
+    /**
+     * 
+     * @return User
+     */
+    public function getUser(){
+        return $this->user;
+    }
 }
 
 ?>

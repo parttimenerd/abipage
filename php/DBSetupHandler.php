@@ -84,7 +84,7 @@ class DBSetupHandler extends ToroHandler {
                 $uri = str_replace($_SERVER["SERVER_NAME"], "", str_replace('http://', "", $_POST["URL"]));
                 file_put_contents($htaccess_file, str_replace("/abipage/", $uri, $htaccess));
                 require dirname(__FILE__) . '/bootloader.php';
-                var_dump("setup");
+//                var_dump("setup");
                 Database::setup();
                 global $db;
                 $db = Database::getConnection();

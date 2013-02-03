@@ -66,7 +66,7 @@ class PageManager {
                 "impress" => array("class" => "ImpressHandler"),
                 "terms_of_use" => array("class" => "TermsOfUseHandler"),
                 "privacy" => array("class" => "PrivacyPolicyHandler"),
-                "register" => array("class" => "RegisterHandler"),
+                "register" => array("class" => "RegisterHandler", "is_open" => $env->registration_enabled),
                 "forgot_password(/.*)?" => array("class" => "ForgotPasswordHandler"),
                 "login" => array("class" => "LoginHandler"),
                 "" => array("class" => "MainHandler")

@@ -397,3 +397,27 @@ function slugToSlugArr($slug) {
 function findParamsInSlug($slug, $params) {
     return findParamsInSlugArr(slugToSlugArr($slug), $params);
 }
+
+/**
+ * Renders the template with the given context with Mustache.
+ * 
+ * @param string $template
+ * @param array $context
+ */
+function render($template, $context) {
+//    $m = new Mustache_Engine(array(
+//        "tpl_item" => function($value) {
+//            ob_start();
+//            tpl_item_before();
+//            echo $value;
+//            tpl_item_after();
+//            return ob_get_clean();
+//        },
+//        "tpl_username" => function ($name) {
+//            $namestr = str_replace(" ", "_", $name);
+//            return '<a href="' . tpl_url("user/" . $namestr) . '" title="' . $name . '">' . $name . '</a>';
+//        }
+//    ));
+//    $m->addHelper($template);
+//    echo $m->render($template, $context);
+}

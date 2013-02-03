@@ -27,7 +27,10 @@ if (!defined("PHP_DIR")) {
 if (!defined('DB_NAME') && file_exists(dirname(__FILE__) . '/db_config.php')) {
     require(PHP_DIR . '/db_config.php');
 }
+
 require_once(PHP_DIR . '/libs/toro.php');
+require(PHP_DIR . '/libs/mustache.php/src/Mustache/Autoloader.php');
+Mustache_Autoloader::register();
 
 $filearr = array();
 
@@ -87,7 +90,7 @@ if (!function_exists('require_dir')) {
 
     function require_dir($dirpath) {
         foreach (scandir($dirpath) as $dir) {
-            if ($dir != '.' && $dir != '..' && $dir != "htmlpurifier") {
+            if ($dir != '.' && $dir != '..' && $dir != "htmlpurifier" && $dir != "mustache.php") {
                 $path = $dirpath . '/' . $dir;
                 if (is_dir($path)) {
                     require_dir($path);

@@ -47,7 +47,7 @@ class PreferencesHandler extends ToroHandler {
                     "favicon" => array("default" => "favicon.ico", "label" => "Favicon der Seite"),
                     "is_under_construction" => array("default" => "false", "label" => "Ist die Seite gerade Wartungsmaßnahmen unterzogen?", "type" => "checkbox"),
                     "registration_enabled" => array("default" => "true", "label" => "Können sich neue Benutzer registrieren?", "type" => "checkbox")
-            )),
+                )),
             "Seitenuntertitel" => array("mode" => "table", "rows" => array(
                     "fourothree_subtitle" => array("default" => '"To protect those who are not able to protect themselves is a duty which every one owes to society." - Lord Macnaghten', "label" => "403-Seite"),
                     "fourofour_subtitle" => array("default" => '"Alles auf Erden lässt sich finden, wenn man nur zu suchen sich nicht verdrießen lässt." - Philemon, Fragmente', "label" => "404-Seite"),
@@ -59,6 +59,7 @@ class PreferencesHandler extends ToroHandler {
                     "polls_subtitle" => array("default" => 'Umfragen zu den wirklich wichtigen Themen des Schulalltags', "label" => "Umfragenseite"),
                     "stats_subtitle" => array("default" => '"Musik ist die versteckte arithmetische Tätigkeit der Seele, die sich nicht dessen bewußt ist, daß sie rechnet." - Leibniz', "label" => "Statistikseite-Untertitel"),
                     "uc_subtitle" => array("default" => '"Oft neutralisieren sich zwei große Eigenschaften und ergeben als Reinertrag eine mittelmäßige Leidenschaft." - Théodore Jouffroy, Das grüne Heft', "label" => "Steckbriefseite"),
+                    "all_user_page_results_page_subtitle" => array("default" => '"Everything is as important as everything else." - John Lennon', "label" => "Gesammelte Benutzseite"),
                     "usermanagement_subtitle" => array("default" => '"Alle Leute sind entweder charmant oder langweilig. Ich ergreife Partei für die Charmanten." - Oscar Wilde', "label" => "Benutzerverwaltungsseite"),
                     "teacherlist_subtitle" => array("default" => '"Wo Menschlichkeit geboten ist, steh&apos; nicht zurück - selbst hinter deinem Lehrer." - Konfuzius', "label" => "Lehrerlisteseite"),
                     "dashboard_subtitle" => array("default" => '"Herrschaft ist im Alltag primär: Verwaltung." - Max Weber', "label" => "Dashboard"),
@@ -72,13 +73,13 @@ class PreferencesHandler extends ToroHandler {
                     "news_subtitle" => array("default" => '', "label" => "Nachrichtenseite"),
                     "news_write_subtitle" => array("default" => '', "label" => "Nachrichtschreibenseite"),
                     "actions_subtitle" => array("default" => '', "label" => "Aktionenseite")
-            )),
+                )),
             "Seiteninhalte" => array("mode" => "table-list", "rows" => array(
                     "mainpage_text" => array(
-                        "default" => "Dies ist die Abizeitungswebsite der (zuk&uuml;nftigen) Abiturienten.",
+                      "default" => "Dies ist die Abizeitungswebsite der (zuk&uuml;nftigen) Abiturienten.",
                         "label" => "Text auf der Hauptseite (Markdown formatiert)",
                         "type" => "textarea"
-                    ),
+                      ),
                     "impress_text" => array(
                         "default" => "##Verantwortlich für diesen Webauftritt
 [Vorname] [Nachname]
@@ -116,17 +117,17 @@ Das Copyright an den Beiträgen geht mit dem Hochladen bzw. Schreiben auf dieser
 <p>Wenn Sie zu den Daten, die auf dieser Seite von ihnen gepseichert Auskunft erhalten möchten oder allgemein Fragen zum Datenschutz dieser Seite haben, kontaktieren sie bitte die im Impressum genannte Adresse.</p>",
                         "label" => "Datenschutz-Seitentext",
                         "type" => "textarea"
-                ))),
+                    ))),
             "Forum" => array("id" => "forum_prefs", "rows" => array(
                     "has_forum" => array("default" => "false", "label" => "Befindet sich ein SMF-Forum in einem Unterpfad des Seitenordners?", "type" => "checkbox"),
                     "forum_path" => array("default" => "smf", "label" => "Pfad des SMF-Forum-Hauptordners relativ zum Seitenhauptordner"),
                     "forum_url" => array("default" => URL . "/smf", "label" => "Url des SMF-Forums")
-            )),
+                )),
             "Wiki" => array("rows" => array(
                     "has_wiki" => array("default" => "false", "label" => "Existiert ein Mediawiki?", "type" => "checkbox"),
                     "wiki_path" => array("default" => "mediawiki", "label" => "Pfad des Mediawiki-Hauptordners relativ zum Seitenhauptordner"),
                     "wiki_url" => array("default" => URL . "/mediawiki", "label" => "Url des Mediawikis")
-            )),
+                )),
             "Bilder" => array("rows" => array(
                     "max_upload_pic_size" => array("default" => "8", "label" => "Maximalgröße eines hochzuladenden Bildes in MiB"),
                     "pic_width" => array("default" => "2400", "label" => "Breite der Bilder in Pixel"),
@@ -136,27 +137,24 @@ Das Copyright an den Beiträgen geht mit dem Hochladen bzw. Schreiben auf dieser
                     "thumbnail_width" => array("default" => "800", "label" => "Breite der Vorschaubilder"),
                     "max_uploads_size" => array("default" => "1000", "label" => "Maximale Gesammtgröße der hochgeladenden Bilder in MiB"),
                     "upload_path" => array("default" => "uploads", "label" => "Order in welchem die hochgeladenen Bilder gespeichert werden")
-            )),
+                )),
             "Piwik" => array("id" => "piwik_prefs", "rows" => array(
                     "has_piwik" => array("default" => "false", "label" => "Wird Piwik als Webanalysis Werkzeug verwendet?
 Wenn ja, sollte Piwik installiert sein und diese Website hinzugefügt worden sein.", "type" => "checkbox"),
                     "piwik_site_id" => array("default" => "", "label" => "Piwik-Seiten-ID"),
                     "piwik_url" => array("default" => URL . "/piwik/", "label" => "Piwik URL"),
                     "piwik_token_auth" => array("default" => "", "label" => "Piwik token_auth-Wert, findbar im API Menu der Piwik-Installation dort: '&token_auth=[token_auth-Wert]'")
-            )),
+                )),
             "Nachrichten" => array("id" => "news_prefs", "rows" => array(
                     "news_enabled" => array("default" => "true", "label" => "Ist die einfache Nachrichtenseite aktiviert?", "type" => "checkbox"),
                     "number_of_news_shown_at_the_home_page" => array("default" => "1", "label" => "Anzahl der Nachrichten, die auf der Hauptseite angezeigt werden", "type" => "number")
-            )),
+                )),
             "Weitere Einstellungen" => array("id" => "more_prefs", "rows" => array(
                     "wysiwyg_editor_enabled" => array("default" => "false", "type" => "checkbox", "label" => "Wird ein visueller Editor auf dieser und der 'Nachrichten schreiben'-Seite verwendet?"),
                     "items_per_page" => array("default" => "30", "label" => "Angezeigte Einträge pro Seite"),
                     "images_per_page" => array("default" => "5", "label" => "Angezeigte Bilder pro Seite"),
                     "footer_appendix" => array("default" => "", "label" => "Code, der nach dem Footer eingefügt wird", "type" => "codearea"),
-                    "show_usercharacteristics" => array("default" => "false", "label" => "Wird die Steckbriefseite angezeigt?", "type" => "checkbox"),
                     "showed_actions" => array("default" => "12", "label" => "Angezeigte Aktionen in der Seitenleiste"),
-                    "userpolls_result_length" => array("default" => "3", "label" => "Anzahl der Personen die pro Umfrage in der Ergebnisliste angezeigt werden"),
-                    "results_viewable" => array("default" => "false", "label" => "Kann sich ein Benutzer (mindestens vom Rang eines Editors), die Ergebnisse anzeigen lassen", "type" => "checkbox"),
                     "stats_open" => array("default" => "false", "label" => "Ist die Statitikseite auch für normale Benutzer sichtbar?", "type" => "checkbox"),
                     "images_editable" => array("default" => "true", "label" => "Können Bilder hinzugefügt werden?", "type" => "checkbox"),
                     "quotes_editable" => array("default" => "true", "label" => "Können Zitate hinzugefügt werden?", "type" => "checkbox"),
@@ -167,8 +165,23 @@ Wenn ja, sollte Piwik installiert sein und diese Website hinzugefügt worden sei
                     "system_mail_adress" => array("default" => "", "label" => "Mailadresse der Seite"),
                     "response_allowed" => array("default" => "true", "label" => "Können Kommentare zu Stimmt es...-Beiträgen und Zitaten geschrieben werden?", "type" => "checkbox"),
                     "show_logs" => array("default" => "false", "label" => "Werden die Loggingnachrichten den Admins angezeigt?", "type" => "checkbox"),
-                    "auto_update_interval" => array("default" => "15000", "label" => "Pause zwischen zwei Aktualisierungsvorgängen von z.B. der Aktionenspalte in Millisekunden", "type" => "number")
-            )));
+                    "auto_update_interval" => array("default" => "15000", "label" => "Pause zwischen zwei Aktualisierungsvorgängen von z.B. der Aktionenspalte in Millisekunden", "type" => "number"),
+                    "userpolls_result_length" => array("default" => "3", "label" => "Anzahl der Personen die pro Umfrage in der Ergebnisliste angezeigt werden"),
+                    "results_viewable" => array("default" => "false", "label" => "Kann sich ein Benutzer (mindestens vom Rang eines Editors), die Ergebnisse anzeigen lassen", "type" => "checkbox")
+                ),
+//                "Ergebnisanzeige" => array("id" => "result_pages", "rows" => array(
+//                       "quote_template" => array(
+////                        "default" => "",
+//                        "label" => "Zitatseiten-Template",
+//                        "type" => "textarea"
+//                    ),
+//                    "usercharacteristics_page_teplate" => array(
+//                        "default" => "",
+//                        "label" => "Zitatseiten-Template",
+//                        "type" => "textarea"
+//                    )
+            //))
+        ));
         $this->loadDefaultVals();
         $this->updatePrefVisuArr();
         foreach ($this->pref_vals_visu as $key => $arr) {

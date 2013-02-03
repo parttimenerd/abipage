@@ -105,7 +105,7 @@ function tpl_image_item(RatableUserContentItem $ruci) {
     $imgfile = $ruci->id . '.' . $ruci->format;
     ?>
     <a class="item-content" href="<?php echo tpl_url($env->upload_path . '/' . $imgfile) ?>" title="<?= date("d.m.y H:i", $ruci->capture_time) ?>: <?= $ruci->category != "" ? $ruci->category : str_replace('\r\n', " ", $ruci->description) ?>">
-        <img src="<?php echo tpl_url($env->upload_path . '/thumbs/' . $imgfile) ?>"/>
+        <img src="<?= tpl_url($env->upload_path . '/thumbs/' . $imgfile) ?>"/>
     </a><br/>
     <div class="img_descr">
         <div class="descr_text">

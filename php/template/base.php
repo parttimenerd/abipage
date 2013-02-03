@@ -92,8 +92,8 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
                 $meta_dropdown["usermanagement"] = array("Benutzerverwaltung", $env->usermanagement_subtitle);
                 $meta_dropdown["teacherlist"] = array("Lehrerliste", $env->teacherlist_subtitle);
                 $meta_dropdown["admin"] = array("Dashboard", $env->dashboard_subtitle);
-                $meta_dropdown["user_characteristics/edit"] = array("Steckbriefverwaltung", $env->uc_management_subtitle);
-                $meta_dropdown["polls/edit"] = array("Umfragenverwaltung", $env->polls_management_subtitle);
+//                $meta_dropdown["user_characteristics/edit"] = array("Steckbriefverwaltung", $env->uc_management_subtitle);
+//                $meta_dropdown["polls/edit"] = array("Umfragenverwaltung", $env->polls_management_subtitle);
             }
             if (Auth::canViewPreferencesPage()) {
                 $meta_dropdown["preferences"] = array("Einstellungen", $env->preferences_subtitle);
@@ -113,7 +113,7 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
             "impress" => array("Impressum", $env->impress_subtitle),
             "humans.txt" => array("humans.txt", "")
         );
-        if (!$env->registration_enabled){
+        if (!$env->registration_enabled) {
             unset($menus["register"]);
         }
     }
@@ -248,6 +248,7 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
                     $has_sidebar = $subnav == true;
                     tpl_no_subnav();
                 }
+                tpl_uc_answer_info();
             }
 
             /**
@@ -290,23 +291,23 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
     <script>
-        var access_key = "<?= Auth::getAccessKey() ?>";
-        var auto_update_interval = "<?= $env->auto_update_interval ?>";
-        var ajax_url = "<?= tpl_url("ajax") ?>";
-        var has_sidebar = <?= $has_sidebar ? "true" : "false" ?>;
+                var access_key = "<?= Auth::getAccessKey() ?>";
+                var auto_update_interval = "<?= $env->auto_update_interval ?>";
+                var ajax_url = "<?= tpl_url("ajax") ?>";
+                var has_sidebar = <?= $has_sidebar ? "true" : "false" ?>;
     </script>
     <script>
-    $(".tablesorter").ready(function(){
-        $(".tablesorter").tablesorter();
-    });
-                $("body").ready(function(){
+        $(".tablesorter").ready(function() {
+            $(".tablesorter").tablesorter();
+        });
+        $("body").ready(function() {
     <? if (Auth::canViewLogs()): ?>
-                                                   add_log_object(<?= json_encode(logArray()) ?>);
+                add_log_object(<?= json_encode(logArray()) ?>);
     <? endif ?>
-                $(".tablesorter").tablesorter();
+            $(".tablesorter").tablesorter();
     <?php echo $js ?>
-                });
-                max_file_size = <?= $env->max_upload_pic_size * 1048576 ?>;
+        });
+        max_file_size = <?= $env->max_upload_pic_size * 1048576 ?>;
     </script>
     <?= str_replace("&apos;", "'", str_replace("&quot;", '"', $env->footer_appendix)); ?>
     <?php if ($env->has_piwik) PiwikHelper::echoJSTrackerCode(true, $document_title) ?>
@@ -362,7 +363,8 @@ function tpl_no_subnav() {
                 ?>
                 <div class="subnav">
                     <div class="nav nav-pills">
-                        <input type="text" name="phrase" id="search_field" placeholder="Suche" value="<?php echo $phrase ?>" onkeypress="if (event.keyCode == 13) search($(this).val())"/>
+                        <input type="text" name="phrase" id="search_field" placeholder="Suche" value="<?php echo $phrase ?>" onkeypress="if (event.keyCode == 13)
+                search($(this).val())"/>
                     </div>
                 </div>	
                 </header>
@@ -581,7 +583,33 @@ function tpl_html5_please() {
     ?>
     <div id="h5p-message"></div>
     <script async>
-    Modernizr.html5please = function(opts){ var passes = true; var features = opts.features.split('+'); var feat; for (var i = -1, len = features.length; ++i < len; ){ feat = features[i]; if (Modernizr[feat] === undefined) window.console && console.warn('Modernizr.' + feat + ' test not found'); if (Modernizr[feat] === false) passes = false; } if (passes){ opts.yep && opts.yep(); return passes; } Modernizr.html5please.cb = opts.nope; var script = document.createElement('script'); var ref = document.getElementsByTagName('script')[0]; var url = 'http://api.html5please.com/' + features.join('+') + '.json?callback=Modernizr.html5please.cb' + (opts.options ? ('&' + opts.options) : '') + '&html'; script.src = url; ref.parentNode.insertBefore(script, ref); return false; }; Modernizr.html5please({ features: "svg-css+svg-img+css-transitions+fontface+form-validation+forms+datalist+filereader", options: "texticon", yep: function(){ /* put your own initApp() here */ }, nope: function(a){ document.getElementById("h5p-message").innerHTML=a.html; } })
+        Modernizr.html5please = function(opts) {
+            var passes = true;
+            var features = opts.features.split('+');
+            var feat;
+            for (var i = -1, len = features.length; ++i < len; ) {
+                feat = features[i];
+                if (Modernizr[feat] === undefined)
+                    window.console && console.warn('Modernizr.' + feat + ' test not found');
+                if (Modernizr[feat] === false)
+                    passes = false;
+            }
+            if (passes) {
+                opts.yep && opts.yep();
+                return passes;
+            }
+            Modernizr.html5please.cb = opts.nope;
+            var script = document.createElement('script');
+            var ref = document.getElementsByTagName('script')[0];
+            var url = 'http://api.html5please.com/' + features.join('+') + '.json?callback=Modernizr.html5please.cb' + (opts.options ? ('&' + opts.options) : '') + '&html';
+            script.src = url;
+            ref.parentNode.insertBefore(script, ref);
+            return false;
+        };
+        Modernizr.html5please({features: "svg-css+svg-img+css-transitions+fontface+form-validation+forms+datalist+filereader", options: "texticon", yep: function() { /* put your own initApp() here */
+            }, nope: function(a) {
+                document.getElementById("h5p-message").innerHTML = a.html;
+            }})
     </script>
     <?
 }

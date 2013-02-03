@@ -121,7 +121,7 @@ class UserCharacteristicsTopic {
      * @param boolean $force_query
      * @return null|UserCharacteristicsTopic
      */
-    public static function getByID($id, $force_query) {
+    public static function getByID($id, $force_query = false) {
         global $db;
         $cid = intval($id);
         if ($force_query || !isset(self::$instance_cache[$cid]) || self::$instance_cache[$cid] === null) {
@@ -250,8 +250,8 @@ class UserCharacteristicsTopic {
         global $env;
         $user = Auth::getUser();
         $file_path = $env->upload_path . '/' . $user->getPictureDirPart();
-        $exif = $env->uploadImage($this->id, sanitizeInputText($upload_name), $file_path, false);
-        $this->_submit($user->getPictureDirPart() . '/' . $exif["FileName"]);
+        $exif = $env->uploadImage($this->id, $upload_name, $file_path, false);
+        $this->_submit($user->getPictureDirPart() . '/' . $exif["FileName"], true);
     }
 
     public function submit($answer) {
@@ -270,7 +270,7 @@ class UserCharacteristicsTopic {
                 case self::NUMBER_TYPE:
                     $canswer = intval($answer);
                     break;
-                default :
+                default:
                     $canswer = sanitizeInputText($answer);
             }
         } else {
@@ -314,7 +314,8 @@ class UserCharacteristicsTopic {
      * @return UserCharacteristicsItem
      */
     public function getUserAnswerItem($user = null) {
-        return UserCharacteristicsItem::getByTopic($topic, $user == null ? Auth::getUser() : $user);
+        $arr = UserCharacteristicsItem::getByTopic($this, $user == null ? Auth::getUser() : $user);
+        return count($arr) == 0 ? null : $arr[0];
     }
 
 }

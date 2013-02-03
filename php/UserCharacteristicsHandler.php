@@ -22,7 +22,7 @@ class UserCharacteristicsHandler extends ToroHandler {
     public function get($slug = "") {
         if ($slug == "") {
             if (Auth::isViewingResults()) {
-                tpl_all_usercharacteristics_page(UserCharacteristicsItem::getAll());
+                tpl_usercharacteristics_result_page(Auth::getUser(), UserCharacteristicsItem::getAll(Auth::getUser()));
             } else {
                 tpl_usercharacteristics_answer_page(UserCharacteristicsTopic::getAll());
             }
@@ -35,15 +35,15 @@ class UserCharacteristicsHandler extends ToroHandler {
                 if (is_numeric($key)) {
                     $topic = UserCharacteristicsTopic::getByID($key);
                     if ($topic) {
-                        $topic->submitAnswer($value);
+                        $topic->submit($value);
                     }
                 }
             }
             foreach ($_FILES as $key => $value) {
                 if (is_numeric($key)) {
                     $topic = UserCharacteristicsTopic::getByID($key);
-                    if ($topic) {
-                        $topic->submitImage($value);
+                    if ($topic && $value != "") {
+                        $topic->submitPicture($key);
                     }
                 }
             }
