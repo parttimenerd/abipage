@@ -69,25 +69,30 @@ if (window.rating_url !== undefined) {
 }
 
 function loadItems() {
-    if (window._page <= max_page) {
-        /*if (chocolat_options != {}){
-         last_item = $(".imagelist .item").last();
-         } else {
-         last_item = $(".content .item").last();
-         }*/
-        ajax({
-            type: "GET",
-            url: rating_url2,
-            data: {
-                'page': window._page + 1,
-                'phrase': phrase,
-                'ajax': true
-            },
-            func: function(data) {
-                addLoadedItemsHTML(data["html"]);
-            }
-        });
-        window._page++;
+    if (this.lock === undefined || this.lock === false) {
+        this.lock = true;
+        $this = this;
+        if (window._page <= max_page) {
+            /*if (chocolat_options != {}){
+             last_item = $(".imagelist .item").last();
+             } else {
+             last_item = $(".content .item").last();
+             }*/
+            ajax({
+                type: "GET",
+                url: rating_url2,
+                data: {
+                    'page': window._page + 1,
+                    'phrase': phrase,
+                    'ajax': true
+                },
+                func: function(data) {
+                    addLoadedItemsHTML(data["html"]);
+                    $this.lock = false;
+                }
+            });
+            window._page++;
+        }
     }
 }
 
