@@ -29,7 +29,7 @@
 function tpl_image_list($rucis, $page, $pages, $phrase = "", $as_page = true) {
     global $env;
     if ($as_page) {
-        tpl_before("images", null, null, array("url_part" => "images", "page" => $page, "pagecount" => $pages, "phrase" => $phrase));
+        tpl_before("images", null, null, array("url_part" => "images", "page" => $page, "pagecount" => $pages, "phrase" => $phrase, "auto_search_forbidden" => true));
         echo '<div class="imagelist">';
     }
     if ($page == 1 && $as_page && $env->images_editable) {

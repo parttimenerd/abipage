@@ -104,14 +104,23 @@ class User {
      * @param type $name
      * @return String[]
      */
-    public static function getNameSuggestions($name) {
+    public static function getNameSuggestions($name, $also_unvisible = false, $as_namearray = false) {
         global $db;
         $namearr = User::splitName(sanitizeInputText($name));
-        $res = $db->query("SELECT CONCAT(first_name, ' ', last_name) AS 'name' FROM " . DB_PREFIX . "user WHERE first_name LIKE '%" . $namearr[0] . "%' OR last_name LIKE '%" . $namearr[1] . "%' OR first_name LIKE '%" . $namearr[1] . "%' OR last_name LIKE '%" . $namearr[0] . "%' ORDER BY last_name, first_name ASC");
+        if ($as_namearray) {
+            $str = "first_name, last_name, CONCAT(first_name, ' ', last_name) AS 'both' ";
+        } else {
+            $str = "CONCAT(first_name, ' ', last_name) AS 'name' ";
+        }
+        $res = $db->query("SELECT $str FROM " . DB_PREFIX . "user WHERE first_name LIKE '%" . $namearr[0] . "%' OR last_name LIKE '%" . $namearr[1] . "%' OR first_name LIKE '%" . $namearr[1] . "%' OR last_name LIKE '%" . $namearr[0] . "%' " . (!$also_unvisible ? " AND visible=1 " : "") . "ORDER BY last_name, first_name ASC");
         $arr = mysqliResultToArr($res);
-        $retarr = array();
-        foreach ($arr as $line) {
-            $retarr[] = $line["name"];
+        if ($as_namearray) {
+            $retarr = $arr;
+        } else {
+            $retarr = array();
+            foreach ($arr as $line) {
+                $retarr[] = $line["name"];
+            }
         }
         return $retarr;
     }
@@ -151,9 +160,9 @@ class User {
      * 
      * @return UserArray
      */
-    public static function getAll() {
+    public static function getAll($sort_by_name = true, $also_unvisible = false) {
         global $db;
-        $res = $db->query("SELECT * FROM " . DB_PREFIX . "user");
+        $res = $db->query("SELECT * FROM " . DB_PREFIX . "user " . (!$also_unvisible ? " WHERE visible=1 " : "") . ($sort_by_name ? "ORDER BY last_name, first_name ASC" : ""));
         $retarr = array();
         while ($user = User::getFromMySQLResult($res)) {
             $retarr[] = $user;

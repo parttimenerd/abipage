@@ -21,13 +21,16 @@
  * 
  * @param array $usernamearr array of user names, array(array("both" => ...), ...)
  */
-function tpl_userlist($usernamearr) {
+function tpl_userlist($usernamearr, $phrase = "", $ajax = false) {
     global $env;
-    tpl_before("user/all", "Schülerliste", "");
-    if ($env->user_characteristics_editable) {
+    if (!$ajax) {
+        tpl_before("user/all", "Schülerliste", "", array("phrase" => $phrase));
+        tpl_add_js("search_time_buffer = " . $env->search_update_interval); 
+    }
+    if (Auth::isViewingResults()) {
         tpl_all_userpages_infobox();
     }
-    tpl_item_before("", "", "userlist");
+    tpl_item_before("", "", "content-item userlist");
     ?>
     <ui>
         <?php foreach ($usernamearr as $namearr): ?>
@@ -39,12 +42,13 @@ function tpl_userlist($usernamearr) {
     </ui>
     <?php
     tpl_item_after();
-    tpl_after();
+    if (!$ajax) {
+        tpl_after();
+    }
 }
 
 function tpl_all_userpages_infobox() {
-    global $env;
-    if ($env->user_characteristics_editable && Auth::isViewingResults()) {
+    if (Auth::isViewingResults()) {
         tpl_infobox("", "Gesammelte Benutzerseiten ansehen. Achtung: Laden dieser Seite kann sehr lange dauern.", tpl_url("user/all_pages"));
     }
 }
@@ -203,7 +207,7 @@ function tpl_user_not_found($given, $suggestions) {
     global $env;
     header('HTTP/1.0 404 Not Found');
     tpl_before("fourofour", $given . " nicht gefunden", $env->fourofour_subtitle, false, null, "owl");
-   
+
     tpl_item_before("Meinten sie...");
     foreach ($suggestions as $username) {
         ?><a class="suggestion" href="<?= tpl_url("user/" . $username) ?>"><?= $username ?></a><br/><?

@@ -16,7 +16,7 @@
   Patrick Haar: for new ideas and bug reports
 
 /* SITE */
-  Last update: 2012/01/27
+  Last update: 2012/02/04
   Standards: HTML5, CSS3, ECMAScript5, PHP5, Ruby1.9
   Components: Twitter Bootstrap, HTML5 Boilerplate, Modernizr, PHP Markdown, ToroPHP, jQuery, TableSorter, Chocolat, Color picker, jQuery.bottom, Icons by The Noun Project, jQuery wysiwyg, handlebars.js, Swag handlebars.js helpers
   Doctype: HTML5

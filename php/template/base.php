@@ -238,9 +238,12 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
                     <?php echo $subtitle ?></p>
                 <?php
                 global $has_sidebar;
-                if (($subnav && count($subnav) == 4) || $sidebar) {
-                    $has_sidebar = true;
-                    tpl_subnav($subnav["phrase"]);
+                $has_sidebar = $sidebar;
+                if (($subnav && count($subnav) >= 1) || $sidebar) {
+                    if (count($subnav) == 4) {
+                        $has_sidebar = true;
+                    }
+                    tpl_subnav($subnav["phrase"], isset($subnav["auto_search_forbidden"]) ? $subnav["auto_search_forbidden"] : false);
                 } /* else if ($class == "user"){ //HACK
                   $has_sidebar = true;
                   tpl_no_subnav();
@@ -358,36 +361,37 @@ function tpl_no_subnav() {
              * @global Environment $env
              * @param string $phrase the search phrase
              */
-            function tpl_subnav($phrase) {
+            function tpl_subnav($phrase, $auto_search_forbidden = false) {
                 global $has_sidebar, $env;
                 ?>
                 <div class="subnav">
                     <div class="nav nav-pills">
-                        <input type="text" name="phrase" id="search_field" placeholder="Suche" value="<?php echo $phrase ?>" onkeypress="if (event.keyCode == 13)
-                search($(this).val())"/>
+                        <input type="text" name="phrase" id="search_field" placeholder="Suche" value="<?php echo $phrase ?>" 
+                        <?= $auto_search_forbidden ?'onkeypress="if (event.keyCode == 13) search($(this).val());"' : 'onkeyup="search($(this).val(), false);"' ?>
+                               />
                     </div>
                 </div>	
                 </header>
 
                 <div class="row">
                     <div class="<?php echo (Auth::getUserMode() != User::NO_MODE && $has_sidebar) ? "span9 with_sidebar" : "span12 without_sidebar" ?> content">
-                        <?php
-                    }
+                               <?php
+                           }
 
-                    /**
-                     * Outputs the item container header, if one of the paramters is "" this paramter will be ignored and the corresponding html will not be echoed
-                     * 
-                     * @param string $title title of the item, if empty string, no header is echoed
-                     * @param string $icon title icon
-                     * @param string $classapp css class append to the conainer css class attribute
-                     * @param string $id id of item container
-                     * @param string $link link of the title
-                     * @param string $link_title title of the link of the title
-                     */
-                    function tpl_item_before($title = "", $icon = "", $classapp = "", $id = "", $link = "", $link_title = "") {
-                        ?>
-                        <div class="well item <?php echo $classapp ?>" id="<?php echo $id ?>" style="width: auto">
-                            <?php if ($title != ""): ?>
+                           /**
+                            * Outputs the item container header, if one of the paramters is "" this paramter will be ignored and the corresponding html will not be echoed
+                            * 
+                            * @param string $title title of the item, if empty string, no header is echoed
+                            * @param string $icon title icon
+                            * @param string $classapp css class append to the conainer css class attribute
+                            * @param string $id id of item container
+                            * @param string $link link of the title
+                            * @param string $link_title title of the link of the title
+                            */
+                           function tpl_item_before($title = "", $icon = "", $classapp = "", $id = "", $link = "", $link_title = "") {
+                               ?>
+                               <div class="well item <?php echo $classapp ?>" id="<?php echo $id ?>" style="width: auto">
+                                   <?php if ($title != ""): ?>
                                 <span class="item-header">
                                     <? if ($icon != "") tpl_icon($icon) ?>
                                     <? if ($link != "") echo "<a href=\"$link\"" . ($link_title != "" ? (" title='" . $link_title . "'") : "") . ">" ?>

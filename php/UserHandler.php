@@ -23,15 +23,15 @@ class UserHandler extends ToroHandler {
         global $env;
         $arr = explode('/', substr($slug, 1));
         $user = self::getUserFromSlug($slug, true);
-        if ($user === false){
+        if ($user === false) {
             $arr = explode('/', substr($slug, 1));
             $slug = $arr[0];
             $str = str_replace("_", " ", $slug);
             $suggestions = User::getNameSuggestions($str);
-            if (count($suggestions) > 1){
+            if (count($suggestions) > 1) {
                 tpl_user_not_found($str, $suggestions);
                 return;
-            } else if (count($suggestions) == 1){
+            } else if (count($suggestions) == 1) {
                 tpl_user(User::getByName($suggestions[0]));
                 return;
             } else {
@@ -39,7 +39,13 @@ class UserHandler extends ToroHandler {
             }
         }
         if (!$user) {
-            tpl_userlist($env->getUserNames(false, isset($arr[1]) ? str_replace('_', ' ', $arr[1]) : "", false));
+            if (!isset($_GET["ajax"])) {
+                tpl_userlist($env->getUserNames(false, isset($arr[1]) ? str_replace('_', ' ', $arr[1]) : "", false));
+            } else {
+                jsonAjaxResponseStart();
+                tpl_userlist(User::getNameSuggestions($_GET["phrase"], false, true), $_GET["phrase"], true);
+                jsonAjaxResponseEndSend();
+            }
         } else if (count($arr) == 2 && $arr[1] == "preferences" && Auth::canEditUser($user)) {
             tpl_user_prefs($user);
         } else {
@@ -50,9 +56,9 @@ class UserHandler extends ToroHandler {
     public function get_result($slug = "") {
         global $env;
         if ($slug == "all_pages" || $slug == "/all_pages") {
-            $userarr = User::getAll()->toArray();
+            $userarr = User::getAll(true, false)->toArray();
             $arr = array();
-            foreach ($userarr as $user){
+            foreach ($userarr as $user) {
                 $arr[] = array("user" => $user, "user_characteristics" => UserCharacteristicsItem::getAll($user));
             }
             tpl_user_pages($arr);
@@ -81,9 +87,9 @@ class UserHandler extends ToroHandler {
             } else {
                 $str = str_replace("_", " ", $slug);
                 $user = User::getByName($str);
-                if ($user == null){
-                    if (!$disallow_namelike){
-                    $user = User::getByNameLike($str);
+                if ($user == null) {
+                    if (!$disallow_namelike) {
+                        $user = User::getByNameLike($str);
                     } else {
                         return false;
                     }

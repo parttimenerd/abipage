@@ -76,10 +76,10 @@ class PreferencesHandler extends ToroHandler {
                 )),
             "Seiteninhalte" => array("mode" => "table-list", "rows" => array(
                     "mainpage_text" => array(
-                      "default" => "Dies ist die Abizeitungswebsite der (zuk&uuml;nftigen) Abiturienten.",
+                        "default" => "Dies ist die Abizeitungswebsite der (zuk&uuml;nftigen) Abiturienten.",
                         "label" => "Text auf der Hauptseite (Markdown formatiert)",
                         "type" => "textarea"
-                      ),
+                    ),
                     "impress_text" => array(
                         "default" => "##Verantwortlich für diesen Webauftritt
 [Vorname] [Nachname]
@@ -166,6 +166,7 @@ Wenn ja, sollte Piwik installiert sein und diese Website hinzugefügt worden sei
                     "response_allowed" => array("default" => "true", "label" => "Können Kommentare zu Stimmt es...-Beiträgen und Zitaten geschrieben werden?", "type" => "checkbox"),
                     "show_logs" => array("default" => "false", "label" => "Werden die Loggingnachrichten den Admins angezeigt?", "type" => "checkbox"),
                     "auto_update_interval" => array("default" => "15000", "label" => "Pause zwischen zwei Aktualisierungsvorgängen von z.B. der Aktionenspalte in Millisekunden", "type" => "number"),
+                    "search_update_interval" => array("default" => "300", "label" => "Puffer zwischen zwei Suchabfragen während der Benutzer tippt in Millisekunden", "type" => "number"),
                     "userpolls_result_length" => array("default" => "3", "label" => "Anzahl der Personen die pro Umfrage in der Ergebnisliste angezeigt werden"),
                     "results_viewable" => array("default" => "false", "label" => "Kann sich ein Benutzer (mindestens vom Rang eines Editors), die Ergebnisse anzeigen lassen", "type" => "checkbox")
                 ),
