@@ -134,7 +134,7 @@ function tpl_usercharacteristics_answer_topic(UserCharacteristicsTopic $topic) {
  */
 function tpl_uc_answer_info() {
     global $env;
-    if (Auth::getUser()->hasNotAllUCQuestionsAnswered() && $env->user_characteristics_editable) {
+    if (Auth::isLoggedIn() && Auth::getUser()->hasNotAllUCQuestionsAnswered() && $env->user_characteristics_editable) {
         $number = Auth::getUser()->getNumberOfUCQuestionsToBeAnswered();
         if ($number == 1) {
             $text = "Es ist noch eine Steckbrieffrage unbeantwortet.";

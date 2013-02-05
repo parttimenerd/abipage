@@ -194,6 +194,10 @@ class Auth {
         return $user != null && (Auth::isSameUser($user) || Auth::isAdmin() || (Auth::getUserMode() > $user->getMode() && Auth::getUserMode() < User::EDITOR_MODE));
     }
 
+    public static function isLoggedIn(){
+        return self::getUser() != null;
+    }
+    
     public static function isNotActivated() {
         return self::$user_not_activated;
     }

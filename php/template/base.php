@@ -160,7 +160,7 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
             <meta name="author" content="Johannes Bechberger"/>
             <meta name="viewport" content="width=device-width"/>
             <link href="<?php echo tpl_url("css/project.min.css") ?>" rel="stylesheet"/>   
-            <link href="<?php echo tpl_url("css/style.css") ?>" rel="stylesheet"/>
+            <link href="<?php echo tpl_url("css/style.css?42") ?>" rel="stylesheet"/>
             <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
             <script>window.jQuery || document.write('<script src="<?php echo tpl_url("js/lib/jquery-1.7.2.js") ?>"><\/script>')</script>
             <link rel = "shortcut icon" href = "<?php echo tpl_url($env->favicon) ?>"/>
@@ -251,7 +251,8 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
                     $has_sidebar = $subnav == true;
                     tpl_no_subnav();
                 }
-                tpl_uc_answer_info();
+                if (Auth::isLoggedIn())
+                    tpl_uc_answer_info();
             }
 
             /**
@@ -323,12 +324,12 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
         <script src="<?php echo tpl_url("js/plugins.js") ?>"></script>
         <script src="<?php echo tpl_url("js/application.js") ?>"></script>
         <!--<script src="<?php echo tpl_url("js/libs/modernizr-2.5.3.js") ?>"></script>-->
-        <script src="<?php echo tpl_url("js/script.js?100") ?>"></script>
+        <script src="<?php echo tpl_url("js/script.js?1001") ?>"></script>
     <? else: ?>
         <? if ($editor_needed): ?>
             <script src="<?php echo tpl_url("js/min/jquery.wysiwyg.min.js") ?>"></script>
         <? endif ?>
-        <script src="<?php echo tpl_url("js/min/scripts.min.js") ?>"></script>
+        <script src="<?php echo tpl_url("js/min/scripts?42.min.js") ?>"></script>
     <? endif ?>
     </body>
     </html>
@@ -367,31 +368,34 @@ function tpl_no_subnav() {
                 <div class="subnav">
                     <div class="nav nav-pills">
                         <input type="text" name="phrase" id="search_field" placeholder="Suche" value="<?php echo $phrase ?>" 
-                        <?= $auto_search_forbidden ?'onkeypress="if (event.keyCode == 13) search($(this).val());"' : 'onkeyup="search($(this).val(), false);"' ?>
+                        <?= $auto_search_forbidden ? 'onkeypress="if (event.keyCode == 13) search($(this).val());"' : 'onkeyup="search($(this).val(), false);"' ?>
                                />
                     </div>
                 </div>	
+                <script>
+                    search_time_buffer = <?= $env->search_update_interval ?>;
+                </script>
                 </header>
 
                 <div class="row">
                     <div class="<?php echo (Auth::getUserMode() != User::NO_MODE && $has_sidebar) ? "span9 with_sidebar" : "span12 without_sidebar" ?> content">
-                               <?php
-                           }
+                        <?php
+                    }
 
-                           /**
-                            * Outputs the item container header, if one of the paramters is "" this paramter will be ignored and the corresponding html will not be echoed
-                            * 
-                            * @param string $title title of the item, if empty string, no header is echoed
-                            * @param string $icon title icon
-                            * @param string $classapp css class append to the conainer css class attribute
-                            * @param string $id id of item container
-                            * @param string $link link of the title
-                            * @param string $link_title title of the link of the title
-                            */
-                           function tpl_item_before($title = "", $icon = "", $classapp = "", $id = "", $link = "", $link_title = "") {
-                               ?>
-                               <div class="well item <?php echo $classapp ?>" id="<?php echo $id ?>" style="width: auto">
-                                   <?php if ($title != ""): ?>
+                    /**
+                     * Outputs the item container header, if one of the paramters is "" this paramter will be ignored and the corresponding html will not be echoed
+                     * 
+                     * @param string $title title of the item, if empty string, no header is echoed
+                     * @param string $icon title icon
+                     * @param string $classapp css class append to the conainer css class attribute
+                     * @param string $id id of item container
+                     * @param string $link link of the title
+                     * @param string $link_title title of the link of the title
+                     */
+                    function tpl_item_before($title = "", $icon = "", $classapp = "", $id = "", $link = "", $link_title = "") {
+                        ?>
+                        <div class="well item <?php echo $classapp ?>" id="<?php echo $id ?>" style="width: auto">
+                            <?php if ($title != ""): ?>
                                 <span class="item-header">
                                     <? if ($icon != "") tpl_icon($icon) ?>
                                     <? if ($link != "") echo "<a href=\"$link\"" . ($link_title != "" ? (" title='" . $link_title . "'") : "") . ">" ?>
@@ -587,33 +591,33 @@ function tpl_html5_please() {
     ?>
     <div id="h5p-message"></div>
     <script async>
-        Modernizr.html5please = function(opts) {
-            var passes = true;
-            var features = opts.features.split('+');
-            var feat;
-            for (var i = -1, len = features.length; ++i < len; ) {
-                feat = features[i];
-                if (Modernizr[feat] === undefined)
-                    window.console && console.warn('Modernizr.' + feat + ' test not found');
-                if (Modernizr[feat] === false)
-                    passes = false;
-            }
-            if (passes) {
-                opts.yep && opts.yep();
-                return passes;
-            }
-            Modernizr.html5please.cb = opts.nope;
-            var script = document.createElement('script');
-            var ref = document.getElementsByTagName('script')[0];
-            var url = 'http://api.html5please.com/' + features.join('+') + '.json?callback=Modernizr.html5please.cb' + (opts.options ? ('&' + opts.options) : '') + '&html';
-            script.src = url;
-            ref.parentNode.insertBefore(script, ref);
-            return false;
-        };
-        Modernizr.html5please({features: "svg-css+svg-img+css-transitions+fontface+form-validation+forms+datalist+filereader", options: "texticon", yep: function() { /* put your own initApp() here */
-            }, nope: function(a) {
-                document.getElementById("h5p-message").innerHTML = a.html;
-            }})
+                    Modernizr.html5please = function(opts) {
+                        var passes = true;
+                        var features = opts.features.split('+');
+                        var feat;
+                        for (var i = -1, len = features.length; ++i < len; ) {
+                            feat = features[i];
+                            if (Modernizr[feat] === undefined)
+                                window.console && console.warn('Modernizr.' + feat + ' test not found');
+                            if (Modernizr[feat] === false)
+                                passes = false;
+                        }
+                        if (passes) {
+                            opts.yep && opts.yep();
+                            return passes;
+                        }
+                        Modernizr.html5please.cb = opts.nope;
+                        var script = document.createElement('script');
+                        var ref = document.getElementsByTagName('script')[0];
+                        var url = 'http://api.html5please.com/' + features.join('+') + '.json?callback=Modernizr.html5please.cb' + (opts.options ? ('&' + opts.options) : '') + '&html';
+                        script.src = url;
+                        ref.parentNode.insertBefore(script, ref);
+                        return false;
+                    };
+                    Modernizr.html5please({features: "svg-css+svg-img+css-transitions+fontface+form-validation+forms+datalist+filereader", options: "texticon", yep: function() { /* put your own initApp() here */
+                        }, nope: function(a) {
+                            document.getElementById("h5p-message").innerHTML = a.html;
+                        }})
     </script>
     <?
 }
