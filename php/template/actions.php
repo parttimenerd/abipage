@@ -24,6 +24,7 @@
  */
 function tpl_actions_sidebar() {
     global $env, $store;
+    tpl_update_with_js();
     ?>
     <script>
         var actions_url = "<?php echo tpl_url("ajax/actions"); ?>";
@@ -34,11 +35,11 @@ function tpl_actions_sidebar() {
         <div class="well">
             <ul class="nav nav-list action_list_container">
                 <li class="nav-header" id="action_header"><a href="<?= tpl_url("actions") ?>" style="color: #333333; text-align: center">Aktionen</a></li>
-                <?php
-                $action_arr = Actions::getLastActions();
-                tpl_actions($action_arr);
-                tpl_add_js('var last_action_id = ' . $action_arr->getLastActionID());
-                ?>
+                    <?php
+                    $action_arr = Actions::getLastActions();
+                    tpl_actions($action_arr);
+                    tpl_add_js('var last_action_id = ' . $action_arr->getLastActionID());
+                    ?>
             </ul>
         </div><!--/.well -->
     </div><!--/span .sidebar-->
@@ -56,18 +57,25 @@ function tpl_actions_page(ActionArray $actions, $as_page = true, $class_app = ""
     if ($as_page) {
         tpl_before("actions");
     }
+    tpl_update_with_js();
     echo '<div class="action_list_container ' . $class_app . '">';
 
     foreach ($actions->getActionArray() as $action) {
-        tpl_item_before("", "", "action action_list_item", 'action_' . $action["id"]);
-        tpl_action($action);
-        tpl_item_after();
+        tpl_actions_page_action_item($action);
     }
     echo '</div>';
     tpl_add_js('var last_action_id = ' . $actions->getLastActionID());
     if ($as_page) {
         tpl_after();
     }
+}
+
+function tpl_actions_page_action_item($action){
+    ob_start();
+        tpl_item_before("", "", "action action_list_item", 'action_' . $action["id"]);
+        $html = ob_get_clean();
+        tpl_action($action,true,$html);
+        tpl_item_after();
 }
 
 /**
@@ -88,61 +96,64 @@ function tpl_actions(ActionArray $actions) {
  * 
  * @param array $action action item
  * @param boolean $with_time print a tpl_timediff_span in front of the action text
- * @param String $before_html html to be printed before the action text (and the tpl_timediff_span)
+ * @param String $before_html html to be printed before the action text (and the tpl_timediff_span),
+ *  URL is replaced by the url of the action item
  * @param String $after_html html to be printed after the action text
  * @return String the url of the linked action item
  */
 function tpl_action($action, $with_time = true, $before_html = '', $after_html = '') {
-    echo $before_html;
-    if ($with_time) {
-        tpl_timediff_span(time() - $action["time"]);
-        echo " ";
-    }
     $url = "";
+    $center = "";
     switch ($action["type"]) {
         case "add_user_comment":
-            echo "Kommentar bei ";
+            $center = "Kommentar bei ";
             $url = tpl_userlink($action["person"]);
             break;
         case "delete_user_comment":
-            echo "Kommentar gelöscht";
+            $center = "Kommentar gelöscht";
             break;
         case "add_quote":
             $url = tpl_url('quotes');
-            echo '<a href="' . $url . '">Zitat</a> von ' . $action["person"];
+            $center = '<a href="' . $url . '">Zitat</a> von ' . $action["person"];
             break;
         case "add_rumor":
             $url = tpl_url('rumors');
-            echo '<a href="' . $url . '">Stimmt es...</a> Beitrag geschrieben';
+            $center = '<a href="' . $url . '">Stimmt es...</a> Beitrag geschrieben';
             break;
         case "upload_image":
             $url = tpl_url('images');
-            echo '<a href="' . $url . '">Bild</a> hochgeladen';
+            $center = '<a href="' . $url . '">Bild</a> hochgeladen';
             break;
         case "new_user":
             $url = tpl_userlink(intval($action["person"]));
-            echo " registriert";
+            $center = " registriert";
             break;
         case "delete_image":
             $url = tpl_url('images');
-            echo '<a href="' . $url . '">Bild</a> gelöscht';
+            $center = '<a href="' . $url . '">Bild</a> gelöscht';
             break;
         case "delete_quote":
             $url = tpl_url('quotes');
-            echo '<a href="' . $url . '">Zitat</a> gelöscht';
+            $center = '<a href="' . $url . '">Zitat</a> gelöscht';
             break;
         case "delete_rumor":
             $url = tpl_url('rumors');
-            echo '<a href="' . $url . '">Stimmt es...</a> Beitrag gelöscht';
+            $center = '<a href="' . $url . '">Stimmt es...</a> Beitrag gelöscht';
             break;
         case "register":
-            echo 'Neuer Benutzer registriert';
+            $center = 'Neuer Benutzer registriert';
             break;
         case "write_news":
             $url = tpl_url('news');
-            echo '<a href="' . $url . '">Neue Nachricht</a> von ' . $action["person"] . ' geschrieben';
+            $center = '<a href="' . $url . '">Neue Nachricht</a> von ' . $action["person"] . ' geschrieben';
             break;
     }
+    echo str_replace("URL", $url, $before_html);
+    if ($with_time) {
+        tpl_timediff_span(time() - $action["time"], $action["time"]);
+        echo " ";
+    }
+    echo $center;
     echo $after_html;
     return $url;
 }

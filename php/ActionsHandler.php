@@ -20,13 +20,25 @@
 class ActionsHandler extends ToroHandler {
 
     public function get($slug = "") {
-        $slug = $slug != "" ? substr($slug, 1) : "";
-        if ($slug != "" && is_numeric($slug)) {
-            $action = Actions::getActionByID($slug);
-            if ($action != null)
-                tpl_actions_page(new ActionArray(array($action)));
+        if (!isset($_GET["ajax"])) {
+            $slug = $slug != "" ? substr($slug, 1) : "";
+            if ($slug != "" && is_numeric($slug)) {
+                $action = Actions::getActionByID($slug);
+                if ($action != null)
+                    tpl_actions_page(new ActionArray(array($action)));
+            } else {
+                tpl_actions_page(Actions::getLastActions());
+            }
         } else {
-            tpl_actions_page(Actions::getLastActions());
+            ob_start();
+            if (isset($_GET["last_time_updated"])) {
+                $actions = Actions::getLastActionsSince($_GET["last_time_updated"]);
+                foreach ($actions->getActionArray() as $action){
+                    tpl_actions_page_action_item($action);
+                }
+           }
+            $items = ob_get_clean();
+            jsonAjaxResponseEndSend(array(), array("items" => $items), "");
         }
     }
 

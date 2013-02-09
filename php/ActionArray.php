@@ -44,6 +44,10 @@ class ActionArray {
     public function getLastActionID() {
         return $this->last_action_id;
     }
+    
+    public function isEmpty(){
+        return empty($this->actions);
+    }
 
 }
 

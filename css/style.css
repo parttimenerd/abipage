@@ -306,12 +306,12 @@ table {
 
 .subhead input, .subhead input:focus {
     font-size: 23px;
-    font-family: 'PT Sans', 'Helvetica';
+    font-family: 'PT Sans','Helvetica';
     line-height: 27px;
-    background: none;
-    border: none;
-    width: 100%;
-    height: 35px;
+    background: none repeat scroll 0% 0% transparent;
+    border: medium none;
+    width: calc(100% - 9px);
+    height: 27px;
     box-shadow: none;
 }
 

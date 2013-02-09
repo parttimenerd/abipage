@@ -31,6 +31,7 @@ class RatableUserContentHandler extends ToroHandler {
         "search_def" => array("single"),
         "page" => "int",
         "id" => "int", //Not yet implemented in the ui
+        "start_time" => "int",
         "sort" => "(time|rating)",
         "user" => "string",
         "desc", "asc");
@@ -54,17 +55,35 @@ class RatableUserContentHandler extends ToroHandler {
         if (isset($_GET["page"]))
             $this->list->setStart($this->items_per_page * (intval($_GET["page"]) - 1));
 
-        $arr = $this->list->getItems();
         $ajax = isset($params["ajax"]) || isset($_GET["ajax"]);
-        if ($ajax)
+        if ($ajax) {
             jsonAjaxResponseStart();
-        call_user_func($this->tpl_list_func_name, $arr["items"], $arr["page"], $this->list->getPageCount(), $phrase, !$ajax);
-        if ($ajax)
-            jsonAjaxResponseEndSend();
+        }
+        if (!isset($_GET["only_update"]) || $_GET["only_update"] == false) {
+            $arr = $this->list->getItems();
+            call_user_func($this->tpl_list_func_name, $arr["items"], $arr["page"], $this->list->getPageCount(), $phrase, !$ajax);
+        }
+        if ($ajax) {
+            $html = ob_get_clean();
+            ob_start();
+            if (isset($_GET["last_time_updated"])) {
+                $this->list->appendToWhereApp("AND time > " . $_GET["last_time_updated"]);
+                $this->list->resetCount();
+                $this->list->setStart(10E100);
+                if (!$this->list->isEmpty()) {
+                    $arr = $this->list->getItems();
+                    call_user_func($this->tpl_list_func_name, $arr["items"], -1, -1, null, false);
+                }
+            }
+            $items = ob_get_clean();
+            jsonAjaxResponseEndSend(array(), array("items" => $items), $html);
+        }
     }
 
     private function configListFromSlug($slug) {
         $params = findParamsInSlug($slug, $this->slug_params);
+        if (isset($params["start_time"]) > 10000)
+            $this->list->appendToWhereApp("time < " . $params["start_time"]);
         if (isset($params["search_def"]))
             $this->list->appendSearchAfterPhrase(str_replace('_', ' ', $params["search_def"]));
         if (isset($params["search"]))

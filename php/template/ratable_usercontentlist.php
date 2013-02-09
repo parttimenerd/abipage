@@ -29,6 +29,7 @@
 function tpl_image_list($rucis, $page, $pages, $phrase = "", $as_page = true) {
     global $env;
     if ($as_page) {
+        tpl_update_with_js();
         tpl_before("images", null, null, array("url_part" => "images", "page" => $page, "pagecount" => $pages, "phrase" => $phrase, "auto_search_forbidden" => true));
         echo '<div class="imagelist">';
     }
@@ -41,10 +42,11 @@ function tpl_image_list($rucis, $page, $pages, $phrase = "", $as_page = true) {
     <script>
         var rating_url = "<?php echo tpl_url('images') ?>";
     <?php if ($as_page) echo 'var page = ' . $page . ';' ?>
-        window.max_page = pagecount = <?php echo $pages ?>;
+    <? if ($pages != -1): ?>
+            window.max_page = pagecount = <?php echo $pages ?>;
+    <? endif ?>
     <?php echo $phrase == "" ? "" : 'var phrase = "' . $phrase . '";' ?>
-        var chocolat_options = {};
-    </script>
+        var chocolat_options = {};</script>
     <?php
     if ($as_page) {
         ?>
@@ -135,6 +137,7 @@ function tpl_image_item(RatableUserContentItem $ruci) {
 function tpl_quote_list($rucis, $page, $pages, $phrase, $as_page = true) {
     global $env;
     if ($as_page) {
+        tpl_update_with_js();
         tpl_before("quotes", null, null, array("url_part" => "quotes", "page" => $page, "pagecount" => $pages, "phrase" => $phrase));
     }
     if ($page == 1 && $as_page && $env->quotes_editable) {
@@ -146,7 +149,9 @@ function tpl_quote_list($rucis, $page, $pages, $phrase, $as_page = true) {
     <script>
         var rating_url = "<?php echo tpl_url('quotes') ?>";
     <?php if ($as_page) echo 'var page = ' . $page . ';' ?>
-        window.max_page = pagecount = <?php echo $pages ?>;
+    <? if ($pages != -1): ?>
+            window.max_page = pagecount = <?php echo $pages ?>;
+    <? endif ?>
     <? if ($pages == -1): ?>
             var phrase = "<?php echo $phrase ?>";
     <? endif; ?>
@@ -183,9 +188,9 @@ function tpl_write_quote_response_item_hbs($id = "item-response-template") {
     ?><script id="<?= $id ?>" type="text/x-handlebars-template"><?
     tpl_item_before("", "", "item-send item-quote-send");
     ?>
-        <input type="hidden" name="person" class="teacher_typeahead" value="{{teacher}}"/>
-        <textarea name="text" placeholder="Zitat" require="on"></textarea>
-        <input type="hidden" name="response_to" value="-1"/>
+        < input type = "hidden" name = "person" class = "teacher_typeahead" value = "{{teacher}}" / >
+        < textarea name = "text" placeholder = "Zitat" require = "on" > < /textarea>
+        < input type = "hidden" name = "response_to" value = "-1" / >
     <?php
     tpl_item_after_buttons(array("{{button_answer_title}}" => array("onclick" => "sendQuote(false, {{response_to}}, '{{teacher}}')"), "{{button_answer_ano_title}}" => array("onclick" => "sendQuote(true, {{response_to}}, '{{teacher}}')"), "Schließen" => array("onclick" => "responseToItem({{response_to}})")));
     ?></script><?
@@ -219,6 +224,7 @@ function tpl_quote_item(RatableUserContentItem $ruci) {
 function tpl_rumor_list($rucis, $page, $pages, $phrase, $as_page = true) {
     global $env;
     if ($as_page) {
+        tpl_update_with_js();
         tpl_before("rumors", null, null, array("url_part" => "rumors", "page" => $page, "pagecount" => $pages, "phrase" => $phrase));
     }
     if ($page == 1 && $as_page && $env->rumors_editable) {
@@ -230,7 +236,9 @@ function tpl_rumor_list($rucis, $page, $pages, $phrase, $as_page = true) {
     <script>
         var rating_url = "<?php echo tpl_url('rumors') ?>";
     <?php if ($as_page) echo 'var page = ' . $page . ';' ?>
-        window.max_page = pagecount = <?php echo $pages ?>;
+    <? if ($pages != -1): ?>
+            window.max_page = pagecount = <?php echo $pages ?>;
+    <? endif ?>
     <? if ($pages == -1): ?>
             var phrase = "<?php echo $phrase ?>";
     <? endif; ?>
@@ -265,8 +273,8 @@ function tpl_write_rumor_response_item_hbs($id = "item-response-template") {
     ?><script id="<?= $id ?>" type="text/x-handlebars-template"><?
     tpl_item_before("", "", "item-send item-rumor-send");
     ?>
-        <textarea name="text" placeholder="..., dass " require="on">..., dass </textarea>
-        <input type="hidden" name="response_to" value="-1"/>
+        < textarea name = "text" placeholder = "..., dass " require = "on" > ..., dass < /textarea>
+        < input type = "hidden" name = "response_to" value = "-1" / >
     <?php
     tpl_item_after_buttons(array("{{button_answer_title}}" => array("onclick" => "sendRumor(false, {{response_to}})"), "{{button_answer_ano_title}}" => array("onclick" => "sendRumor(true, {{response_to}})"), "Schließen" => array("onclick" => "responseToItem({{response_to}})")));
     ?></script><?

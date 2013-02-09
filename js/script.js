@@ -40,7 +40,7 @@ function fillStars(id, rating) {
             $(this).attr("class", "star");
         }
         num--;
-    })
+    });
 }
 
 function deleteItem(id) {
@@ -84,7 +84,7 @@ function loadItems() {
                 data: {
                     'page': window._page + 1,
                     'phrase': phrase,
-                    'ajax': true
+                    'start_time': start_time
                 },
                 func: function(data) {
                     addLoadedItemsHTML(data["html"]);
@@ -97,10 +97,10 @@ function loadItems() {
 }
 
 function addLoadedItemsHTML(html, is_append) {
-    if (arguments.length == 1) {
+    if (arguments.length === 1) {
         is_append = true;
     }
-    if (html != "") {
+    if (html !== "") {
         if (chocolat_options.length > 0) {
             if (is_append) {
                 $('.imagelist').append(html);
@@ -141,6 +141,7 @@ function search(_phrase, no_timeout) {
             func: function(data) {
                 $(".content-item").remove();
                 addLoadedItemsHTML(data["html"]);
+                window.start_time = getTime();
             }
         });
         this.last_search_time = (new Date()).getTime();
@@ -163,64 +164,6 @@ function initBottomLoad() {
     }
 }
 setTimeout("initBottomLoad()", 300);
-
-function updateActionsSidebar() {
-    if ($(".sidebar").css("display") === "hidden")
-        return;
-    ajax({
-        type: "GET",
-        url: ajax_url + "/last_actions",
-        data: {
-            'id': last_action_id
-        },
-        func: function(data) {
-            $(".action_list_container .action_list_item:first").before(data["html"]);
-            if (data["last_action_id"] !== undefined)
-                last_action_id = data["last_action_id"];
-        },
-        needs: ["html", "last_action_id"]
-    });
-}
-
-if ($(".action_list_container").length > 0)
-    setInterval("updateActionsSidebar()", auto_update_interval);
-
-/*function loadNew(){
- //var get_items = window.first_item_id !== undefined;
- //var get_actions = window.first_action_id !== undefined;
- //addHTML(element, html_to_add, is_append);
- //if (get_items || get_actions){
- if (window.page !== undefined && !is_loading){
- $.ajax({
- type: "POST",
- url: rating_url2,
- data: $.param({
- 'page': 1, 
- 'sort': sort_str, 
- 'phrase': phrase
- }),
- success: function(html){
- addLoadedItemsHTML(html, false);
- },
- error: function(html){
- addLoadedItemsHTML(html.responseText, false);
- }
- });
- }
- if ($(".sidebar").length != 0 && window.actions_url !== undefined && !is_loading){
- $.ajax({
- url: actions_url,
- success: function(html){
- addActionsHTMLItems(html);
- },
- error: function(html){
- addActionsHTMLItems(html.responseText);
- }
- });
- }
- }
- 
- setInterval("loadNew()", interval);*/
 
 if ($("#drop_area").length !== 0) {
     $('.imagelist a.item-content').Chocolat(chocolat_options);
@@ -297,7 +240,7 @@ if ($("#drop_area").length !== 0) {
     }
 
     function uploadImage() {
-        if (file != null) {
+        if (file !== null) {
             if (window.XMLHttpRequest) {
                 var xhr = new XMLHttpRequest();
             } else {
@@ -337,7 +280,7 @@ if ($("#drop_area").length !== 0) {
             xhr.send(fd);
 
             xhr.onreadystatechange = function() {
-                if (xhr.status == 200 && xhr.readyState == 4) {
+                if (xhr.status === 200 && xhr.readyState === 4) {
                     var json;
                     try {
                         json = JSON.parse(xhr.responseText);
@@ -345,7 +288,7 @@ if ($("#drop_area").length !== 0) {
                         console.log(xhr.responseText);
                         console.log(err);
                     }
-                    if (json == null)
+                    if (json === null)
                         return;
                     if (json["logs"] !== undefined)
                         add_log_object(json["logs"]);
@@ -495,7 +438,7 @@ function sendUserComment(is_anonymous) {
         data: data,
         func: function(data) {
             $(".write_comment textarea").val("");
-            if (data["html"] != "")
+            if (data["html"] !== "")
                 $(".write_comment").after(data["html"]);
         }
     });
@@ -512,24 +455,17 @@ function setResultMode(view_results) {
 }
 
 function updateTimespans() {
-    $(".timediff").each(function() {
+    $(".timediff[time]").each(function() {
         var ele = $(this);
-        ele.html(timespanText(getUTCUnixTime() - ele.attr("time")));
+        ele.html(timespanText(getTime() - Number(ele.attr("time"))));
     });
 }
 
-function getUTCUnixTime() {
+function getTime() {
     var now = new Date();
-    return Math.round(Date.UTC(
-            now.getFullYear(),
-            now.getMonth(),
-            now.getDate(),
-            now.getHours(),
-            now.getMinutes()
-            ) / 1000);
+    return Math.round(now.getTime() / 1000); // - reference_time_diff_seconds;
 }
 
-//TODO fix me
 function timespanText(timediff) {
     var text = "";
     var arr = [
@@ -544,14 +480,14 @@ function timespanText(timediff) {
         var steparr = arr[i];
         if (steparr[1] > timediff) {
             var value = Math.floor(timediff / steparr[0]);
-            text = (value == 1 ? steparr[2][2] : value) + " " + (value == 1 ? steparr[2][0] : (steparr[2][0] + steparr[2][1]));
+            text = (value === 1 ? steparr[2][2] : value) + " " + (value === 1 ? steparr[2][0] : (steparr[2][0] + steparr[2][1]));
             break;
         }
     }
     return 'Vor ' + text;
 }
 
-//window.setInterval("updateTimespans()", 5000);
+window.setInterval("updateTimespans()", 5000);
 
 function deleteUserComment(id) {
     ajax({
@@ -566,18 +502,30 @@ function deleteUserComment(id) {
 }
 
 function ajax(args) {
+    $this = this;
+    if (this.last_time_updated === undefined) {
+        this.last_time_updated = (new Date()).getTime();
+        this.last_time_updated_loc = getTime();
+    }
     var func = function(resp) {
-        if (resp == null) {
+        if (resp === null) {
             args["no_return"](null);
             return;
         }
         if (resp["logs"] !== undefined)
             add_log_object(resp["logs"]);
         if (resp["data"] !== undefined) {
+            if (resp["data"]["ext"] !== undefined) {
+                $this.last_time_updated = (new Date()).getTime();
+                $this.last_time_updated_loc = getTime();
+                if (resp["data"]["ext"].length !== 0) {
+                    update(resp["data"]["ext"]);
+                }
+            }
             var ok = true;
             for (var i = 0; i < args["needs"].length; i++) {
                 var need_data = resp["data"][args["needs"][i]];
-                if (need_data === undefined || need_data == null || need_data == "") {
+                if (need_data === undefined || need_data === null || need_data === "") {
                     ok = false;
                     args["func"](false);
                     return;
@@ -586,10 +534,13 @@ function ajax(args) {
             if (ok)
                 args["func"](resp["data"]);
         }
-    }
+    };
     args = $.extend({
         type: "POST",
         dataType: "json",
+        func: function(data) {
+
+        },
         success: func,
         error: function(resp, textStatus) {
             console.error(textStatus, resp.responseText);
@@ -602,11 +553,36 @@ function ajax(args) {
     }, args);
     args["data"] = $.extend({
         access_key: access_key,
+        last_time_updated: this.last_time_updated_loc,
         ajax: true
     }, args["data"]);
-    if (args["data"] !== undefined && typeof(args["data"]) != "string")
+    if (args["data"] !== undefined && typeof(args["data"]) !== "string")
         args["data"] = $.param(args["data"]);
-    $.ajax(args);
+    if (args["only_update"] === true) {
+        if (window.auto_update_interval !== undefined
+                && Number(this.last_time_updated) + Number(auto_update_interval) < (new Date()).getTime()) {
+            $.ajax(args);
+        }
+    } else {
+        $.ajax(args);
+    }
+}
+
+function update(ext_data) {
+    if (ext_data["actions"] !== undefined) {
+        if ($(".action_list_container").size() !== 0) {
+            $(".action_list_container ul").html(ext_data["actions"] + $(".action_list_container ul").html());
+        } else if ($(".action_list_container").size !== 0) {
+            $(".action_list_container").html(ext_data["actions"] + $(".action_list_container").html());
+        }
+    }
+    if (ext_data["items"] !== undefined) {
+        if ($(".item-send").size() !== 0) {
+            $(".item-send").after(ext_data["items"]);
+        } else if ($(".action_list_container").size() !== 0){
+            $(".action_list_container").prepend(ext_data["items"]);
+        }
+    }
 }
 
 var weird_counter = 23426;
@@ -627,7 +603,7 @@ var time_precision = 3;
 Handlebars.registerHelper("s_to_ms", function(value) {
     var precision = Math.pow(10, time_precision);
     return Math.round(value * 1000 * precision) / precision;
-})
+});
 
 function deletePoll(id, real_del) {
     if (real_del) {

@@ -167,12 +167,13 @@ Wenn ja, sollte Piwik installiert sein und diese Website hinzugefügt worden sei
                     "show_logs" => array("default" => "false", "label" => "Werden die Loggingnachrichten den Admins angezeigt?", "type" => "checkbox"),
                     "auto_update_interval" => array("default" => "15000", "label" => "Pause zwischen zwei Aktualisierungsvorgängen von z.B. der Aktionenspalte in Millisekunden", "type" => "number"),
                     "search_update_interval" => array("default" => "300", "label" => "Puffer zwischen zwei Suchabfragen während der Benutzer tippt in Millisekunden", "type" => "number"),
+//                    "time_zone_offset" => array("default" => "2", "label" => "Zeitzonenverschiebung (im Vergleich zur UTC) in Stunden", "type" => "number"),
                     "userpolls_result_length" => array("default" => "3", "label" => "Anzahl der Personen die pro Umfrage in der Ergebnisliste angezeigt werden"),
                     "results_viewable" => array("default" => "false", "label" => "Kann sich ein Benutzer (mindestens vom Rang eines Editors), die Ergebnisse anzeigen lassen", "type" => "checkbox")
                 ),
 //                "Ergebnisanzeige" => array("id" => "result_pages", "rows" => array(
 //                       "quote_template" => array(
-////                        "default" => "",
+//                        "default" => "",
 //                        "label" => "Zitatseiten-Template",
 //                        "type" => "textarea"
 //                    ),
@@ -226,10 +227,12 @@ Wenn ja, sollte Piwik installiert sein und diese Website hinzugefügt worden sei
     public function post() {
         if (Auth::canModifyPreferences()) {
             foreach ($this->pref_vals as $key => $value) {
-                if (isset($value["type"]) && $value["type"] == "checkbox") {
-                    $this->pref_vals[$key]["default"] = isset($_POST[$key]) ? "true" : "false";
-                } else {
-                    $this->pref_vals[$key]["default"] = str_replace("\'", "&apos;", str_replace('\"', "&quot;", $_POST[$key]));
+                if (isset($_POST[$key])) {
+                    if (isset($value["type"]) && $value["type"] == "checkbox") {
+                        $this->pref_vals[$key]["default"] = isset($_POST[$key]) ? "true" : "false";
+                    } else {
+                        $this->pref_vals[$key]["default"] = str_replace("\'", "&apos;", str_replace('\"', "&quot;", $_POST[$key]));
+                    }
                 }
             }
             $this->updateDB();

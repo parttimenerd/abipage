@@ -266,19 +266,36 @@ function mysqliResultToArr($result, $single = false) {
 }
 
 function jsonAjaxResponseStart() {
+    header("Content-Type: application/json");
     ob_start();
 }
 
 define("START_TIME", microtime(true));
 
-function jsonAjaxResponseEndSend($data = array()) {
-    $str = ob_get_clean();
+function jsonAjaxResponseEndSend($data = array(), $ext = array(), $html = null) {
+    if ($html == null) {
+        $str = ob_get_clean();
+    } else {
+        $str = $html;
+    }
     if (Auth::canViewLogs()) {
         $json = array("logs" => logArray());
     } else {
         $json = array();
     }
-    $json["data"] = array("html" => $str);
+    $ext_arr = $ext;
+    if (isset($_REQUEST["last_time_updated"])) {
+        $time = $_REQUEST["last_time_updated"];
+        $actions_arr = Actions::getLastActionsSince($time);
+        $actions_arr;
+        if (!$actions_arr->isEmpty()) {
+            ob_start();
+            tpl_actions($actions_arr);
+            $actions_html = ob_get_clean();
+            $ext_arr["actions"] = $actions_html;
+        }
+    }
+    $json["data"] = array("html" => $str, "ext" => $ext_arr);
     $json["data"] = array_merge($json["data"], $data);
     echo json_encode($json);
 }
@@ -296,10 +313,12 @@ function logArray() {
 
 function jsonAjaxResponse($func = null) {
     jsonAjaxResponseStart();
-    if (is_callable($func))
+    $data = array();
+    if (is_callable($func)) {
         $data = $func();
-    elseif (is_array($func))
+    } elseif (is_array($func)) {
         $data = $func;
+    }
     jsonAjaxResponseEndSend(is_array($data) ? $data : array());
 }
 

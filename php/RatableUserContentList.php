@@ -257,4 +257,9 @@ abstract class RatableUserContentList {
         return $this;
     }
 
+    public function resetCount(){
+        $this->count = -1;
+        $this->getCount();
+    }
+    
 }

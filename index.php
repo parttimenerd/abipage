@@ -17,8 +17,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-//define('DEBUG', isset($_REQUEST["debug"]));
-define('DEBUG', true);
+define('DEBUG', isset($_REQUEST["debug"]));
+//define('DEBUG', true);
 //define("UNMINIFIED_SOURCE", true);
 define('SHOW_LOGS_TO_ADMIN', false);
 define("BASE_DIR", __DIR__);
@@ -56,6 +56,7 @@ if (!defined('DB_NAME')) {
     if (!Auth::canSeeDebugOutput() && !Auth::canViewLogs() && (!defined("DEBUG") || !DEBUG)) {
         error_reporting(0);
     }
+ 
     PageManager::serve();
 
     Auth::updateLastVisitTime();

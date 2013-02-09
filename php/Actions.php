@@ -41,6 +41,25 @@ class Actions {
     /**
      * 
      * @global mysqli $db
+     * @global Enviroment $env
+     * @param type $last_time
+     * @return \ActionArray
+     */
+    public static function getLastActionsSince($last_time) {
+        global $db, $env;
+        $actions = array();
+        $res = $db->query("SELECT * FROM " . DB_PREFIX . "actions WHERE time > " . intval($last_time) . " ORDER BY time DESC LIMIT 0, " . intval($env->showed_actions)) or die($db->error);
+        if ($res != null) {
+            while ($action = $res->fetch_array()) {
+                $actions[] = $action;
+            }
+        }
+        return new ActionArray($actions);
+    }
+    
+    /**
+     * 
+     * @global mysqli $db
      * @param int $id
      * @return array
      */

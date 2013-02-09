@@ -214,7 +214,7 @@ function tpl_user_last_visit($name_or_id, $brackets = true, $does_echo = false) 
         $time = Auth::getLastVisitTime($id);
         if ($time && $time > 0 && !Auth::isSameUser($id)) {
             $timediff = time() - $time;
-            $str = '<span class="last_visit_time">' . ($brackets ? "[" : "") . 'Letzter Besuch:' . ($timediff > 60 ? tpl_timediff_span($timediff, false) : "Jetzt") . ($brackets ? "]" : "") . '</span>';
+            $str = '<span class="last_visit_time">' . ($brackets ? "[" : "") . 'Letzter Besuch:' . ($timediff > 60 ? tpl_timediff_span($timediff, $time, false) : "Jetzt") . ($brackets ? "]" : "") . '</span>';
             if ($does_echo) {
                 echo $str;
             } else {
@@ -229,22 +229,24 @@ function tpl_user_last_visit($name_or_id, $brackets = true, $does_echo = false) 
  * Outputs or returns a time difference span
  * 
  * @param int $timediff time difference
+ * @param int $time time (to allow the time to be updated automatically by the client js)
  * @param boolean $does_echo output the html code?
  * @param boolean $only_time output/return only time span
  * @return string htlm code if $does_echo is false
  */
-function tpl_timediff_span($timediff, $does_echo = true, $only_time = false) {
+function tpl_timediff_span($timediff, $time, $does_echo = true, $only_time = false) {
     $text = "";
     $arr = array(
-        array(1, 60, array("Sekunde", "n", "einer")),
-        array(60, 3600, array("Minute", "n", "einer")),
-        array(3600, 86400, array("Stunde", "n", "einer")),
-        array(86400, 2626560, array("Tag", "en", "einem")),
-        array(2626560, 31518720, array("Monat", "en", "einem")),
-        array(31518720, 1E10, array("Jahr", "en", "einem"))
+        0 => array(1, 60, array("Sekunde", "n", "einer")),
+        1 => array(60, 3600, array("Minute", "n", "einer")),
+        2 => array(3600, 86400, array("Stunde", "n", "einer")),
+        3 => array(86400, 2626560, array("Tag", "en", "einem")),
+        4 =>array(2626560, 31518720, array("Monat", "en", "einem")),
+        5 => array(31518720, 1E10, array("Jahr", "en", "einem"))
     );
     $update_via_js = true;
-    foreach ($arr as $steparr) {
+    for ($i = 0; $i < count($arr); $i++) {
+        $steparr = $arr[$i];
         if ($steparr[1] > $timediff) {
             $value = floor($timediff / $steparr[0]);
             $text = ($value == 1 ? $steparr[2][2] : $value) . " " . ($value == 1 ? $steparr[2][0] : $steparr[2][0] . $steparr[2][1]);
@@ -253,7 +255,7 @@ function tpl_timediff_span($timediff, $does_echo = true, $only_time = false) {
         if ($steparr[0] >= 3600)
             $update_via_js = false;
     }
-    $str = '<span class="timediff"' . ($update_via_js ? (' time="' . (time() + $timediff) . '"') : '') . '>' . ($only_time ? '' : 'Vor ') . $text . '</span>';
+    $str = '<span class="timediff"' . ($update_via_js ? (' time="' . ($time) . '"') : '') . '>' . ($only_time ? '' : 'Vor ') . $text . '</span>';
     if ($does_echo) {
         echo $str;
     } else {
@@ -453,4 +455,15 @@ function tpl_input($args = array("name" => "default", "value" => "", "placeholde
             echo '<input type="email" ' . $str . ' value="' . $value . '"/>';
             break;
     }
+}
+
+/**
+ * Adds the time zone offset to the given time
+ * @global Environment $env
+ * @param int $time time in seconds
+ * @return int
+ */
+function usertime($time = -1) {
+    global $env;
+    return ($time == -1 ? time() : $time) + $env->time_zone_offset * 3600;
 }

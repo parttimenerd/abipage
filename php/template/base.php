@@ -33,6 +33,11 @@ $has_sidebar = false;
 $editor_needed = false;
 
 /**
+ * Does the web page update via ajax?
+ */
+$update_with_js = false;
+
+/**
  * Outputs the header of the page
  * 
  * @global Environment $env
@@ -159,7 +164,11 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
             <title><?php echo ($title != null ? ($title . $env->title_sep . $env->title) : '') ?></title>
             <meta name="author" content="Johannes Bechberger"/>
             <meta name="viewport" content="width=device-width"/>
-            <link href="<?php echo tpl_url("css/project.min.css") ?>" rel="stylesheet"/>   
+            <? if (UNMINIFIED_SOURCE): ?>
+                <link href="<?php echo tpl_url("css/project.css") ?>" rel="stylesheet"/>   
+            <? else: ?>
+                <link href="<?php echo tpl_url("css/project.min.css") ?>" rel="stylesheet"/>   
+            <? endif; ?>
             <link href="<?php echo tpl_url("css/style.css?42") ?>" rel="stylesheet"/>
             <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
             <script>window.jQuery || document.write('<script src="<?php echo tpl_url("js/lib/jquery-1.7.2.js") ?>"><\/script>')</script>
@@ -240,7 +249,7 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
                 global $has_sidebar;
                 $has_sidebar = $sidebar;
                 if (($subnav && count($subnav) >= 1) || $sidebar) {
-                    if (count($subnav) == 4) {
+                    if (count($subnav) > 1) {
                         $has_sidebar = true;
                     }
                     tpl_subnav($subnav["phrase"], isset($subnav["auto_search_forbidden"]) ? $subnav["auto_search_forbidden"] : false);
@@ -265,7 +274,7 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
              */
             function tpl_after() {
                 ?>         </div> <?php
-                global $env, $js, $has_sidebar, $editor_needed;
+                global $env, $js, $has_sidebar, $editor_needed, $update_with_js;
                 if (Auth::getUserMode() != User::NO_MODE && $has_sidebar) {
                     tpl_actions_sidebar();
                 }
@@ -295,23 +304,12 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
     <script>
+                var start_time = Math.round((new Date()).getTime() / 1000);
+                var reference_time_diff_seconds = start_time - <?= time() ?>;
                 var access_key = "<?= Auth::getAccessKey() ?>";
                 var auto_update_interval = "<?= $env->auto_update_interval ?>";
                 var ajax_url = "<?= tpl_url("ajax") ?>";
                 var has_sidebar = <?= $has_sidebar ? "true" : "false" ?>;
-    </script>
-    <script>
-        $(".tablesorter").ready(function() {
-            $(".tablesorter").tablesorter();
-        });
-        $("body").ready(function() {
-    <? if (Auth::canViewLogs()): ?>
-                add_log_object(<?= json_encode(logArray()) ?>);
-    <? endif ?>
-            $(".tablesorter").tablesorter();
-    <?php echo $js ?>
-        });
-        max_file_size = <?= $env->max_upload_pic_size * 1048576 ?>;
     </script>
     <?= str_replace("&apos;", "'", str_replace("&quot;", '"', $env->footer_appendix)); ?>
     <?php if ($env->has_piwik) PiwikHelper::echoJSTrackerCode(true, $document_title) ?>
@@ -329,8 +327,25 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
         <? if ($editor_needed): ?>
             <script src="<?php echo tpl_url("js/min/jquery.wysiwyg.min.js") ?>"></script>
         <? endif ?>
-        <script src="<?php echo tpl_url("js/min/scripts?42.min.js") ?>"></script>
+        <script src="<?php echo tpl_url("js/min/scripts.min.js?42") ?>"></script>
     <? endif ?>
+    <script>
+        $(".tablesorter").ready(function() {
+            $(".tablesorter").tablesorter();
+        });
+        $("body").ready(function() {
+    <? if (Auth::canViewLogs()): ?>
+                add_log_object(<?= json_encode(logArray()) ?>);
+    <? endif ?>
+            $(".tablesorter").tablesorter();
+    <?php echo $js ?>
+        });
+        max_file_size = <?= $env->max_upload_pic_size * 1048576 ?>;
+    <? if ($update_with_js): ?>
+            window.auto_update_interval = <?= $env->auto_update_interval ?>;
+            window.setInterval("ajax({only_update: true, type: 'GET', data: {only_update: true}})", window.auto_update_interval);
+    <? endif ?>
+    </script>
     </body>
     </html>
     <?php
@@ -635,4 +650,9 @@ function tpl_enable_javascript() {
     </div>
     </noscript>
     <?
+}
+
+function tpl_update_with_js() {
+    global $update_with_js;
+    $update_with_js = true;
 }
