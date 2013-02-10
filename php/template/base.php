@@ -164,7 +164,7 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
             <title><?php echo ($title != null ? ($title . $env->title_sep . $env->title) : '') ?></title>
             <meta name="author" content="Johannes Bechberger"/>
             <meta name="viewport" content="width=device-width"/>
-            <? if (UNMINIFIED_SOURCE): ?>
+            <? if (defined("UNMINIFIED_SOURCE")): ?>
                 <link href="<?php echo tpl_url("css/project.css") ?>" rel="stylesheet"/>   
             <? else: ?>
                 <link href="<?php echo tpl_url("css/project.min.css") ?>" rel="stylesheet"/>   
@@ -327,7 +327,7 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
         <? if ($editor_needed): ?>
             <script src="<?php echo tpl_url("js/min/jquery.wysiwyg.min.js") ?>"></script>
         <? endif ?>
-        <script src="<?php echo tpl_url("js/min/scripts.min.js?42") ?>"></script>
+        <script src="<?php echo tpl_url("js/min/scripts.min.js?424242") ?>"></script>
     <? endif ?>
     <script>
         $(".tablesorter").ready(function() {

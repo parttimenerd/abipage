@@ -251,6 +251,17 @@ class User {
         return mysqliResultToArr($db->query("SELECT * FROM " . DB_PREFIX . "user_comments WHERE id=" . intval($id)), true);
     }
 
+    public static function getNumberOfUserComments() {
+        global $db;
+        if (Auth::canSeeNameWhenSentAnonymous()) {
+            $query = "SELECT count(*) as 'count' FROM " . DB_PREFIX . "user_comments";
+        } else {
+            $query = "SELECT count(*) as 'count' FROM " . DB_PREFIX . "user_comments WHERE isanonymous=0 AND notified_as_bad=0";
+        }
+        $arr = mysqliResultToArr($db->query($query), true);
+        return $arr["count"];
+    }
+
     public function notifyUserComment($id) {
         $db = Database::getConnection();
         $db->query("UPDATE " . DB_PREFIX . "user_comments SET notified_as_bad=1 WHERE id=" . intval($id));

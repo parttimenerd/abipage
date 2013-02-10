@@ -42,7 +42,8 @@ class PageManager {
                 "polls(/.*)?" => array("class" => "PollsHandler", "is_open" => $env->user_polls_open)
             ),
             User::ADMIN_MODE => array(
-                "preferences" => array("class" => "PreferencesHandler")
+                "preferences" => array("class" => "PreferencesHandler"),
+                "user_connection_visu(/ajax)?" => array("class" => "UserConnectionVisuHandler")
             ),
             User::MODERATOR_MODE => array(
                 "usermanagement" => array("class" => "UserManagementHandler"),
@@ -60,7 +61,7 @@ class PageManager {
                 "logout" => array("class" => "LogoutHandler"),
                 "ajax(/.*)?" => array("class" => "AjaxHandler"),
                 "news(/.*)?" => array("class" => "NewsListHandler"),
-                "actions(/.*)?" => array("class" => "ActionsHandler")
+                "actions(/.*)?" => array("class" => "ActionsHandler"),
             ),
             User::NO_MODE => array(
                 "impress" => array("class" => "ImpressHandler"),

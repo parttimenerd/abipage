@@ -70,12 +70,12 @@ function tpl_actions_page(ActionArray $actions, $as_page = true, $class_app = ""
     }
 }
 
-function tpl_actions_page_action_item($action){
+function tpl_actions_page_action_item($action) {
     ob_start();
-        tpl_item_before("", "", "action action_list_item", 'action_' . $action["id"]);
-        $html = ob_get_clean();
-        tpl_action($action,true,$html);
-        tpl_item_after();
+    tpl_item_before("", "", "action action_list_item", 'action_' . $action["id"]);
+    $html = ob_get_clean();
+    tpl_action($action, true, $html);
+    tpl_item_after();
 }
 
 /**
@@ -102,57 +102,57 @@ function tpl_actions(ActionArray $actions) {
  * @return String the url of the linked action item
  */
 function tpl_action($action, $with_time = true, $before_html = '', $after_html = '') {
-    $url = "";
     $center = "";
-    switch ($action["type"]) {
-        case "add_user_comment":
-            $center = "Kommentar bei ";
-            $url = tpl_userlink($action["person"]);
-            break;
-        case "delete_user_comment":
-            $center = "Kommentar gelöscht";
-            break;
-        case "add_quote":
-            $url = tpl_url('quotes');
-            $center = '<a href="' . $url . '">Zitat</a> von ' . $action["person"];
-            break;
-        case "add_rumor":
-            $url = tpl_url('rumors');
-            $center = '<a href="' . $url . '">Stimmt es...</a> Beitrag geschrieben';
-            break;
-        case "upload_image":
-            $url = tpl_url('images');
-            $center = '<a href="' . $url . '">Bild</a> hochgeladen';
-            break;
-        case "new_user":
-            $url = tpl_userlink(intval($action["person"]));
-            $center = " registriert";
-            break;
-        case "delete_image":
-            $url = tpl_url('images');
-            $center = '<a href="' . $url . '">Bild</a> gelöscht';
-            break;
-        case "delete_quote":
-            $url = tpl_url('quotes');
-            $center = '<a href="' . $url . '">Zitat</a> gelöscht';
-            break;
-        case "delete_rumor":
-            $url = tpl_url('rumors');
-            $center = '<a href="' . $url . '">Stimmt es...</a> Beitrag gelöscht';
-            break;
-        case "register":
-            $center = 'Neuer Benutzer registriert';
-            break;
-        case "write_news":
-            $url = tpl_url('news');
-            $center = '<a href="' . $url . '">Neue Nachricht</a> von ' . $action["person"] . ' geschrieben';
-            break;
-    }
-    echo str_replace("URL", $url, $before_html);
+    echo $before_html;
     if ($with_time) {
         tpl_timediff_span(time() - $action["time"], $action["time"]);
         echo " ";
     }
+    switch ($action["type"]) {
+        case "add_user_comment":
+            echo "Kommentar bei ";
+            tpl_userlink($action["person"]);
+            break;
+        case "delete_user_comment":
+            echo "Kommentar gelöscht";
+            break;
+        case "add_quote":
+            $url = tpl_url('quotes');
+            echo '<a href="' . $url . '">Zitat</a> von ' . $action["person"];
+            break;
+        case "add_rumor":
+            $url = tpl_url('rumors');
+            echo '<a href="' . $url . '">Stimmt es...</a> Beitrag geschrieben';
+            break;
+        case "upload_image":
+            $url = tpl_url('images');
+            echo '<a href="' . $url . '">Bild</a> hochgeladen';
+            break;
+        case "new_user":
+            $url = tpl_userlink(intval($action["person"]));
+            echo " registriert";
+            break;
+        case "delete_image":
+            $url = tpl_url('images');
+            echo '<a href="' . $url . '">Bild</a> gelöscht';
+            break;
+        case "delete_quote":
+            $url = tpl_url('quotes');
+            echo '<a href="' . $url . '">Zitat</a> gelöscht';
+            break;
+        case "delete_rumor":
+            $url = tpl_url('rumors');
+            echo '<a href="' . $url . '">Stimmt es...</a> Beitrag gelöscht';
+            break;
+        case "register":
+            echo 'Neuer Benutzer registriert';
+            break;
+        case "write_news":
+            $url = tpl_url('news');
+            echo '<a href="' . $url . '">Neue Nachricht</a> von ' . $action["person"] . ' geschrieben';
+            break;
+    }
+
     echo $center;
     echo $after_html;
     return $url;

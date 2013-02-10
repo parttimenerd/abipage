@@ -16,6 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+rated_items = [];
+
 function rating(id, rating) {
     fillStars(id, rating);
     ajax({
@@ -165,7 +167,7 @@ function initBottomLoad() {
 }
 setTimeout("initBottomLoad()", 300);
 
-if ($("#drop_area").length !== 0) {
+if ($("#drop_area") !== null && $("#drop_area").length !== 0) {
     $('.imagelist a.item-content').Chocolat(chocolat_options);
 
     /* based on http://robertnyman.com/2010/12/16/utilizing-the-html5-file-api-to-choose-upload-preview-and-see-progress-for-multiple-files/,
@@ -549,6 +551,9 @@ function ajax(args) {
         no_return: function() {
 
         },
+        func: function() {
+
+        },
         needs: []
     }, args);
     args["data"] = $.extend({
@@ -579,7 +584,7 @@ function update(ext_data) {
     if (ext_data["items"] !== undefined) {
         if ($(".item-send").size() !== 0) {
             $(".item-send").after(ext_data["items"]);
-        } else if ($(".action_list_container").size() !== 0){
+        } else if ($(".action_list_container").size() !== 0) {
             $(".action_list_container").prepend(ext_data["items"]);
         }
     }

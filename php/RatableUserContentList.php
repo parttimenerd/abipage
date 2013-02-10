@@ -159,7 +159,7 @@ abstract class RatableUserContentList {
         $this->db->query("UPDATE " . $this->table . " SET rating=" . $avg . ", data='" . json_encode($data) . "' WHERE id=" . $cid) or die($this->db->error);
         return array($avg, $count, $data);
     }
-
+    
     public function rate($id, $rating, $user = null) {
         $user = Auth::getUser();
         $cid = intval($id);
