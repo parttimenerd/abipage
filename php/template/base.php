@@ -322,12 +322,12 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
         <script src="<?php echo tpl_url("js/plugins.js") ?>"></script>
         <script src="<?php echo tpl_url("js/application.js") ?>"></script>
         <!--<script src="<?php echo tpl_url("js/libs/modernizr-2.5.3.js") ?>"></script>-->
-        <script src="<?php echo tpl_url("js/script.js?1001") ?>"></script>
+        <script src="<?php echo tpl_url("js/script.js?1002") ?>"></script>
     <? else: ?>
         <? if ($editor_needed): ?>
             <script src="<?php echo tpl_url("js/min/jquery.wysiwyg.min.js") ?>"></script>
         <? endif ?>
-        <script src="<?php echo tpl_url("js/min/scripts.min.js?424242") ?>"></script>
+        <script src="<?php echo tpl_url("js/min/scripts.min.js?42424242") ?>"></script>
     <? endif ?>
     <script>
         $(".tablesorter").ready(function() {

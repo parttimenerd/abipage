@@ -452,6 +452,9 @@ function setResultMode(view_results) {
         url: ajax_url + "/result_mode",
         data: {
             value: view_results
+        },
+        success: function(){
+            location.reload();
         }
     });
 }

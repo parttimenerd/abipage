@@ -216,7 +216,7 @@ function tpl_edit_poll(Poll $poll) {
  * Outputs the edit new poll handlebars template, needed to create new polls within the poll edit or management page
  */
 function tpl_edit_poll_hbs() {
-    ?><script id="edit_poll_item_template" type="text/x-handlebars-template"><?
+    ?><div id="edit_poll_item_template" type="text/x-handlebars-template"><?
     tpl_item_before("", '{{type}}', "form-horizontal edit_poll_item");
     ?>
         <input type="hidden" name="{{id}}" value="{{id}}"/>  
@@ -228,5 +228,5 @@ function tpl_edit_poll_hbs() {
         <input type="number" id="{{id}}_position" name="{{id}}_position" value="{{position}}"/>
         <button class="btn btn-warning" onclick="deletePoll('{{id}}', false)">Löschen</button>
     <? tpl_item_after(); ?>
-    </script><?
+    </div><?
 }

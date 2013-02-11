@@ -34,7 +34,7 @@ function tpl_log_container() {
  */
 function tpl_log_hbs_template() {
     ?>
-    <script id="log_table_template" type="text/x-handlebars-template">
+    <div id="log_table_template" type="text/x-handlebars-template">
         <button type="button" class="btn" style="width: 100%" data-toggle="collapse" data-parent="#log_container" href="#{{id}}">
             Log {{now "%T,%L"}} [Database: {{s_to_ms data.db_queries.time}}ms; Overall: {{s_to_ms data.time}}ms; Logs: {{length data.logs}}; Queries: {{length data.db_queries.queries}}]
         </button>
@@ -128,6 +128,6 @@ function tpl_log_hbs_template() {
             </table>
             {{/with}}
         </div>
-    </script>
+    </div>
     <?
 }

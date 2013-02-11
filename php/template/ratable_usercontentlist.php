@@ -185,15 +185,15 @@ function tpl_write_quote_item() {
  * @param string $id id of the template
  */
 function tpl_write_quote_response_item_hbs($id = "item-response-template") {
-    ?><script id="<?= $id ?>" type="text/x-handlebars-template"><?
-    tpl_item_before("", "", "item-send item-quote-send");
-    ?>
-        < input type = "hidden" name = "person" class = "teacher_typeahead" value = "{{teacher}}" / >
-        < textarea name = "text" placeholder = "Zitat" require = "on" > < /textarea>
-        < input type = "hidden" name = "response_to" value = "-1" / >
-    <?php
-    tpl_item_after_buttons(array("{{button_answer_title}}" => array("onclick" => "sendQuote(false, {{response_to}}, '{{teacher}}')"), "{{button_answer_ano_title}}" => array("onclick" => "sendQuote(true, {{response_to}}, '{{teacher}}')"), "Schließen" => array("onclick" => "responseToItem({{response_to}})")));
-    ?></script><?
+    ?><div id="<?= $id ?>" type="text/x-handlebars-template"><?
+        tpl_item_before("", "", "item-send item-quote-send");
+        ?>
+        <input type="hidden" name="person" class="teacher_typeahead" value="{{teacher}}" />
+        <textarea name="text" placeholder="Zitat" require="on"> </textarea>
+        <input type="hidden" name="response_to" value="-1" />
+        <?
+        tpl_item_after_buttons(array("{{button_answer_title}}" => array("onclick" => "sendQuote(false, {{response_to}}, '{{teacher}}')"), "{{button_answer_ano_title}}" => array("onclick" => "sendQuote(true, {{response_to}}, '{{teacher}}')"), "Schließen" => array("onclick" => "responseToItem({{response_to}})")));
+        ?></div><?
 }
 
 /**
@@ -270,34 +270,34 @@ function tpl_write_rumor_item() {
  * @param string $id id of the template
  */
 function tpl_write_rumor_response_item_hbs($id = "item-response-template") {
-    ?><script id="<?= $id ?>" type="text/x-handlebars-template"><?
-    tpl_item_before("", "", "item-send item-rumor-send");
-    ?>
-        < textarea name = "text" placeholder = "..., dass " require = "on" > ..., dass < /textarea>
-        < input type = "hidden" name = "response_to" value = "-1" / >
-    <?php
-    tpl_item_after_buttons(array("{{button_answer_title}}" => array("onclick" => "sendRumor(false, {{response_to}})"), "{{button_answer_ano_title}}" => array("onclick" => "sendRumor(true, {{response_to}})"), "Schließen" => array("onclick" => "responseToItem({{response_to}})")));
-    ?></script><?
-}
+    ?><div id="<?= $id ?>" type="text/x-handlebars-template"><?
+        tpl_item_before("", "", "item-send item-rumor-send");
+        ?>
+        <textarea name="text" placeholder="..., dass " require = "on"> ..., dass </textarea>
+        <input type="hidden" name="response_to" value="-1" />
+        <?
+        tpl_item_after_buttons(array("{{button_answer_title}}" => array("onclick" => "sendRumor(false, {{response_to}})"), "{{button_answer_ano_title}}" => array("onclick" => "sendRumor(true, {{response_to}})"), "Schließen" => array("onclick" => "responseToItem({{response_to}})")));
+        ?></div><?
+    }
 
-/**
- * Outputs a rumor item
- * 
- * @param RatableUserContentItem $ruci rumor item
- */
-function tpl_rumor_item(RatableUserContentItem $ruci) {
-    tpl_item_before("", "", "content-item", $ruci->id);
-    echo formatText($ruci->text, false);
-    tpl_item_after_ruc($ruci);
-}
+    /**
+     * Outputs a rumor item
+     * 
+     * @param RatableUserContentItem $ruci rumor item
+     */
+    function tpl_rumor_item(RatableUserContentItem $ruci) {
+        tpl_item_before("", "", "content-item", $ruci->id);
+        echo formatText($ruci->text, false);
+        tpl_item_after_ruc($ruci);
+    }
 
-/**
- * Outputs the html code closing a RatableUserContent item container with an footer
- * 
- * @param RatableUserContentItem $ruci
- */
-function tpl_item_after_ruc(RatableUserContentItem $ruci) {
-    ?>
+    /**
+     * Outputs the html code closing a RatableUserContent item container with an footer
+     * 
+     * @param RatableUserContentItem $ruci
+     */
+    function tpl_item_after_ruc(RatableUserContentItem $ruci) {
+        ?>
     </div>
     <hr/>
     <div class="item-footer <?php echo Auth::isModerator() ? "deletable" : '' ?>">
