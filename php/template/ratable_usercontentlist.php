@@ -304,7 +304,7 @@ function tpl_write_rumor_response_item_hbs($id = "item-response-template") {
         <ul>
             <li class="time_span_li"><?php tpl_time_span($ruci->time) ?></li>
             <li class="rating_li"><?php tpl_rating($ruci) ?></li>
-            <li class="user_span_li"><?php tpl_user_span($ruci->isAnonymous() ? -1 : $ruci->userid, true) ?></li>
+            <li class="user_span_li"><?php tpl_user_span($ruci->userid, true, $ruci->isAnonymous()) ?></li>
             <? if ($ruci->canHaveResponsesButton()): ?>
                 <li class="response_to_span_li"><? tpl_item_response_to_span($ruci) ?></li>
             <? endif ?>

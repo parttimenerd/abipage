@@ -546,6 +546,7 @@ RewriteCond %{REQUEST_URI} !^(index\.php)
 RewriteCond %{REQUEST_URI} !^(.*smf.*)
 RewriteCond %{REQUEST_URI} !^(.*forum.*)
 RewriteCond %{REQUEST_URI} !^(.*piwik.*)
+RewriteCond %{REQUEST_URI} !^(.*sqlbuddy.*)
 RewriteCond %{REQUEST_URI} !^(.*wiki.*)
 RewriteCond %{REQUEST_URI} !^(.*beta.*)
 RewriteRule ^(.*)$ index.php/$1 [L]

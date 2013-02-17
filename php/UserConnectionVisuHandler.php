@@ -25,10 +25,34 @@
 class UserConnectionVisuHandler extends ToroHandler {
 
     public function get($slug = "") {
-        if ($slug === "/ajax" || $slug === "ajax") {
-            header("Content-Type: application/json");
-            $cons = UserConnectionVisu::getConnectionArray();
-            echo json_encode($cons);
+        if (strlen($slug) >= 2) {
+            $slug_arr = explode("/", substr($slug, 1));
+            $ajax = false;
+            $type = UserConnectionVisu::ALL;
+            switch ($slug_arr[0]) {
+                case "received":
+                    $type = UserConnectionVisu::RECEIVED_COMMENTS;
+                    break;
+                case "sent":
+                    $type = UserConnectionVisu::SENT_COMMENTS;
+                    break;
+                case "all":
+                    $type = UserConnectionVisu::ALL;
+                    break;
+                case "ajax":
+                    $ajax = true;
+                    break;
+            }
+            if (!$ajax && count($slug_arr) == 2 && $slug_arr[1] == "ajax"){
+                $ajax = true;
+            }
+            if ($ajax) {
+                header("Content-Type: application/json");
+                $cons = UserConnectionVisu::getConnectionArray($type);
+                echo json_encode($cons);
+            } else {
+                tpl_user_connection_visu_page();
+            }
         } else {
             tpl_user_connection_visu_page();
         }

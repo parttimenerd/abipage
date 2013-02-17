@@ -38,6 +38,12 @@ $editor_needed = false;
 $update_with_js = false;
 
 /**
+ * Title of the document, set by the tpl_before method
+ * @see tpl_before
+ */
+$document_title = "";
+
+/**
  * Outputs the header of the page
  * 
  * @global Environment $env
@@ -51,7 +57,7 @@ $update_with_js = false;
  * @param string $header_icon the icon shown in the title (e.g. 'owl' for the 404 page owl)
  */
 function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $sidebar = false, $header_icon = "") {
-    global $env, $store;
+    global $env, $store, $document_title;
     $usermenu = null;
     if (Auth::getUserMode() != User::NO_MODE) {
         $menus = array(
@@ -80,7 +86,7 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
             $meta_dropdown["stats"] = array("Statistik", $env->stats_subtitle);
         }
         $userapp = array();
-        $document_title = "";
+        $document_title = $title;
         if (Auth::getUser() != null) {
             $user = Auth::getUser();
             $usermenu = array("head" => array("Me", tpl_get_user_subtitle($user)));
@@ -97,7 +103,7 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
                 $meta_dropdown["usermanagement"] = array("Benutzerverwaltung", $env->usermanagement_subtitle);
                 $meta_dropdown["teacherlist"] = array("Lehrerliste", $env->teacherlist_subtitle);
                 $meta_dropdown["admin"] = array("Dashboard", $env->dashboard_subtitle);
-//                $meta_dropdown["user_characteristics/edit"] = array("Steckbriefverwaltung", $env->uc_management_subtitle);
+                $meta_dropdown["user_characteristics/edit"] = array("Steckbriefverwaltung", $env->uc_management_subtitle);
 //                $meta_dropdown["polls/edit"] = array("Umfragenverwaltung", $env->polls_management_subtitle);
             }
             if (Auth::canViewPreferencesPage()) {
@@ -172,6 +178,7 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
             <link href="<?php echo tpl_url("css/style.css?42") ?>" rel="stylesheet"/>
             <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
             <script>window.jQuery || document.write('<script src="<?php echo tpl_url("js/lib/jquery-1.7.2.js") ?>"><\/script>')</script>
+            <script src="<?php echo tpl_url("js/passwortmeter2.js") ?>"></script>
             <link rel = "shortcut icon" href = "<?php echo tpl_url($env->favicon) ?>"/>
             <!--Le HTML5 shim, for IE6-8 support of HTML5 elements-->
             <!--[if lt IE 9]>
@@ -274,7 +281,7 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
              */
             function tpl_after() {
                 ?>         </div> <?php
-                global $env, $js, $has_sidebar, $editor_needed, $update_with_js;
+                global $env, $js, $has_sidebar, $editor_needed, $update_with_js, $document_title;
                 if (Auth::getUserMode() != User::NO_MODE && $has_sidebar) {
                     tpl_actions_sidebar();
                 }
@@ -284,7 +291,9 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
     ================================================== -->
     <footer class="footer">
         <p>Powered by <a href="https://github.com/parttimenerd/abipage/">abipage</a>.
-            Designed and built by Johannes Bechberger with <a href="http://twitter.github.com/bootstrap/">Twitter Bootstrap</a>.
+            Designed and built by <a href="https://uqudy.serpens.uberspace.de">Johannes Bechberger</a>
+            with <a href="http://twitter.github.com/bootstrap/">Twitter Bootstrap</a>
+            and <a href="<?= tpl_url("img/icons/icon_credits.txt") ?>">Icons from the <a href="http://thenounproject.com">Noun Project</a>.
             <a href="<?php echo tpl_url("humans.txt") ?>">humans.txt</a>
         <p><a href="<?= tpl_url("impress") ?>">Impressum</a>. 
             <a href="<?= tpl_url("terms_of_use") ?>">Nutzungsbedingungen</a>. 

@@ -43,7 +43,7 @@ class RatableUserContentItem {
     }
 
     public function isAnonymous() {
-        return isset($this->props["isanonymous"]) ? ($this->props["isanonymous"] && !Auth::canSeeNameWhenSentAnonymous()) : false;
+        return isset($this->props["isanonymous"]) ? $this->props["isanonymous"] : false;
     }
 
     public function isDeletable() {

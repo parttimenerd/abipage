@@ -33,25 +33,26 @@ function tpl_piwik_js_tracker_code($site_id, $url, $lines, $with_init = true, $d
             var pkBaseURL = "<?php echo $url ?>";
             document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
         </script>
-        <script type="text/javascript">
-            try {
-                piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", <?php echo $site_id ?>);
-                piwikTracker.setCustomVariable(1, "User mode", "<?php echo tpl_usermode_to_text(Auth::getUserMode()) ?>", "visit");
     <? endif ?>
-    <? if (!$with_init) echo "<script>\n   try {\n" ?>
-    <? if ($with_init && Auth::getUser() != null): ?>
-            piwikTracker.setCustomVariable(2, "Math course", "<? $user = Auth::getUser(); echo $user->getMathCourse() ?>", "visit");
+    <script type="text/javascript">
+        try {
+            piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", <?php echo $site_id ?>);
+            piwikTracker.setCustomVariable(1, "User mode", "<?php echo tpl_usermode_to_text(Auth::getUserMode()) ?>", "visit");
+    <? if (Auth::getUser() != null): ?>
+                piwikTracker.setCustomVariable(2, "Math course", "<? $user = Auth::getUser();
+        echo $user->getMathCourse() ?>", "visit");
     <? endif; ?>
     <?php
     foreach ($lines as $line)
         echo $line . "\n"
         ?>
     <? if ($with_init): ?>
-            piwikTracker.enableLinkTracking();
-            piwikTracker.setDocumentTitle("<?= $document_title ?>");
-            piwikTracker.trackPageView();
+                piwikTracker.enableLinkTracking();
+                piwikTracker.setDocumentTitle("<?= $document_title ?>");
+                piwikTracker.trackPageView();
     <? endif ?>
-    } catch( err ) {}
+        } catch (err) {
+        }
     </script><noscript><p><img src="<?php echo $url ?>piwik.php?idsite=<?php echo $site_id ?>" style="border:0" alt="" /></p></noscript>
     <!-- End Piwik Tracking Code -->
     <?php

@@ -33,7 +33,6 @@ class KeyValueStore {
     }
 
     public function __set($var, $value) {
-        global $db;
         list($_var, $ud) = $this->getRealVarName($var);
         $key = !$ud ? "common" : "ud";
         if (isset($this->__dic[$key][$_var])) {

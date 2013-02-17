@@ -28,7 +28,7 @@ class Database {
                 printf("Connect failed: %s\n", self::$db->connect_error);
                 self::$db = null;
             }
-            if (defined('DEBUG')){
+            if (defined('DEBUG')) {
                 self::$db = new DebugDBWrapper(self::$db);
             }
             return self::$db;
@@ -44,7 +44,6 @@ class Database {
 
     public static function setup() {
         self::connect();
-        //var_dump("Erzeuge Datenbanktabellen...");
         self::$db->query('CREATE TABLE IF NOT EXISTS ' . DB_PREFIX . "user(id INT AUTO_INCREMENT PRIMARY KEY, first_name VARCHAR(30), last_name VARCHAR(30), math_course TINYINT, math_teacher VARCHAR(30), mail_adress VARCHAR(40), mode TINYINT, activated TINYINT, visible TINYINT, crypt_str VARCHAR(250), data TEXT, FULLTEXT(first_name, last_name, math_teacher, mail_adress)) ENGINE = MYISAM") or die("Can't create user table: " . self::$db->error);
         self::$db->query('CREATE TABLE IF NOT EXISTS ' . DB_PREFIX . "preferences(`key` VARCHAR(40) PRIMARY KEY, value TEXT, FULLTEXT(`key`, value)) ENGINE = MYISAM") or die("Can't create preferences table: " . self::$db->error);
         self::$db->query('CREATE TABLE IF NOT EXISTS ' . DB_PREFIX . "keyvaluestore(id INT AUTO_INCREMENT PRIMARY KEY, `key` VARCHAR(40), value TEXT, userid INT, FULLTEXT(`key`, value)) ENGINE = MYISAM") or die("Can't create keyvaluestore table: " . self::$db->error);

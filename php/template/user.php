@@ -25,7 +25,7 @@ function tpl_userlist($usernamearr, $phrase = "", $ajax = false) {
     global $env;
     if (!$ajax) {
         tpl_before("user/all", "Schülerliste", "", array("phrase" => $phrase));
-        tpl_add_js("search_time_buffer = " . $env->search_update_interval); 
+        tpl_add_js("search_time_buffer = " . $env->search_update_interval);
     }
     if (Auth::isViewingResults()) {
         tpl_all_userpages_infobox();
@@ -134,7 +134,7 @@ function tpl_user_comment($user, $comment) {
     <div class="item-footer">
         <ul>
             <li><? tpl_time_span($comment["time"]) ?></li>
-            <li><? tpl_user_span((Auth::isModerator() && !Auth::isSameUser($user)) || !$comment["isanonymous"] ? $comment["commenting_userid"] : -1) ?></li>
+            <li><? tpl_user_span($comment["commenting_userid"], true, $comment["isanonymous"], Auth::isModerator() && !Auth::isSameUser($user)) ?></li>
             <li><? if (Auth::isSameUser($user)): ?>
                     <span class="notify_as_bad">
                         <?php if ($comment["notified_as_bad"]) { ?>
@@ -143,13 +143,8 @@ function tpl_user_comment($user, $comment) {
                             <button class="btn icon notify" onclick="userCommentNotify('<?php echo $comment["id"] ?>')"></span>
                     <?php } ?>
                     </span>
-                <? elseif (Auth::isModerator()):
-                    $apps = array();
-                    if ($comment["isanonymous"])
-                        $apps[] = "Anonym abgesendet";
-                    if ($comment["notified_as_bad"])
-                        $apps[] = "Als schlecht markiert";
-                    echo (!empty($apps) ? ('<span class="mod_info">[' . join("; ", $apps) . ']</span>') : "");
+                <? elseif (Auth::canSeeNameWhenSentAnonymous() && $comment["notified_as_bad"]):
+                    tpl_icon("dissaprove");
                 endif;
                 ?>
             </li>

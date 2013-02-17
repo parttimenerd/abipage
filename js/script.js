@@ -468,7 +468,7 @@ function updateTimespans() {
 
 function getTime() {
     var now = new Date();
-    return Math.round(now.getTime() / 1000); // - reference_time_diff_seconds;
+    return Math.round(now.getTime() / 1000) - reference_time_diff_seconds;
 }
 
 function timespanText(timediff) {

@@ -94,7 +94,7 @@ function tpl_user_connection_visu_page($as_page = true) {
             /*}*/
         </style> 
         <script type="text/javascript">
-            var wc_url = "<?= tpl_url("user_connection_visu/ajax") ?>";
+            var wc_url = window.location.href + "/ajax";
             var wc = null;
             var data = null;
             window.onload = function() {

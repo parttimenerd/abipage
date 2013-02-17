@@ -116,19 +116,37 @@ function tpl_time_span($time, $with_icon = true, $class = "time") {
     <?php
 }
 
-function tpl_user_span($user_id = -1, $with_icon = true) {
+function tpl_user_span($user_id = -1, $with_icon = true, $anonymous = false, $can_user_see_name_when_ano = null) {
+    if ($can_user_see_name_when_ano === null) {
+        $can_user_see_name_when_ano = Auth::canSeeNameWhenSentAnonymous();
+    }
+    if ($user_id == -1) {
+        $anonymous = true;
+    }
     ?>
     <span class="user_span">
         <?php
-        if ($with_icon)
-            tpl_icon("user");
+        if ($with_icon) {
+            if ($anonymous) {
+                tpl_icon("guy_fawkes", "Anonym abgesendet");
+            } else {
+                tpl_icon("user");
+            }
+        }
         echo " ";
-        if ($user_id == -1) {
-            echo 'Anonym';
-        } else if ($user_id == Auth::getUserID()) {
-            echo '<a href="' . tpl_url("user/me") . '">Me</a>';
-        } else {
-            tpl_userlink($user_id, false);
+        if ($can_user_see_name_when_ano || !$anonymous) {
+            if ($user_id == Auth::getUserID()) {
+                echo '<a href="' . tpl_url("user/me") . '">Me</a>';
+            } else {
+                tpl_userlink($user_id, false);
+            }
+        }
+        if ($anonymous) {
+            if (!$can_user_see_name_when_ano) {
+                echo 'Anonym';
+            } else if (!$with_icon) {
+                echo ' [Anonym]';
+            }
         }
         ?>
     </span>
@@ -241,7 +259,7 @@ function tpl_timediff_span($timediff, $time, $does_echo = true, $only_time = fal
         1 => array(60, 3600, array("Minute", "n", "einer")),
         2 => array(3600, 86400, array("Stunde", "n", "einer")),
         3 => array(86400, 2626560, array("Tag", "en", "einem")),
-        4 =>array(2626560, 31518720, array("Monat", "en", "einem")),
+        4 => array(2626560, 31518720, array("Monat", "en", "einem")),
         5 => array(31518720, 1E10, array("Jahr", "en", "einem"))
     );
     $update_via_js = true;
@@ -293,15 +311,15 @@ function tpl_color_selector($name, $default_value = "#ff0000", $js_onchange = ""
     <script>
         $('#<?php echo $id ?>').ColorPicker({
             color: '<?php echo $default_value ?>',
-            onShow: function (colpkr) {
+            onShow: function(colpkr) {
                 $(colpkr).fadeIn(500);
                 return false;
             },
-            onHide: function (colpkr) {
+            onHide: function(colpkr) {
                 $(colpkr).fadeOut(500);
                 return false;
             },
-            onChange: function (hsb, hex, rgb) {
+            onChange: function(hsb, hex, rgb) {
                 $('#<?php echo $id ?> div').css('backgroundColor', '#' + hex);
     <?php
     if ($js_onchange != "") {
@@ -309,7 +327,7 @@ function tpl_color_selector($name, $default_value = "#ff0000", $js_onchange = ""
     }
     ?>
             },
-            onSubmit: function (hsb, hex, rgb) {
+            onSubmit: function(hsb, hex, rgb) {
                 $('#<?php echo $id ?> div').css('backgroundColor', '#' + hex);
     <?php
     if ($js_onchange != "") {
@@ -382,11 +400,11 @@ function tpl_input($args = array("name" => "default", "value" => "", "placeholde
     $name = $args["name"];
     $value = isset($args["default"]) ? $args["default"] : (isset($args["value"]) ? $args["value"] : "");
     $type = "inputfield";
-    if (isset($args["type"])){
+    if (isset($args["type"])) {
         $type = $args["type"];
-    } else if (is_numeric($value)){
+    } else if (is_numeric($value)) {
         $type = "number";
-    } else if ($value == "true" || $value == "false"){
+    } else if ($value == "true" || $value == "false") {
         $type = "checkbox";
     }
     $id = isset($args["id"]) ? $args["id"] : $name;

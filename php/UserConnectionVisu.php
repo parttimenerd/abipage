@@ -24,21 +24,37 @@
  */
 class UserConnectionVisu {
 
+    const SENT_COMMENTS = 1;
+    const RECEIVED_COMMENTS = 2;
+    const ALL = 3;
+
     /**
      * 
      * @global mysqli $db
      * @param int $id
      */
-    public static function getConnectionsArrForUserID(User $user) {
+    public static function getConnectionsArrForUserID(User $user, $type = self::ALL) {
         global $db;
         $id = $user->getID();
         $connections = array();
+        $userid_comp = " ";
+        switch ($type) {
+            case self::SENT_COMMENTS:
+                $userid_comp = " commenting_userid=$id AND commented_userid=u.id ";
+                break;
+            case self::RECEIVED_COMMENTS:
+                $userid_comp = " commenting_userid=u.id AND commented_userid=$id ";
+                break;
+            case self::ALL;
+            default:
+                $userid_comp = "(commenting_userid=u.id AND commented_userid=$id) OR (commenting_userid=$id AND commented_userid=u.id) ";
+                break;
+        }
         if (Auth::canSeeNameWhenSentAnonymous()) {
-            $userid_comp = "(commenting_userid=u.id AND commented_userid=$id) OR (commenting_userid=$id AND commented_userid=u.id) ";
             $query = "SELECT u.id AS 'id', " .
                     " (SELECT count(*) FROM " . DB_PREFIX . "user_comments WHERE $userid_comp ) AS 'count', " .
                     " (SELECT count(*) FROM " . DB_PREFIX . "user_comments WHERE $userid_comp  AND notified_as_bad=0 AND isanonymous=0)" .
-                    "- (SELECT count(*) FROM " . DB_PREFIX . "user_comments WHERE $userid_comp  AND notified_as_bad=1 AND isanonymous=0) " . 
+                    "- (SELECT count(*) FROM " . DB_PREFIX . "user_comments WHERE $userid_comp  AND notified_as_bad=1 AND isanonymous=0) " .
                     " AS 'weight_unano'," .
                     " (SELECT count(*) FROM " . DB_PREFIX . "user_comments WHERE $userid_comp  AND notified_as_bad=0 AND isanonymous=1)" .
                     "- (SELECT count(*) FROM " . DB_PREFIX . "user_comments WHERE $userid_comp  AND notified_as_bad=1 AND isanonymous=1) AS " .
@@ -54,7 +70,6 @@ class UserConnectionVisu {
             }
 //            var_dump($query);
         } else {
-            $userid_comp = "(commenting_userid=u.id AND commented_userid=$id) OR (commenting_userid=$id AND commented_userid=u.id) ";
             $query = "SELECT u.id AS 'id', " .
                     " (SELECT count(*) FROM " . DB_PREFIX . "user_comments WHERE $userid_comp ) AS 'count', " .
                     " (SELECT count(*) FROM " . DB_PREFIX . "user_comments WHERE $userid_comp  AND notified_as_bad=0 AND isanonymous=0)" .
@@ -79,11 +94,11 @@ class UserConnectionVisu {
         return $connections;
     }
 
-    public static function getConnectionArray() {
+    public static function getConnectionArray($type = self::ALL) {
         $users = User::getAll();
         $arr = array();
         foreach ($users->toArray() as $user) {
-            $cons = self::getConnectionsArrForUserID($user);
+            $cons = self::getConnectionsArrForUserID($user, $type);
             $arr[] = array("id" => $user->getID(), "text" => $user->getName(), "connections" => $cons);
         }
         if (!Auth::canSeeNameWhenSentAnonymous()) {
@@ -93,11 +108,11 @@ class UserConnectionVisu {
         $max = 0;
         foreach ($arr as $value) {
             $cons = $value["connections"];
-            foreach ($cons as $connection){
-                if ($connection[1] < $min){
+            foreach ($cons as $connection) {
+                if ($connection[1] < $min) {
                     $min = $connection[1];
                 }
-                if ($connection[1] > $max){
+                if ($connection[1] > $max) {
                     $max = $connection[1];
                 }
             }
@@ -107,12 +122,13 @@ class UserConnectionVisu {
         for ($i = 0; $i < $c; $i++) {
             $cons = $arr[$i]["connections"];
             $c2 = count($cons);
-            for ($j = 0; $j < $c2; $j++){
-                 $arr[$i]["connections"][$j][1] = ($arr[$i]["connections"][$j][1] - $min) * $factor;
+            for ($j = 0; $j < $c2; $j++) {
+                $arr[$i]["connections"][$j][1] = ($arr[$i]["connections"][$j][1] - $min) * $factor;
             }
         }
         return $arr;
     }
 
 }
+
 ?>

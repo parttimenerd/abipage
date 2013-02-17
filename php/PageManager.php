@@ -43,7 +43,7 @@ class PageManager {
             ),
             User::ADMIN_MODE => array(
                 "preferences" => array("class" => "PreferencesHandler"),
-                "user_connection_visu(/ajax)?" => array("class" => "UserConnectionVisuHandler")
+                "user_connection_visu(/.*)?" => array("class" => "UserConnectionVisuHandler")
             ),
             User::MODERATOR_MODE => array(
                 "usermanagement" => array("class" => "UserManagementHandler"),
