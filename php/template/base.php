@@ -168,8 +168,13 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
             <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
             <title><?php echo ($title != null ? ($title . $env->title_sep . $env->title) : '') ?></title>
-            <meta name="author" content="Johannes Bechberger"/>
+            <!--<meta name="author" content="Johannes Bechberger"/>-->
             <meta name="viewport" content="width=device-width"/>
+            <? if ($env->windows_8_tile_image != ""): ?>
+                <meta name="application-name" content="<?= $env->title ?>"/>
+                <meta name="msapplication-TileColor" content="<?= $env->windows_8_tile_color ?>"/>
+                <meta name="msapplication-TileImage" content="<?= tpl_url($env->windows_8_tile_image) ?>"/>
+            <? endif ?>
             <? if (defined("UNMINIFIED_SOURCE")): ?>
                 <link href="<?php echo tpl_url("css/project.css") ?>" rel="stylesheet"/>   
             <? else: ?>
@@ -293,7 +298,7 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
         <p>Powered by <a href="https://github.com/parttimenerd/abipage/">abipage</a>.
             Designed and built by <a href="https://uqudy.serpens.uberspace.de">Johannes Bechberger</a>
             with <a href="http://twitter.github.com/bootstrap/">Twitter Bootstrap</a>
-            and <a href="<?= tpl_url("img/icons/icon_credits.txt") ?>">Icons from the <a href="http://thenounproject.com">Noun Project</a>.
+            and <a href="<?= tpl_url("img/icons/icon_credits.txt") ?>">Icons</a> from the <a href="http://thenounproject.com">Noun Project</a>.
             <a href="<?php echo tpl_url("humans.txt") ?>">humans.txt</a>
         <p><a href="<?= tpl_url("impress") ?>">Impressum</a>. 
             <a href="<?= tpl_url("terms_of_use") ?>">Nutzungsbedingungen</a>. 

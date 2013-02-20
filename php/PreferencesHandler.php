@@ -169,7 +169,9 @@ Wenn ja, sollte Piwik installiert sein und diese Website hinzugefügt worden sei
                     "search_update_interval" => array("default" => "300", "label" => "Puffer zwischen zwei Suchabfragen während der Benutzer tippt in Millisekunden", "type" => "number"),
 //                    "time_zone_offset" => array("default" => "2", "label" => "Zeitzonenverschiebung (im Vergleich zur UTC) in Stunden", "type" => "number"),
                     "userpolls_result_length" => array("default" => "3", "label" => "Anzahl der Personen die pro Umfrage in der Ergebnisliste angezeigt werden"),
-                    "results_viewable" => array("default" => "false", "label" => "Kann sich ein Benutzer (mindestens vom Rang eines Editors), die Ergebnisse anzeigen lassen", "type" => "checkbox")
+                    "results_viewable" => array("default" => "false", "label" => "Kann sich ein Benutzer (mindestens vom Rang eines Editors), die Ergebnisse anzeigen lassen", "type" => "checkbox"),
+                    "windows_8_tile_image" => array("default" => "", "label" => "Windows 8 Kachelbild"),
+                    "windows_8_tile_color" => array("default" => "#333333", "label" => "Windows 8 Kachelfarbe", "type" => "color")
                 ),
 //                "Ergebnisanzeige" => array("id" => "result_pages", "rows" => array(
 //                       "quote_template" => array(
@@ -227,10 +229,10 @@ Wenn ja, sollte Piwik installiert sein und diese Website hinzugefügt worden sei
     public function post() {
         if (Auth::canModifyPreferences()) {
             foreach ($this->pref_vals as $key => $value) {
-                if (isset($_POST[$key])) {
-                    if (isset($value["type"]) && $value["type"] == "checkbox") {
-                        $this->pref_vals[$key]["default"] = isset($_POST[$key]) ? "true" : "false";
-                    } else {
+                if (isset($value["type"]) && $value["type"] == "checkbox") {
+                    $this->pref_vals[$key]["default"] = isset($_POST[$key]) ? "true" : "false";
+                } else {
+                    if (isset($_POST[$key])) {
                         $this->pref_vals[$key]["default"] = str_replace("\'", "&apos;", str_replace('\"', "&quot;", $_POST[$key]));
                     }
                 }

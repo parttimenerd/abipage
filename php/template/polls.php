@@ -125,7 +125,15 @@ function tpl_poll(Poll $poll) {
             }
             echo "</ol>";
             if ($poll->getType() == Poll::NUMBER_TYPE) {
-                echo 'Ø: ' . $data["avg"];
+                echo 'Ø: ' . $data["avg"] . '<br/>';
+            }
+            if (isset($data["number_of_answers"])){
+                $num = $data["number_of_answers"];
+                if ($num == 1){
+                    echo "Diese Frage wurde einmal beantwortet.";
+                } else if ($num > 1){
+                    echo "Diese Frage wurde " . $num . " mal beantwortet.";
+                }
             }
         }
         ?></span><?

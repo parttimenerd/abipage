@@ -112,7 +112,10 @@ function tpl_get_user_subtitle(User $user) {
  */
 function tpl_time_span($time, $with_icon = true, $class = "time") {
     ?>
-    <span class="<?php echo $class ?>"><?php if ($with_icon) tpl_icon("clock") ?> <?php echo date("d.m.y H:i", $time) ?></span>
+    <span class="<?php echo $class ?>">
+        <?php if ($with_icon) tpl_icon("clock") ?> <?= date("d.m.y", $time) ?> 
+        <span class="hour-minutes hidden-phone"><?= date("H:i") ?></span>
+    </span>
     <?php
 }
 
@@ -307,34 +310,37 @@ function tpl_color_selector($name, $default_value = "#ff0000", $js_onchange = ""
         $id = $name . rand(0, 100);
     }
     ?>
-    <input type="text" name="<?php echo $name ?>" value="<?php echo $default_value ?>" id="<?php echo $id ?>"/>
+    <input type="text" name="<?php echo $name ?>" style="background: <?= $default_value ?>" value="<?php echo $default_value ?>" id="<?php echo $id ?>"/>
     <script>
-        $('#<?php echo $id ?>').ColorPicker({
-            color: '<?php echo $default_value ?>',
-            onShow: function(colpkr) {
-                $(colpkr).fadeIn(500);
-                return false;
-            },
-            onHide: function(colpkr) {
-                $(colpkr).fadeOut(500);
-                return false;
-            },
-            onChange: function(hsb, hex, rgb) {
-                $('#<?php echo $id ?> div').css('backgroundColor', '#' + hex);
+        $('body').ready(function() {
+            $('#<?php echo $id ?>').ColorPicker({
+                color: '<?php echo $default_value ?>',
+                onShow: function(colpkr) {
+                    $(colpkr).fadeIn(500);
+                    return false;
+                },
+                onHide: function(colpkr) {
+                    $(colpkr).fadeOut(500);
+                    return false;
+                },
+                onChange: function(hsb, hex, rgb) {
+                    $('#<?= $id ?>').css('backgroundColor', '#' + hex);
+                    $("#<?= $id ?>").attr("value", "#" + hex);
     <?php
     if ($js_onchange != "") {
         echo $js_onchange . (substr($js_onchange, strlen($js_onchange) - 2) != ';' ? ';' : '');
     }
     ?>
-            },
-            onSubmit: function(hsb, hex, rgb) {
-                $('#<?php echo $id ?> div').css('backgroundColor', '#' + hex);
+                },
+                onSubmit: function(hsb, hex, rgb) {
+                    $('#<?php echo $id ?> div').css('backgroundColor', '#' + hex);
     <?php
     if ($js_onchange != "") {
         echo $js_onchange . (substr($js_onchange, strlen($js_onchange) - 2) != ';' ? ';' : '');
     }
     ?>
-            }
+                }
+            });
         });
     </script>
     <?php

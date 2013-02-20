@@ -209,7 +209,7 @@ class Poll {
             $arr["answer"] = intval($arr["answer"]);
             $data[$index] = $arr;
         }
-        $this->data = array("answers" => $data, "avg" => round($sum / $numberOfEntries, 3));
+        $this->data = array("answers" => $data, "avg" => round($sum / $numberOfEntries, 3), "number_of_answers" => $numberOfEntries);
     }
 
     /**

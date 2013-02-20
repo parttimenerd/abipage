@@ -301,15 +301,18 @@ function tpl_write_rumor_response_item_hbs($id = "item-response-template") {
     </div>
     <hr/>
     <div class="item-footer <?php echo Auth::isModerator() ? "deletable" : '' ?>">
-        <ul>
-            <li class="time_span_li"><?php tpl_time_span($ruci->time) ?></li>
+        <ul class="ruc_footer">
+            <li class="time_span_li"><?php tpl_time_span($ruci->time, true) ?></li>
             <li class="rating_li"><?php tpl_rating($ruci) ?></li>
-            <li class="user_span_li"><?php tpl_user_span($ruci->userid, true, $ruci->isAnonymous()) ?></li>
+            <li class="user_span_li 
+                <? if ($ruci->canHaveResponsesButton()) echo "visible-desktop" ?>">
+                    <?php tpl_user_span($ruci->userid, true, $ruci->isAnonymous()) ?>
+            </li>
             <? if ($ruci->canHaveResponsesButton()): ?>
                 <li class="response_to_span_li"><? tpl_item_response_to_span($ruci) ?></li>
             <? endif ?>
             <? if ($ruci->isDeletable()): ?>
-                <li class="delete_span_li"><? tpl_item_delete_span($ruci) ?></li>
+                <li class="delete_span_li hidden-phone"><? tpl_item_delete_span($ruci) ?></li>
             <? endif ?>
         </ul>
     </div>
@@ -363,7 +366,7 @@ function tpl_item_response_to_span(RatableUserContentItem $ruci) {
  */
 function tpl_item_delete_span(RatableUserContentItem $ruci) {
     ?>
-    <span class="del_item"><?php tpl_icon("delete", "Löschen", "deleteItem('" . $ruci->id . "')") ?></span>
+    <button class="del_item btn"><?php tpl_icon("delete", "Löschen", "deleteItem('" . $ruci->id . "')") ?></button>
     <?php
 }
 
@@ -402,7 +405,7 @@ function tpl_rating(RatableUserContentItem $ruci) {
  */
 function tpl_average($rating, $count = -1, $data = array()) {
     ?>
-    <span class="average">
+    <span class="average hidden-phone">
         <? if ($rating != -1): ?>
             [<span class="num" title="<? printf("Ø Bewertung: %1.3f; Bewertungen: %2.d", $rating, $count) ?>"><? printf("Ø%1.1f, x%2.d", $rating, $count) ?></span>]
         <? endif; ?>
