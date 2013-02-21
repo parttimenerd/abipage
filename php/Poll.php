@@ -158,15 +158,33 @@ class Poll {
      * @param array $data
      * @return \Poll
      */
-    public static function create($type, $question, $position, $data = array()) {
+    public static function create($type, $question, $position = -1, $data = array()) {
         global $db;
         $type = intval($type);
         $question = sanitizeInputText($question);
         $position = intval($position);
         $data = json_encode($data);
-        $db->query("INSERT INTO " . POLLS_TABLE . "(id, type, question, position, data) VALUES(NULL, $type, '$question', $position, '$data')");
+        if ($position == -1){
+            $arr = mysqliResultToArr($db->query("SELECT MAX(position) as 'max' FROM " . POLLS_TABLE . " WHERE type=" . $type . " GROUP BY type"), true);
+            if (count($arr) == 0){
+                $position = 0;
+            } else {
+                $position = $arr["max"] + 1;
+            }
+        }
+        $db->query("INSERT INTO " . POLLS_TABLE . "(id, type, question, position, data) VALUES(NULL, $type, '$question', " . $position . ", '$data')");
         $id = $db->insert_id;
         return new Poll($id, $type, $question, $position, $data);
+    }
+    
+    public static function createFromText($type, $text){
+        $arr = explode("\n", str_replace("\r\n", "\n", $text));
+        foreach ($arr as $line){
+            $line = trim($line);
+            if ($line != ""){
+                self::create($type, trim($line));
+            }
+        }
     }
 
     public function delete() {
@@ -412,7 +430,6 @@ class Poll {
     public function __toString() {
         return "ID: " + $this->id + "; Type: " + $this->getTypeString() + "; Text: '" + $this->getQuestion() + "'";
     }
-
 }
 
 ?>

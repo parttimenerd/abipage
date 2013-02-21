@@ -103,8 +103,8 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
                 $meta_dropdown["usermanagement"] = array("Benutzerverwaltung", $env->usermanagement_subtitle);
                 $meta_dropdown["teacherlist"] = array("Lehrerliste", $env->teacherlist_subtitle);
                 $meta_dropdown["admin"] = array("Dashboard", $env->dashboard_subtitle);
-                $meta_dropdown["user_characteristics/edit"] = array("Steckbriefverwaltung", $env->uc_management_subtitle);
-//                $meta_dropdown["polls/edit"] = array("Umfragenverwaltung", $env->polls_management_subtitle);
+//                $meta_dropdown["user_characteristics/edit"] = array("Steckbriefverwaltung", $env->uc_management_subtitle);
+                $meta_dropdown["polls/add"] = array("Umfragen hinzufügen", $env->polls_management_subtitle);
             }
             if (Auth::canViewPreferencesPage()) {
                 $meta_dropdown["preferences"] = array("Einstellungen", $env->preferences_subtitle);

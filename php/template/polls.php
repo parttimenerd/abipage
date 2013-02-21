@@ -86,34 +86,34 @@ function tpl_poll_results($polls) {
 function tpl_poll(Poll $poll) {
     if ($poll == null)
         return;
-        ?><span class="poll_container"><span class="poll_question"><?= $poll->getQuestion() ?></span>
+    ?><span class="poll_container"><span class="poll_question"><?= $poll->getQuestion() ?></span>
         <span class="poll_answer">
             <?
             switch ($poll->getType()) {
                 case Poll::TEACHER_TYPE:
                 case Poll::USER_TYPE:
                     ?><input type="text" name="<?= $poll->getID() ?>" value="<?= $poll->getUserAnswerString() ?>" class="teacher_typeahead" list="<?= $poll->getID() ?>_datalist"/><?
-            tpl_datalist($poll->getID() . "_datalist", $poll->getType() == Poll::TEACHER_TYPE ? Teacher::getNameList() : User::getNameList());
-            break;
-        default:
+                    tpl_datalist($poll->getID() . "_datalist", $poll->getType() == Poll::TEACHER_TYPE ? Teacher::getNameList() : User::getNameList());
+                    break;
+                default:
                     ?><input type="number" name="<?= $poll->getID() ?>" value="<?= $poll->getUserAnswerString() ?>" pattern="[0-9]+(\.[0-9]+)?"/><?
-            break;
-    }
+                    break;
+            }
             ?>
         </span></span><?
-    }
+}
 
-    /**
-     * Outputs the result of a poll as an content item
-     * 
-     * @param Poll $poll
-     * @return null
-     */
-    function tpl_poll_result(Poll $poll) {
-        if ($poll == null)
-            return;
-        tpl_item_before($poll->getQuestion(), "", "poll_result");
-            ?>
+/**
+ * Outputs the result of a poll as an content item
+ * 
+ * @param Poll $poll
+ * @return null
+ */
+function tpl_poll_result(Poll $poll) {
+    if ($poll == null)
+        return;
+    tpl_item_before($poll->getQuestion(), "", "poll_result");
+    ?>
     <span class="poll_answer">
         <?
         $data = $poll->getData();
@@ -127,17 +127,46 @@ function tpl_poll(Poll $poll) {
             if ($poll->getType() == Poll::NUMBER_TYPE) {
                 echo 'Ø: ' . $data["avg"] . '<br/>';
             }
-            if (isset($data["number_of_answers"])){
+            if (isset($data["number_of_answers"])) {
                 $num = $data["number_of_answers"];
-                if ($num == 1){
+                if ($num == 1) {
                     echo "Diese Frage wurde einmal beantwortet.";
-                } else if ($num > 1){
+                } else if ($num > 1) {
                     echo "Diese Frage wurde " . $num . " mal beantwortet.";
                 }
             }
         }
         ?></span><?
     tpl_item_after();
+}
+
+function tpl_add_polls() {
+    tpl_before("polls/add");
+    tpl_item_before_form(array());
+    ?>
+    Typ der Hinzuzufügenden Umfragen: <? tpl_polltype_combobox("type") ?>
+    <textarea name="text"></textarea>
+    <?
+    tpl_infobox("", "Die einzelnen Umfragenfragen müssen durch Zeilenumbrüch getrennt geschrieben werden.");
+    tpl_item_after_form(array("submit" => array("text" => "Hinzufügen", "type" => "submit")));
+    tpl_after();
+}
+
+function tpl_polltype_combobox($name) {
+    $arr = array(
+        Poll::TEACHER_TYPE,
+        Poll::USER_TYPE,
+        Poll::NUMBER_TYPE
+    );
+    ?>
+    <select style="display: inline;" name="<?php echo $name ?>" class="poll_type_combobox">
+        <?php foreach ($arr as $value): ?>
+            <option value="<?= $value ?>">
+                <?php echo Poll::getStringRepOfType($value) ?>
+            </option>
+        <?php endforeach ?>
+    </select>
+    <?php
 }
 
 /**
@@ -148,7 +177,7 @@ function tpl_poll(Poll $poll) {
 function tpl_edit_polls($polls) {
     tpl_before("polls/edit");
     $i_polls = $polls;
-        ?>
+    ?>
     <form method="POST">
         <ul class="nav nav-tabs" id="poll_tabs">
             <?
@@ -185,7 +214,7 @@ function tpl_edit_polls($polls) {
  */
 function tpl_edit_polls_pane($type, $polls, $active = false) {
     $typestr = Poll::getStringRepOfType($type);
-        ?>
+    ?>
     <div class="tab-pane<?= ($active ? ' active' : "") ?>" id="<?= str_replace(" ", "_", $typestr) ?>">
         <div class = "poll_edit_container">
             <?
@@ -235,6 +264,6 @@ function tpl_edit_poll_hbs() {
         <label for="{{id}}_position">Position</label>
         <input type="number" id="{{id}}_position" name="{{id}}_position" value="{{position}}"/>
         <button class="btn btn-warning" onclick="deletePoll('{{id}}', false)">Löschen</button>
-    <? tpl_item_after(); ?>
+        <? tpl_item_after(); ?>
     </div><?
 }

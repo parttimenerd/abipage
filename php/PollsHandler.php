@@ -22,13 +22,15 @@ class PollsHandler extends ToroHandler {
     public function get($slug = "") {
         if ($slug === "/edit" && Auth::canEditUserPolls()) {
             tpl_edit_polls(Poll::getAll());
+        } else if ($slug == "/add" && Auth::canEditUserPolls()) {
+            tpl_add_polls();
         } else {
             tpl_polls(Poll::getAll());
         }
     }
 
     public function get_result($slug = "") {
-        if ($slug != "/edit") {
+        if ($slug != "/edit" && $slug != "/add") {
             tpl_poll_results(Poll::getAll());
         } else {
             $this->get($slug);
@@ -57,6 +59,8 @@ class PollsHandler extends ToroHandler {
                     }
                 }
             }
+        } else if ($slug === "/add" && Auth::canEditUserPolls() && isset($_POST["type"]) && isset($_POST["text"])) {
+            Poll::createFromText($_POST["type"], $_POST["text"]);
         } else if (isset($_POST["submit"])) {
             foreach ($_POST as $key => $value) {
                 if (is_numeric($key)) {

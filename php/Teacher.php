@@ -123,6 +123,13 @@ class Teacher {
         return $arr;
     }
 
+    public static function doesTeacherExist($namestr){
+        global $db;
+        $cnamestr = sanitizeInputText($namestr);
+        $res = $db->query("SELECT * FROM " . DB_PREFIX . "teacher WHERE namestr='" . $cnamestr  . "'");
+        return count(mysqliResultToArr($res));
+    }
+    
     public static function addTeacher($last_name, $is_male, $first_name = "") {
         global $db;
         $last_name = sanitizeInputText($last_name);

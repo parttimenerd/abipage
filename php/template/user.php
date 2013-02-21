@@ -27,9 +27,7 @@ function tpl_userlist($usernamearr, $phrase = "", $ajax = false) {
         tpl_before("user/all", "Schülerliste", "", array("phrase" => $phrase));
         tpl_add_js("search_time_buffer = " . $env->search_update_interval);
     }
-    if (Auth::isViewingResults()) {
-        tpl_all_userpages_infobox();
-    }
+    tpl_all_userpages_infobox();
     tpl_item_before("", "", "content-item userlist");
     ?>
     <ui>
@@ -166,8 +164,8 @@ function tpl_user_comment($user, $comment) {
 function tpl_user_page(User $user, $user_characteristics_items, $as_page = true) {
     if ($as_page) {
         tpl_before("", $user->getName(), tpl_get_user_subtitle($user));
+        tpl_all_userpages_infobox();
     }
-    tpl_all_userpages_infobox();
     tpl_usercharacteristics_result_page($user, $user_characteristics_items, false);
     tpl_user_comment_results($user);
     if ($as_page) {
