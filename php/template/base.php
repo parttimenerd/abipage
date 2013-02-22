@@ -22,6 +22,11 @@
  */
 $js = "";
 /**
+ * HTML code array(id => html) to append invisible in divs to the footer 
+ * @var string
+ */
+$html_app = array();
+/**
  * Has the page to be echoed with the actions sidebar?
  * @var boolean
  */
@@ -183,7 +188,7 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
             <link href="<?php echo tpl_url("css/style.css?42") ?>" rel="stylesheet"/>
             <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
             <script>window.jQuery || document.write('<script src="<?php echo tpl_url("js/lib/jquery-1.7.2.js") ?>"><\/script>')</script>
-            <script src="<?php echo tpl_url("js/passwortmeter2.js") ?>"></script>
+            <script src="<?php echo tpl_url("js/passwordmeter2.js") ?>"></script>
             <link rel = "shortcut icon" href = "<?php echo tpl_url($env->favicon) ?>"/>
             <!--Le HTML5 shim, for IE6-8 support of HTML5 elements-->
             <!--[if lt IE 9]>
@@ -286,7 +291,7 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
              */
             function tpl_after() {
                 ?>         </div> <?php
-                global $env, $js, $has_sidebar, $editor_needed, $update_with_js, $document_title;
+                global $env, $js, $has_sidebar, $editor_needed, $update_with_js, $document_title, $html_app;
                 if (Auth::getUserMode() != User::NO_MODE && $has_sidebar) {
                     tpl_actions_sidebar();
                 }
@@ -312,6 +317,7 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
     </div>
     <!--</div> /container -->
     <? if (Auth::canViewLogs()) tpl_log_container() ?>
+    
     <div id="side_bar_helper_div"/>
     <div id="more_helper_div"/>
     <!-- Le javascript
@@ -336,12 +342,12 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
         <script src="<?php echo tpl_url("js/plugins.js") ?>"></script>
         <script src="<?php echo tpl_url("js/application.js") ?>"></script>
         <!--<script src="<?php echo tpl_url("js/libs/modernizr-2.5.3.js") ?>"></script>-->
-        <script src="<?php echo tpl_url("js/script.js?1002") ?>"></script>
+        <script src="<?php echo tpl_url("js/script.js?100223") ?>"></script>
     <? else: ?>
         <? if ($editor_needed): ?>
             <script src="<?php echo tpl_url("js/min/jquery.wysiwyg.min.js") ?>"></script>
         <? endif ?>
-        <script src="<?php echo tpl_url("js/min/scripts.min.js?42424242") ?>"></script>
+        <script src="<?php echo tpl_url("js/min/scripts.min.js?4242424223") ?>"></script>
     <? endif ?>
     <script>
         $(".tablesorter").ready(function() {
@@ -360,6 +366,17 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
             window.setInterval("ajax({only_update: true, type: 'GET', data: {only_update: true}})", window.auto_update_interval);
     <? endif ?>
     </script>
+    <div style="display: hidden">
+        <?
+        if (!empty($html_app)) {
+            foreach ($html_app as $id => $value) {
+                echo '<div id="' . $id . '">';
+                echo $value;
+                echo '</div>';
+            }
+        }
+        ?>
+    </div>
     </body>
     </html>
     <?php
@@ -568,6 +585,11 @@ function tpl_no_subnav() {
 function tpl_add_js($code) {
     global $js;
     $js .= ($js != "" ? "\n" : "") . $code . (substr($code, strlen($code) - 1) != ';' ? ';' : '');
+}
+
+function tpl_add_html_app($id, $html) {
+    global $html_app;
+    $html_app[$id] = $html;
 }
 
 /**

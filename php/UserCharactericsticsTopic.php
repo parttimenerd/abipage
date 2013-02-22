@@ -26,6 +26,7 @@ class UserCharacteristicsTopic {
     /**
      * Answer is a on line text
      */
+
     const SHORTTEXT_TYPE = 1;
     /**
      * Answer is a block of text
@@ -250,7 +251,9 @@ class UserCharacteristicsTopic {
         $user = Auth::getUser();
         $file_path = $env->upload_path . '/' . $user->getPictureDirPart();
         $exif = $env->uploadImage($this->id, $upload_name, $file_path, false);
-        $this->_submit($user->getPictureDirPart() . '/' . $exif["FileName"], true);
+        if ($exif["FileName"] != "") {
+            $this->_submit($user->getPictureDirPart() . '/' . $exif["FileName"], true);
+        }
     }
 
     public function submit($answer) {
@@ -278,9 +281,9 @@ class UserCharacteristicsTopic {
         if ($canswer != "") {
             $res = $db->query("SELECT * FROM " . USERCHARACTERISTIC_ITEMS_TABLE . " WHERE topic=" . $this->id . " AND userid=" . $userid);
             if ($res && $res->fetch_array()) {
-                $db->query("UPDATE " . USERCHARACTERISTIC_ITEMS_TABLE . " SET text='" . $canswer . "' WHERE topic=" . $this->id . " AND userid=" . $userid);
+                $db->query("UPDATE " . USERCHARACTERISTIC_ITEMS_TABLE . " SET text='" . $canswer . "', time=CURRENT_TIMESTAMP WHERE topic=" . $this->id . " AND userid=" . $userid);
             } else {
-                $db->query("INSERT INTO " . USERCHARACTERISTIC_ITEMS_TABLE . "(userid, topic, type, text) VALUES(" . $userid . ", " . $this->id . ", " . $this->type . ", '" . $canswer . "')");
+                $db->query("INSERT INTO " . USERCHARACTERISTIC_ITEMS_TABLE . "(userid, topic, type, time, text) VALUES(" . $userid . ", " . $this->id . ", " . $this->type . ", CURRENT_TIMESTAMP, '" . $canswer . "')");
             }
         }
     }

@@ -21,20 +21,20 @@
 
 function tpl_usercharacteristics_result_page(User $user, array $itemarr, $as_page = true) {
     global $env;
-    if (!$env->user_characteristics_editable){
-       return; 
+    if (!$env->user_characteristics_editable) {
+        return;
     }
     if ($as_page) {
         tpl_before("user_characteristics", $user->getName(), tpl_get_user_subtitle($user));
-    }
-    if ($user->hasNotAllUCQuestionsAnswered()){
-        $number = $user->getNumberOfUCQuestionsToBeAnswered();
-        if ($number == 1) {
-            $text = $user->getName() . " muss noch eine Steckbrieffrage beantworten.";
-        } else {
-            $text = $user->getName() . " muss noch " . $number . " Steckbrieffragen beantworten.";
+        if ($user->hasNotAllUCQuestionsAnswered()) {
+            $number = $user->getNumberOfUCQuestionsToBeAnswered();
+            if ($number == 1) {
+                $text = $user->getName() . " muss noch eine Steckbrieffrage beantworten.";
+            } else {
+                $text = $user->getName() . " muss noch " . $number . " Steckbrieffragen beantworten.";
+            }
+            tpl_infobox("", $text);
         }
-        tpl_infobox("", $text);
     }
     foreach ($itemarr as $item) {
         tpl_usercharacteristics_result_item($item);
@@ -96,9 +96,11 @@ function tpl_usercharacteristics_answer_topic(UserCharacteristicsTopic $topic) {
     global $env;
     tpl_item_before($topic->getText());
     $user_answer = $topic->getUserAnswerItem();
+    $time = 0;
     if ($user_answer == null) {
         $user_answer = "";
     } else {
+        $time = $user_answer->getTime();
         $user_answer = $user_answer->getAnswer();
     }
     switch ($topic->getType()) {
@@ -114,11 +116,11 @@ function tpl_usercharacteristics_answer_topic(UserCharacteristicsTopic $topic) {
         case UserCharacteristicsTopic::PICTURE_TYPE:
             ?>
             <? if ($user_answer != ""): ?>
-                <img src="<?= tpl_url($env->upload_path . '/' . $user_answer) ?>" class="uc_img"/><br/>
+                <img src="<?= tpl_url($env->upload_path . '/' . $user_answer) ?>?<?= $time ?>" class="uc_img"/><br/>
                 <input type="hidden" name="MAX_FILE_SIZE" value="<?= $env->max_upload_pic_size * 1048576 ?>"/>
                 <hr/>
             <? endif ?>
-            Neues Bild hochladen:<br/>
+            <strong>Neues Bild hochladen</strong>: (Kann etwas länger Dauern, bitte seien sie geduldig.)<br/>
             <input type="file" accept="image/*" name="<?= $topic->getID() ?>"/>
             (Das Bild darf maximal <?= $env->max_upload_pic_size ?>MB groß sein und sollte die Dateiendung .png, .jpg, .jpeg, .bmp oder .gif haben.)
             <?

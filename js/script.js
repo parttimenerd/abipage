@@ -453,7 +453,7 @@ function setResultMode(view_results) {
         data: {
             value: view_results
         },
-        success: function(){
+        success: function() {
             location.reload();
         }
     });
@@ -550,6 +550,7 @@ function ajax(args) {
         error: function(resp, textStatus) {
             console.error(textStatus, resp.responseText);
             func($.parseJSON(resp.responseText));
+            $this.use_ajax_url = true;
         },
         no_return: function() {
 
@@ -557,9 +558,10 @@ function ajax(args) {
         func: function() {
 
         },
-        needs: []
+                needs: []
     }, args);
     args["data"] = $.extend({
+        url: $(".item-send").length == 0 ? ajax_url : "",
         access_key: access_key,
         last_time_updated: this.last_time_updated_loc,
         ajax: true

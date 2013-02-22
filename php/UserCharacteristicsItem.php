@@ -55,17 +55,24 @@ class UserCharacteristicsItem {
     private $answer;
 
     /**
+     * Time the answer had been sent
+     * @var int
+     */
+    private $time;
+
+    /**
      * 
      * @param int $id
      * @param int|User $user
      * @param UserCharacteristicsTopic|int $topic
      * @param string|int $answer
      */
-    public function __construct($id, $user, $topic, $answer) {
+    public function __construct($id, $user, $topic, $answer, $time) {
         $this->id = $id;
         $this->user = is_a($user, "User") ? $user : User::getByID($user);
         $this->topic = is_object($topic) ? $topic : UserCharacteristicsTopic::getByID($topic);
         $this->type = $this->topic->getType();
+        $this->time = $time;
         if ($this->type == UserCharacteristicsTopic::NUMBER_TYPE) {
             $this->answer = intval($answer);
         } else {
@@ -82,7 +89,7 @@ class UserCharacteristicsItem {
         if ($array == null || !isset($array["id"]) || $array["id"] == "") {
             return null;
         }
-        return new UserCharacteristicsItem($array["id"], $array["userid"], $array["topic"], $array["text"]);
+        return new UserCharacteristicsItem($array["id"], $array["userid"], $array["topic"], $array["text"], is_string($array["time"]) ? strtotime($array["time"]) : $array["time"]);
     }
 
     /**
@@ -130,7 +137,7 @@ class UserCharacteristicsItem {
             $cuserid = -1;
         }
         $ctopicID = is_numeric($topic) ? intval($topic) : $topic->getID();
-        $res = $db->query("SELECT * FROM " . USERCHARACTERISTIC_ITEMS_TABLE . " WHERE type=" . $ctopicID . ($cuserid != -1 ? " AND userid=" . $cuserid : ""));
+        $res = $db->query("SELECT * FROM " . USERCHARACTERISTIC_ITEMS_TABLE . " WHERE topic=" . $ctopicID . ($cuserid != -1 ? (" AND userid=" . $cuserid) : ""));
         $retarr = array();
         while ($poll = self::getFromMySQLResult($res)) {
             $retarr[] = $poll;
@@ -155,7 +162,7 @@ class UserCharacteristicsItem {
             }
         } else {
             $res = $db->query("SELECT *, (SELECT position FROM " . USERCHARACTERISTIC_TOPIC_TABLE . " WHERE id=topic) as position FROM " . USERCHARACTERISTIC_ITEMS_TABLE . " WHERE userid=" . $cuserid . " ORDER BY position ASC");
-            while ($item = self::getFromMySQLResult($res)){
+            while ($item = self::getFromMySQLResult($res)) {
                 $arr[] = $item;
             }
         }
@@ -170,30 +177,34 @@ class UserCharacteristicsItem {
         return "ID: " + $this->id + "; Type: " + $this->getTypeString() + "; Text: '" + $this->getQuestion() + "'";
     }
 
-    
-    public function getAnswer(){
+    public function getAnswer() {
         return $this->answer;
     }
-    
-    public function getID(){
+
+    public function getID() {
         return $this->id;
     }
-    
-    public function getType(){
+
+    public function getType() {
         return $this->type;
     }
-    
-    public function getTopic(){
+
+    public function getTopic() {
         return $this->topic;
+    }
+
+    public function getTime(){
+        return $this->time;
     }
     
     /**
      * 
      * @return User
      */
-    public function getUser(){
+    public function getUser() {
         return $this->user;
     }
+
 }
 
 ?>

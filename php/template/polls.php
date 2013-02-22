@@ -25,7 +25,7 @@
 function tpl_polls($polls, $show_results = false) {
     tpl_before("polls");
     if (!$show_results)
-        tpl_item_before_form(array("method" => "POST"));
+        tpl_item_before();
     $first = true;
     ?>
     <form method="POST">
@@ -89,18 +89,48 @@ function tpl_poll(Poll $poll) {
     ?><span class="poll_container"><span class="poll_question"><?= $poll->getQuestion() ?></span>
         <span class="poll_answer">
             <?
+            $datalist_id = $poll->getID() . "_datalist";
             switch ($poll->getType()) {
                 case Poll::TEACHER_TYPE:
                 case Poll::USER_TYPE:
-                    ?><input type="text" name="<?= $poll->getID() ?>" value="<?= $poll->getUserAnswerString() ?>" class="teacher_typeahead" list="<?= $poll->getID() ?>_datalist"/><?
-                    tpl_datalist($poll->getID() . "_datalist", $poll->getType() == Poll::TEACHER_TYPE ? Teacher::getNameList() : User::getNameList());
+                    ?><input type="text" name="<?= $poll->getID() ?>" value="<?= $poll->getUserAnswerString() ?>" class="teacher_typeahead" list="<?= $datalist_id ?>"/>
+                    <datalist id="<?= $datalist_id ?>"></datalist>
+                    <?
+                    if ($poll->getType() == Poll::TEACHER_TYPE) {
+                        tpl_teacher_datalist();
+                        tpl_add_js('$("#' . $datalist_id . '").html(teacher_datalist)');
+                    } else {
+                        tpl_user_datalist();
+                        tpl_add_js('$("#' . $datalist_id . '").html(user_datalist)');
+                    }
                     break;
                 default:
-                    ?><input type="number" name="<?= $poll->getID() ?>" value="<?= $poll->getUserAnswerString() ?>" pattern="[0-9]+(\.[0-9]+)?"/><?
+                    ?><input type="number" name="_<?= $poll->getID() ?>" value="<?= $poll->getUserAnswerString() ?>" pattern="[0-9]+(\.[0-9]+)?" onkeyup="$('#poll_<?= $poll->getID() ?>').val(this.value)"/><?
+                    ?><input type="hidden" name="<?= $poll->getID() ?>" id="poll_<?= $poll->getID() ?>" pattern="[0-9]+(\.[0-9]+)?"/><?
                     break;
-            }
-            ?>
+                }
+                ?>
         </span></span><?
+}
+
+function tpl_teacher_datalist() {
+    global $html_app;
+    if (!isset($html_app["teacher_datalist"])) {
+        ob_start();
+        tpl_datalist("teacher_datalist", Teacher::getNameList());
+        $html_app["teacher_datalist_div"] = ob_get_clean();
+        tpl_add_js('var teacher_datalist = $("#teacher_datalist").html();');
+    }
+}
+
+function tpl_user_datalist() {
+    global $html_app;
+    if (!isset($html_app["user_datalist"])) {
+        ob_start();
+        tpl_datalist("user_datalist", User::getNameList());
+        $html_app["user_datalist_div"] = ob_get_clean();
+        tpl_add_js('var user_datalist = $("#user_datalist").html();');
+    }
 }
 
 /**

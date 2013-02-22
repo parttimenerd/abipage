@@ -164,9 +164,9 @@ class Poll {
         $question = sanitizeInputText($question);
         $position = intval($position);
         $data = json_encode($data);
-        if ($position == -1){
+        if ($position == -1) {
             $arr = mysqliResultToArr($db->query("SELECT MAX(position) as 'max' FROM " . POLLS_TABLE . " WHERE type=" . $type . " GROUP BY type"), true);
-            if (count($arr) == 0){
+            if (count($arr) == 0) {
                 $position = 0;
             } else {
                 $position = $arr["max"] + 1;
@@ -176,12 +176,12 @@ class Poll {
         $id = $db->insert_id;
         return new Poll($id, $type, $question, $position, $data);
     }
-    
-    public static function createFromText($type, $text){
+
+    public static function createFromText($type, $text) {
         $arr = explode("\n", str_replace("\r\n", "\n", $text));
-        foreach ($arr as $line){
+        foreach ($arr as $line) {
             $line = trim($line);
-            if ($line != ""){
+            if ($line != "") {
                 self::create($type, trim($line));
             }
         }
@@ -216,9 +216,9 @@ class Poll {
                 $numberOfEntries += $data[$index]["count"];
             }
         } else {
-            for ($index = 0; $index < count($data); $index++) {
-                $sum += $data[$index]["answer"] * $data[$index]["count"];
-                $numberOfEntries += $data[$index]["count"];
+            foreach ($data as $arr) {
+                $sum += $arr["answer"] * $arr["count"];
+                $numberOfEntries += $arr["count"];
             }
         }
         for ($index = 0; $index < count($data); $index++) {
@@ -246,6 +246,9 @@ class Poll {
      * @return boolean
      */
     public function submitAnswer($answer) {
+        if ($answer == "") {
+            return;
+        }
         $canswer = "";
         switch ($this->type) {
             case self::TEACHER_TYPE:
@@ -430,6 +433,7 @@ class Poll {
     public function __toString() {
         return "ID: " + $this->id + "; Type: " + $this->getTypeString() + "; Text: '" + $this->getQuestion() + "'";
     }
+
 }
 
 ?>

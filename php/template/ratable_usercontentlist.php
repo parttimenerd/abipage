@@ -366,7 +366,7 @@ function tpl_item_response_to_span(RatableUserContentItem $ruci) {
  */
 function tpl_item_delete_span(RatableUserContentItem $ruci) {
     ?>
-    <button class="del_item btn"><?php tpl_icon("delete", "Löschen", "deleteItem('" . $ruci->id . "')") ?></button>
+    <button class="del_item btn" onclick="deleteItem('<?= $ruci->id ?>')"><?php tpl_icon("delete", "Löschen") ?></button>
     <?php
 }
 

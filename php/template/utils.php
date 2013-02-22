@@ -235,7 +235,7 @@ function tpl_user_last_visit($name_or_id, $brackets = true, $does_echo = false) 
         $time = Auth::getLastVisitTime($id);
         if ($time && $time > 0 && !Auth::isSameUser($id)) {
             $timediff = time() - $time;
-            $str = '<span class="last_visit_time">' . ($brackets ? "[" : "") . 'Letzter Besuch:' . ($timediff > 60 ? tpl_timediff_span($timediff, $time, false) : "Jetzt") . ($brackets ? "]" : "") . '</span>';
+            $str = '<span class="last_visit_time">' . ($brackets ? "[" : "") . 'Letzter Besuch: ' . ($timediff > 60 ? tpl_timediff_span($timediff, $time, false) : "Jetzt") . ($brackets ? "]" : "") . '</span>';
             if ($does_echo) {
                 echo $str;
             } else {

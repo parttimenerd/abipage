@@ -63,7 +63,7 @@ class PollsHandler extends ToroHandler {
             Poll::createFromText($_POST["type"], $_POST["text"]);
         } else if (isset($_POST["submit"])) {
             foreach ($_POST as $key => $value) {
-                if (is_numeric($key)) {
+                if (is_numeric($key) && $value != "") {
                     $poll = Poll::getByID($key);
                     if ($poll)
                         $poll->submitAnswer($value);

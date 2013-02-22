@@ -104,6 +104,7 @@ function tpl_actions(ActionArray $actions) {
 function tpl_action($action, $with_time = true, $before_html = '', $after_html = '') {
     $center = "";
     echo $before_html;
+    $url = "";
     if ($with_time) {
         tpl_timediff_span(time() - $action["time"], $action["time"]);
         echo " ";
