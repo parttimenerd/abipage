@@ -233,7 +233,7 @@ Wenn ja, sollte Piwik installiert sein und diese Website hinzugefügt worden sei
                     $this->pref_vals[$key]["default"] = isset($_POST[$key]) ? "true" : "false";
                 } else {
                     if (isset($_POST[$key])) {
-                        $this->pref_vals[$key]["default"] = str_replace("\'", "&apos;", str_replace('\"', "&quot;", $_POST[$key]));
+                        $this->pref_vals[$key]["default"] = str_replace('\'', "'", str_replace('\"', "&quot;", $_POST[$key]));
                     }
                 }
             }

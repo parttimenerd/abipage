@@ -92,30 +92,31 @@ function tpl_poll(Poll $poll) {
             $datalist_id = $poll->getID() . "_datalist";
             switch ($poll->getType()) {
                 case Poll::TEACHER_TYPE:
-                case Poll::USER_TYPE:
                     ?><input type="text" name="<?= $poll->getID() ?>" value="<?= $poll->getUserAnswerString() ?>" class="teacher_typeahead" list="<?= $datalist_id ?>"/>
                     <datalist id="<?= $datalist_id ?>"></datalist>
                     <?
-                    if ($poll->getType() == Poll::TEACHER_TYPE) {
-                        tpl_teacher_datalist();
-                        tpl_add_js('$("#' . $datalist_id . '").html(teacher_datalist)');
-                    } else {
-                        tpl_user_datalist();
-                        tpl_add_js('$("#' . $datalist_id . '").html(user_datalist)');
-                    }
+                    tpl_teacher_datalist();
+                    tpl_add_js('$("#' . $datalist_id . '").html(teacher_datalist)');
+                    break;
+                case Poll::USER_TYPE:
+                    ?><input type="text" name="<?= $poll->getID() ?>" value="<?= $poll->getUserAnswerString() ?>" class="user_typeahead" list="<?= $datalist_id ?>"/>
+                    <datalist id="<?= $datalist_id ?>"></datalist>
+                    <?
+                    tpl_user_datalist();
+                    tpl_add_js('$("#' . $datalist_id . '").html(user_datalist)');
                     break;
                 default:
                     ?><input type="number" name="_<?= $poll->getID() ?>" value="<?= $poll->getUserAnswerString() ?>" pattern="[0-9]+(\.[0-9]+)?" onkeyup="$('#poll_<?= $poll->getID() ?>').val(this.value)"/><?
                     ?><input type="hidden" name="<?= $poll->getID() ?>" id="poll_<?= $poll->getID() ?>" pattern="[0-9]+(\.[0-9]+)?"/><?
                     break;
-                }
-                ?>
+            }
+            ?>
         </span></span><?
 }
 
 function tpl_teacher_datalist() {
     global $html_app;
-    if (!isset($html_app["teacher_datalist"])) {
+    if (!isset($html_app["teacher_datalist_div"])) {
         ob_start();
         tpl_datalist("teacher_datalist", Teacher::getNameList());
         $html_app["teacher_datalist_div"] = ob_get_clean();
@@ -125,7 +126,7 @@ function tpl_teacher_datalist() {
 
 function tpl_user_datalist() {
     global $html_app;
-    if (!isset($html_app["user_datalist"])) {
+    if (!isset($html_app["user_datalist_div"])) {
         ob_start();
         tpl_datalist("user_datalist", User::getNameList());
         $html_app["user_datalist_div"] = ob_get_clean();

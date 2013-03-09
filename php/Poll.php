@@ -143,10 +143,19 @@ class Poll {
      */
     public static function getAll() {
         $arr = array();
-        $arr[self::TEACHER_TYPE] = self::getByType(self::TEACHER_TYPE);
         $arr[self::USER_TYPE] = self::getByType(self::USER_TYPE);
+        $arr[self::TEACHER_TYPE] = self::getByType(self::TEACHER_TYPE);
         $arr[self::NUMBER_TYPE] = self::getByType(self::NUMBER_TYPE);
         return $arr;
+    }
+
+    public static function updateAll() {
+        global $db;
+        $res = $db->query("SELECT * FROM " . POLLS_TABLE);
+        while ($poll = Poll::getFromMySQLResult($res)) {
+            $poll->updateData();
+            $poll->updateDB();
+        }
     }
 
     /**
@@ -201,24 +210,25 @@ class Poll {
     public function updateData() {
         global $db, $env;
         $data = mysqliResultToArr($db->query("SELECT count(*) as count, answer FROM " . POLL_ANSWERS_TABLE . " WHERE pollid=" . $this->id . " GROUP BY answer ORDER BY count DESC LIMIT 0," . $env->userpolls_result_length));
-        $this->updateDataArr($data);
+        $countArr = mysqliResultToArr($db->query("SELECT count(*) as count FROM " . POLL_ANSWERS_TABLE . " WHERE pollid=" . $this->id), true);
+        $this->updateDataArr($data, intval($countArr["count"]));
     }
 
     /**
      * 
      * @param array $data
      */
-    private function updateDataArr($data) {
+    private function updateDataArr($data, $numberOfEntries = 0) {
         $sum = 0;
-        $numberOfEntries = 0;
-        if ($this->type != self::NUMBER_TYPE) {
+        $numberOfListedEntries = 0;
+        if ($this->type != self::NUMBER_TYPE && $numberOfEntries == 0) {
             for ($index = 0; $index < count($data); $index++) {
                 $numberOfEntries += $data[$index]["count"];
             }
-        } else {
+        } else if ($this->type == self::NUMBER_TYPE) {
             foreach ($data as $arr) {
                 $sum += $arr["answer"] * $arr["count"];
-                $numberOfEntries += $arr["count"];
+                $numberOfListedEntries += $arr["count"];
             }
         }
         for ($index = 0; $index < count($data); $index++) {
@@ -227,7 +237,7 @@ class Poll {
             $arr["answer"] = intval($arr["answer"]);
             $data[$index] = $arr;
         }
-        $this->data = array("answers" => $data, "avg" => round($sum / $numberOfEntries, 3), "number_of_answers" => $numberOfEntries);
+        $this->data = array("answers" => $data, "avg" => round($sum / $numberOfListedEntries, 3), "number_of_answers" => $numberOfEntries);
     }
 
     /**

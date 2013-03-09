@@ -56,7 +56,7 @@ if (!defined('DB_NAME')) {
     if (!Auth::canSeeDebugOutput() && !Auth::canViewLogs() && (!defined("DEBUG") || !DEBUG)) {
         error_reporting(0);
     }
- 
+
     PageManager::serve();
 
     Auth::updateLastVisitTime();

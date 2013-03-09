@@ -98,7 +98,7 @@ function sanitizeValue($var, $type = "") {
 }
 
 function formatText($text, $markdown = true) {
-    $arr = array("\'" => "&apos;", '\"' => "&quot;", "..." => "…", '\n' => "\n", '\r' => "\r");
+    $arr = array("..." => "…", '\n' => "\n", '\r' => "\r");
     foreach ($arr as $search => $replacement)
         $text = str_replace($search, $replacement, $text);
     if ($markdown)

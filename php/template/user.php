@@ -142,7 +142,7 @@ function tpl_user_comment($user, $comment) {
                     <?php } ?>
                     </span>
                 <? elseif (Auth::canSeeNameWhenSentAnonymous() && $comment["notified_as_bad"]):
-                    tpl_icon("dissaprove");
+                    tpl_icon("disaprove");
                 endif;
                 ?>
             </li>

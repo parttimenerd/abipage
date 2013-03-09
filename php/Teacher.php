@@ -83,7 +83,7 @@ class Teacher {
         global $db;
         return self::getFromMySQLResult($db->query("SELECT * FROM " . DB_PREFIX . "teacher WHERE namestr='" . sanitizeInputText($namestr) . "'"));
     }
-    
+
     public static function getTeacherWithQuoteRatingAndCount() {
         global $db;
         $res = $db->query("SELECT id, first_name, last_name, namestr, ismale, (SELECT count(*) FROM " . DB_PREFIX . "quotes q WHERE q.teacherid = t.id) AS quote_count, (SELECT avg(q2.rating) FROM " . DB_PREFIX . "quotes q2 WHERE q2.teacherid = t.id) AS quote_rating FROM " . DB_PREFIX . "teacher t ORDER BY quote_count DESC");
@@ -123,13 +123,13 @@ class Teacher {
         return $arr;
     }
 
-    public static function doesTeacherExist($namestr){
+    public static function doesTeacherExist($namestr) {
         global $db;
         $cnamestr = sanitizeInputText($namestr);
-        $res = $db->query("SELECT * FROM " . DB_PREFIX . "teacher WHERE namestr='" . $cnamestr  . "'");
+        $res = $db->query("SELECT * FROM " . DB_PREFIX . "teacher WHERE namestr='" . $cnamestr . "'");
         return count(mysqliResultToArr($res));
     }
-    
+
     public static function addTeacher($last_name, $is_male, $first_name = "") {
         global $db;
         $last_name = sanitizeInputText($last_name);
@@ -146,13 +146,9 @@ class Teacher {
         return false;
     }
 
-    public static function updateQuotes($teacher_id = -1) {
+    public static function updateQuotes() {
         global $db;
-        if ($teacher_id != -1) {
-            $db->query("UPDATE " . DB_PREFIX . "quotes q, " . DB_PREFIX . "teacher t SET q.teacherid=" . intval($teacher_id) . " WHERE (q.person LIKE t.namestr OR (q.person LIKE CONCAT('%', first_name, '%', last_name))) AND q.teacherid = t.id");
-        } else {
-            $db->query("UPDATE " . DB_PREFIX . "quotes q, " . DB_PREFIX . "teacher t SET q.teacherid=t.id WHERE (q.person LIKE t.namestr OR (q.person LIKE CONCAT('%', first_name, '%', last_name))) AND q.teacherid = t.id");
-        }
+        $db->query("UPDATE " . DB_PREFIX . "quotes q SET q.teacherid=(SELECT t.id FROM " . DB_PREFIX . "teacher t WHERE q.person LIKE t.namestr OR (q.person LIKE CONCAT('%', first_name, '%', last_name)) LIMIT 1)");
     }
 
     public static function readTeacherListInput($text) {

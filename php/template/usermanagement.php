@@ -25,80 +25,88 @@
  * @global Environment $env
  */
 function tpl_usermanagement(UserArray $userarr, $as_page = true, $urlapp = "") {
-   global $env;
+    global $env;
     if ($as_page) {
         tpl_before("usermanagement");
         tpl_item_before();
     }
     ?>
-    <form method="post" <?php echo $urlapp != "" ? ('action="?' . $urlapp . '"') : "" ?> class="usermanagement">
-        <input type="hidden" name="access_key" value="<?= Auth::getAccessKey() ?>"/>
-        <table class="table table-striped tablesorter">
-            <thead>
-                <tr>
-                    <th>Auswählen</th>
-                    <th>ID</th>
-                    <th>Vorname</th>
-                    <th>Nachname</th>
-                    <th>Mailadresse</th>
-                    <th>Mathekurs</th>
-                    <th>Mathlehrer</th>
-                    <th>Modus</th>
-                    <th>Aktiviert</th>
-                    <th>Sichtbar</th>
-                    <th>Kommentare moderiert?</th>
-                    <? if ($env->user_characteristics_editable): ?>
-                        <th>Unbeantwortete Steckbrieffragen</th>
-                    <? endif ?>
-                    <th>Link</th>
-                    <th>Einstellungen</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($userarr->toArray() as $user): ?>
+    <div id="user_table">
+        <input class="search" placeholder="Suche" onkeyup="user_table_list.fuzzySearch($(this).val())" autocomplete="off"/>
+        <form method="post" <?php echo $urlapp != "" ? ('action="?' . $urlapp . '"') : "" ?> class="usermanagement">
+            <input type="hidden" name="access_key" value="<?= Auth::getAccessKey() ?>"/>
+            <table class="table table-striped">
+                <thead>
                     <tr>
-                        <td>
-                            <? if (!Auth::isSameUser($user) && Auth::canEditUser($user)): ?>
-                                <input type="checkbox" value="true" name="<?php echo $user->getID() ?>"/>
-                            <? endif; ?>
-                        </td>
-                        <td><?php echo $user->getID() ?></td>
-                        <td><?php echo $user->getFirstName() ?></td>
-                        <td><?php echo $user->getLastName() ?></td>
-                        <td><a href="mailto:<?php echo $user->getMailAdress() ?>"><?php echo $user->getMailAdress() ?></a></td>
-                        <td><?php echo $user->getMathCourse() ?></td>
-                        <td><?php echo $user->getMathTeacher() ?></td>
-                        <td><?php echo tpl_usermode_to_text($user->getMode()) ?></td>
-                        <td><?php echo $user->isActivated() ? "Ja" : "Nein" ?></td>
-                        <td><?php echo $user->isVisible() ? "Ja" : "Nein" ?></td>
-                        <td><?php echo $user->isUserMarkedToHaveHisCommentsBeAlwaysModerated() ? "Ja" : "Nein" ?></td>
+                        <th class="sort" data-sort="is_selected" title="Auswählen"></th>
+                        <th style="display: none"></th>
+                        <th class="sort" data-sort="id">ID</th>
+                        <th class="sort" data-sort="first_name">Vorname</th>
+                        <th class="sort" data-sort="last_name">Nachname</th>
+                        <th class="sort" data-sort="mail_adress">Mailadresse</th>
+                        <th class="sort" data-sort="math_course">Mathekurs</th>
+                        <th class="sort" data-sort="math_teacher">Mathlehrer</th>
+                        <th class="sort" data-sort="user_mode">Modus</th>
+                        <th style="display: none"></th>
+                        <th class="sort" data-sort="activated">Aktiviert</th>
+                        <th class="sort" data-sort="visible">Sichtbar</th>
+                        <th class="sort" data-sort="comments_moderated">Kommentare moderiert?</th>
                         <? if ($env->user_characteristics_editable): ?>
-                        <td><?= $user->getNumberOfUCQuestionsToBeAnswered() ?></td>
+                            <th class="sort" data-sort="unanswered_ucquestions">Unbeantwortete Steckbrieffragen</th>
                         <? endif ?>
-                        <td><a href="<?= tpl_url('user/' . $user->getName()) ?>">Link</a></td>
-                        <td><a href="<?= tpl_url('user/' . $user->getName() . '/preferences') ?>">Einstellungen</a></td>
+                        <th>Link</th>
+                        <th>Einstellungen</th>
                     </tr>
-                <?php endforeach ?>
-            </tbody>
-        </table>
-        Ausgewählte Benutzer  
-        <button class="btn" type="submit" name="activate">Aktivieren</button>
-        <button class="btn" type="submit" name="deactivate">Deaktivieren</button><br/>
-        <?php if (Auth::canSetUserMode()): ?>
-            Modus <?php tpl_usermode_combobox("mode") ?>
-            <button class="btn" type="submit" name="setmode">setzen</button><br/>
-            <button class="btn btn-danger" type="submit" name="delete">Benutzer löschen (Es werden dabei alle Beiträge der betreffenden Benutzer gelöscht!!!)</button><br/>
-        <?php endif ?>
-        <input type="password" name="password" style="width: 150px" placeholder="Neues Passwort"/>
-        <button class="btn" type="submit" name="setpassword">Passwort setzen</button>
-        (mit E-Mail Benachrichtigung der jeweiligen Benutzer)<br/>
-        <? if (Auth::canSetUserVisibility()): ?>
-            <input type="checkbox" checked="checked" name="visible" value="true" style="margin-right: 10px"/>Sichtbar?
-            <button class="btn" name="setvisible">Sichtbarkeit setzen</button><br/>
-        <? endif ?>
-        <input type="checkbox" checked="checked" name="is_marked" value="true" style="margin-right: 10px"/>Werden Kommentare moderiert?
-        <button class="btn" name="mark">Setzen</button>
-    </form>
+                </thead>
+                <tbody class="list">
+                    <?php foreach ($userarr->toArray() as $user): ?>
+                        <tr>
+                            <td>
+                                <? if (!Auth::isSameUser($user) && Auth::canEditUser($user)): ?>
+                                    <input type="checkbox" onclick="var elem = $('#selected_<?= $user->getID() ?>');
+                        elem.html(elem.html() === 'a' ? 'b' : 'a')" value="true" name="<?php echo $user->getID() ?>" title="Auswählen"/>
+                                       <? endif; ?>
+                            </td>
+                            <td class="is_selected" id="selected_<?= $user->getID() ?>" style="display: none">a</td>
+                            <td class="id"><?php echo $user->getID() ?></td>
+                            <td class="first_name"><?php echo $user->getFirstName() ?></td>
+                            <td class="last_name"><?php echo $user->getLastName() ?></td>
+                            <td class="mail_adress"><a href="mailto:<?php echo $user->getMailAdress() ?>"><?php echo $user->getMailAdress() ?></a></td>
+                            <td class="math_course"><?php echo $user->getMathCourse() ?></td>
+                            <td class="math_teacher"><?php echo $user->getMathTeacher() ?></td>
+                            <td><?php echo tpl_usermode_to_text($user->getMode()) ?></td>
+                            <td class="user_mode" style="display:none;"><?= $user->getMode() ?></td>
+                            <td class="activated"><?php echo $user->isActivated() ? "Ja" : "Nein" ?></td>
+                            <td class="visible"><?php echo $user->isVisible() ? "Ja" : "Nein" ?></td>
+                            <td class="comments_moderated"><?php echo $user->isUserMarkedToHaveHisCommentsBeAlwaysModerated() ? "Ja" : "Nein" ?></td>
+                            <? if ($env->user_characteristics_editable): ?>
+                                <td class="unanswered_ucquestions"><?= $user->getNumberOfUCQuestionsToBeAnswered() ?></td>
+                            <? endif ?>
+                            <td><a href="<?= tpl_url('user/' . $user->getName()) ?>">Link</a></td>
+                            <td><a href="<?= tpl_url('user/' . $user->getName() . '/preferences') ?>">Einstellungen</a></td>
+                        </tr>
+                    <?php endforeach ?>
+                </tbody>
+            </table>
+            Ausgewählte Benutzer  
+            <button class="btn" type="submit" name="activate">Aktivieren</button>
+            <button class="btn" type="submit" name="deactivate">Deaktivieren</button><br/>
+            <?php if (Auth::canSetUserMode()): ?>
+                Modus <?php tpl_usermode_combobox("mode") ?>
+                <button class="btn" type="submit" name="setmode">setzen</button><br/>
+                <button class="btn btn-danger" type="submit" name="delete">Benutzer löschen (Es werden dabei alle Beiträge der betreffenden Benutzer gelöscht!!!)</button><br/>
+            <?php endif ?>
+            <input type="password" name="password" style="width: 150px" placeholder="Neues Passwort"/>
+            <button class="btn" type="submit" name="setpassword">Passwort setzen</button>
+            (mit E-Mail Benachrichtigung der jeweiligen Benutzer)<br/>
+            <? if (Auth::canSetUserVisibility()): ?>
+                <input type="checkbox" checked="checked" name="visible" value="true" style="margin-right: 10px"/>Sichtbar?
+                <button class="btn" name="setvisible">Sichtbarkeit setzen</button><br/>
+            <? endif ?>
+            <input type="checkbox" checked="checked" name="is_marked" value="true" style="margin-right: 10px"/>Werden Kommentare moderiert?
+            <button class="btn" name="mark">Setzen</button>
+        </form>
+    </div>
     <?
     if ($as_page) {
         tpl_item_after();

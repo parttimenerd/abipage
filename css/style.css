@@ -193,12 +193,20 @@ input[type="color"],*/
 .item input:not([type="checkbox"]), textarea {
     width: 100%;
 }
-.item input, textarea {
+.item input, textarea, .log_container input {
     resize: none;
     box-shadow: none;
     border: none;
     background-color: whiteSmoke;
     transition: background-color linear 0.3s;
+}
+.log_container input {
+    width: calc(100% - 20px) !important;
+    margin-left: 10px;
+    background-color: white;
+}
+.log_container input:focus {
+    background-color: whiteSmoke;
 }
 .item input, .item label {
     font-size: 15px;

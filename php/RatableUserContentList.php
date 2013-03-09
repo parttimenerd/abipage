@@ -22,7 +22,7 @@ abstract class RatableUserContentList {
     protected $table = "";
     protected $type = "";
     protected $db = "";
-    private $count = -1;
+    private $item_count = -1;
     protected $where_app = "";
     protected $from_app = "";
     protected $items_per_page;
@@ -57,7 +57,7 @@ abstract class RatableUserContentList {
     }
 
     public function getCount() {
-        if ($this->count == -1) {
+        if ($this->item_count == -1) {
             $res = $this->db->query("SELECT count(t.id) AS count FROM " . $this->table . " t, " . DB_PREFIX . "user u " . $this->from_app . " WHERE u.id = userid AND u.activated=1 " . $this->where_app) or die($this->db->error);
             if ($res == null) {
                 $this->item_count = 0;
@@ -258,7 +258,7 @@ abstract class RatableUserContentList {
     }
 
     public function resetCount(){
-        $this->count = -1;
+        $this->item_count = -1;
         $this->getCount();
     }
     

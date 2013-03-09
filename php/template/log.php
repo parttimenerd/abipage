@@ -38,94 +38,121 @@ function tpl_log_hbs_template() {
         <button type="button" class="btn" style="width: 100%" data-toggle="collapse" data-parent="#log_container" href="#{{id}}">
             Log {{now "%T,%L"}} [Database: {{s_to_ms data.db_queries.time}}ms; Overall: {{s_to_ms data.time}}ms; Logs: {{length data.logs}}; Queries: {{length data.db_queries.queries}}]
         </button>
-        <div id="{{id}}" class="accordion-body collapse" data-parent="#log_container">
+        <div id="{{id}}" class="log_container accordion-body collapse" data-parent="#log_container">
             {{#with data}}
             <h3>Zeiten</h3>
-            <table class="table table-striped time-log">
-                <tr>
-                    <th>Message</th>
-                    <th>Time in ms</th>
-                </tr>
-                {{#each time_logs}}
-                <tr>
-                    <td>{{msg}}</td>
-                    <td class="time">{{s_to_ms duration}}</td>
-                </tr>
-                {{/each}}
-                <tr>
-                    <td>Overall</td>
-                    <td class="time">{{s_to_ms time}}</td>
-                </tr>
-            </table>
+            <div id="time_log_{{../id}}">
+                <table class="table table-striped time-log">
+                    <thead>
+                        <tr>
+                            <th class="sort" data-sort="tl_message">Message</th>
+                            <th class="sort" data-sort="tl_time">Time in ms</th>
+                        </tr>
+                    </thead>
+                    <tbody class="list">
+                        {{#each time_logs}}
+                        <tr>
+                            <td class="tl_message">{{msg}}</td>
+                            <td class="time tl_time">{{s_to_ms duration}}</td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                    <tr>
+                        <td>Overall</td>
+                        <td class="time">{{s_to_ms time}}</td>
+                    </tr>
+                </table>
+            </div>
             {{#any logs}}
             <h3>Logmeldungen</h3>
-            <table class="table tablesorter table-striped log">
-                <thead>
-                    <tr>
-                        <th>Time in ms</th>
-                        <th>Message</th>
-                        <th>Call</th>
-                        <th>File</th>
-                        <th>Line</th>
-                        <th>Call call</th>
-                        <th>Line</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {{#each logs}}
-                    <tr class=".{{parent_type}}">
-                        <td class="time">{{s_to_ms time}}</td>
-                        <td>{{type_str}}</td>
-                        <td>{{msg}}</td>
-                        {{#withFirst backtrace}}
-                        <td class="hidden-phone">{{class}}{{type}}{{function}}({{join args ", "}})</td>
-                        <td class="hidden-phone">{{file}}</td>
-                        <td class="hidden-phone">{{line}}</td>
-                        {{/withFirst}}
-                        {{#with backtrace.[1]}}
-                        <td class="visible-desktop">{{class}}{{type}}{{function}}({{join args ", "}})</td>
-                        <td class="visible-desktop">{{line}}</td>
-                        {{/with}}
-                    </tr>
-                    {{/each}}
-                </tbody>
-            </table>
+            <div id="log_messages_table_{{../../id}}">
+                <input class="search" placeholder="Suche" onkeyup="log_messages_table_{{../../id}}.fuzzySearch($(this).val())" autocomplete="off"/>
+                <table class="table table-striped log">
+                    <thead>
+                        <tr>
+                            <th class="sort" data-sort="lmt_time">Time in ms</th>
+                            <th class="sort" data-sort="lmt_type">Typ</th>
+                            <th class="sort" data-sort="lmt_message">Message</th>
+                            <th class="hidden-phone sort" data-sort="lmt_caller">Call</th>
+                            <th class="hidden-phone sort" data-sort="lmt_caller_file">File</th>
+                            <th class="hidden-phone sort" data-sort="lmt_caller_file lmt_caller_line">Line</th>
+                            <th class="visible-desktop sort" data-sort="lmt_caller_caller">Call call</th>
+                            <th class="visible-desktop sort" data-sort="lmt_caller_caller_file">File</th>
+                            <th class="visible-desktop sort" data-sort="lmt_caller_caller_file lmt_caller_caller_line">Line</th>
+                        </tr>
+                    </thead>
+                    <tbody class="list">
+                        {{#each logs}}
+                        <tr class=".{{parent_type}}">
+                            <td class="time lmt_time">{{s_to_ms time}}</td>
+                            <td class="lmt_type">{{type_str}}</td>
+                            <td class="lmt_message">{{msg}}</td>
+                            {{#any backtrace}}
+                                {{#withFirst backtrace}}
+                                <td class="hidden-phone lmt_caller">{{class}}{{type}}{{function}}({{join args ", "}})</td>
+                                <td class="hidden-phone lmt_caller_file">{{file}}</td>
+                                <td class="hidden-phone lmt_caller_line">{{line}}</td>
+                                {{/withFirst}}
+                                {{#with backtrace.[1]}}
+                                <td class="visible-desktop lmt_caller_caller">{{class}}{{type}}{{function}}({{join args ", "}})</td>
+                                <td class="visible-desktop lmt_caller_caller_file">{{file}}</td>
+                                <td class="visible-desktop lmt_caller_caller_line">{{line}}</td>
+                                {{/with}}
+                            {{/any}}
+                            {{#empty backtrace}}
+                                <td class="hidden-phone lmt_caller"></td>
+                                <td class="hidden-phone lmt_caller_file"></td>
+                                <td class="hidden-phone lmt_caller_line"></td>
+                                <td class="visible-desktop lmt_caller_caller"></td>
+                                <td class="visible-desktop lmt_caller_caller_file"></td>
+                                <td class="visible-desktop lmt_caller_caller_line"></td>
+                            {{/empty}}
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
             {{/any}}
             <h3>Datenbankabfragen</h3>
-            <table class="table tablesorter table-striped db-log">
-                <thead>
+            <div id="database_query_table_{{../id}}">
+                <input class="search" placeholder="Suche" onkeyup="database_query_table_{{../id}}.fuzzySearch($(this).val())" autocomplete="off"/>
+                <table class="table table-striped db-log">
+                    <thead>
+                        <tr>
+                            <th class="sort" data-sort="dbt_num"></th>
+                            <th class="sort" data-sort="dbt_query_text">Query</th>
+                            <th class="sort" data-sort="dbt_time">Time in ms</th>
+                            <th class="sort" data-sort="dbt_time">%</th>
+                            <td class="hidden-phone sort" data-sort="dbt_caller">Caller</td>
+                            <td class="visible-desktop" data-sort="dbt_caller_caller">Caller caller</td>
+                        </tr>
+                    </thead>
+                    <tbody class="list">
+                     {{#each db_queries.queries}}
+                        <tr>
+                            <td class="dbt_num">{{num}}}</td>
+                            <td class="dbt_query_text">{{query}}</td>
+                            <td class="time dbt_time">{{s_to_ms time}}</td>
+                            <td class="dbt_time">{{perc}}</td>
+                            {{#withFirst backtrace}}
+                            <td class="hidden-phone dbt_caller">{{class}}{{type}}{{function}}({{join args ", "}})</td>
+                            {{/withFirst}}
+                            {{#with backtrace.[1]}}
+                            <td class="visible-desktop dbt_caller_caller">{{class}}{{type}}{{function}}({{join args ", "}})</td>
+                            {{/with}}
+                        </tr>
+                      {{/each}}
+                    </tbody>
                     <tr>
-                        <th></th>
-                        <th>Query</th>
-                        <th>Time in ms</th>
-                        <th>%</th>
-                        <td class="hidden-phone">Caller</td>
-                        <td class="visible-desktop">Caller caller</td>
+                        <td></td>
+                        <td>Overall</td>
+                        <td class="time">{{s_to_ms db_queries.time}}</td>
+                        <td></td>
+                        <td class="hidden-phone"></td>
+                        <td class="visible-desktop"></td>
                     </tr>
-                </thead>
-                {{#each db_queries.queries}}
-                <tbody>
-                    <tr>
-                        <td>{{num}}}</td>
-                        <td>{{query}}</td>
-                        <td class="time">{{s_to_ms time}}</td>
-                        <td>{{perc}}</td>
-                        {{#withFirst backtrace}}
-                        <td class="hidden-phone">{{class}}{{type}}{{function}}({{join args ", "}})</td>
-                        {{/withFirst}}
-                        {{#with backtrace.[1]}}
-                        <td class="visible-desktop">{{class}}{{type}}{{function}}({{join args ", "}})</td>
-                        {{/with}}
-                    </tr>
-                </tbody>
-                {{/each}}
-                <tr>
-                    <td></td>
-                    <td>Overall</td>
-                    <td class="time">{{s_to_ms db_queries.time}}</td>
-                    <td></td>
-                </tr>
-            </table>
+                </table>
+            </div>
             {{/with}}
         </div>
     </script>

@@ -57,43 +57,47 @@ function tpl_admin(UserArray $userarr, $comments) {
     if (!empty($comments)) {
         tpl_item_before("Nicht freigeschaltete Kommentare", "", "management");
         ?>
-        <form method="post" class="tablesorter">
-            <input type="hidden" name="access_key" value="<?= Auth::getAccessKey() ?>"/>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Auswählen</th>
-                        <th>ID</th>
-                        <th>Text</th>
-                        <th>Kommentierter Benutzer</th>
-                        <th>Kommentierer</th>
-                        <th>Datum</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    foreach ($comments as $comment):
-                        $same = Auth::isSameUser($comment["commenting_userid"]);
-                        ?>
+        <div id="not_reviewed_comments_table">
+            <input class="search" placeholder="Suche" onkeyup="not_reviewed_comments_table_list.fuzzySearch($(this).val())" autocomplete="off"/>
+            <form method="post">
+                <input type="hidden" name="access_key" value="<?= Auth::getAccessKey() ?>"/>
+                <table>
+                    <thead>
                         <tr>
-                            <td>
-                                <? if (!$same): ?>
-                                    <input type="checkbox" value="true" name="<?php echo $comment["id"] ?>" checked="checked"/>
-                                <? endif; ?>
-                            </td>
-                            <td><?php echo $comment["id"] ?></td>
-                            <td><?php echo $comment["text"] ?></td>
-                            <td><?php tpl_userlink($comment["commented_userid"]) ?></td>
-                            <td><?php tpl_userlink($comment["commenting_userid"]) ?></td>
-                            <td><?php tpl_time_span($comment["time"]) ?></td>
+                            <th title="Auswählen"></th>
+                            <th class="sort" data-sort="comment_id">ID</th>
+                            <th class="sort" data-sort="comment_text">Text</th>
+                            <th class="sort" data-sort="commented_user">Kommentierter Benutzer</th>
+                            <th class="sort" data-sort="commenting_user">Kommentierer</th>
+                            <th class="sort" data-sort="comment_date">Datum</th>
                         </tr>
-                    <?php endforeach ?>
-                </tbody>
-            </table>
-            Ausgewählte Kommentare 
-            <button class="btn" type="submit" name="review">Freischalten</button>
-            <button class="btn" type="submit" name="delete">Löschen</button>
-        </form>
+                    </thead>
+                    <tbody class="list">
+                        <?php
+                        foreach ($comments as $comment):
+                            $same = Auth::isSameUser($comment["commenting_userid"]);
+                            ?>
+                            <tr>
+                                <td>
+                                    <? if (!$same): ?>
+                                        <input type="checkbox" value="true" name="<?php echo $comment["id"] ?>" checked="checked"/>
+                                    <? endif; ?>
+                                </td>
+                                <td class="comment_id"><?php echo $comment["id"] ?></td>
+                                <td class="comment_text"><?php echo $comment["text"] ?></td>
+                                <td class="commented_user"><?php tpl_userlink($comment["commented_userid"]) ?></td>
+                                <td class="commenting_user"><?php tpl_userlink($comment["commenting_userid"]) ?></td>
+                                <td><?php tpl_time_span($comment["time"]) ?></td>
+                                <td class="comment_date" style="display: none"><?= $comment["time"] ?></td>
+                            </tr>
+                        <?php endforeach ?>
+                    </tbody>
+                </table>
+                Ausgewählte Kommentare 
+                <button class="btn" type="submit" name="review">Freischalten</button>
+                <button class="btn" type="submit" name="delete">Löschen</button>
+            </form>
+        </div>
         <?php
         tpl_item_after();
     }

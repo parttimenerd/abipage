@@ -114,7 +114,7 @@ function tpl_time_span($time, $with_icon = true, $class = "time") {
     ?>
     <span class="<?php echo $class ?>">
         <?php if ($with_icon) tpl_icon("clock") ?> <?= date("d.m.y", $time) ?> 
-        <span class="hour-minutes hidden-phone"><?= date("H:i") ?></span>
+        <span class="hour-minutes hidden-phone"><?= date("H:i", $time) ?></span>
     </span>
     <?php
 }

@@ -597,6 +597,18 @@ function update(ext_data) {
 
 var weird_counter = 23426;
 
+Handlebars.registerHelper("debug", function(optionalValue) {
+    console.log("Current Context");
+    console.log("====================");
+    console.log(this);
+
+    if (optionalValue) {
+        console.log("Value");
+        console.log("====================");
+        console.log(optionalValue);
+    }
+});
+
 function add_log_object(object) {
     weird_counter++;
     if (window.log_table_template_hbs === undefined)
@@ -605,7 +617,15 @@ function add_log_object(object) {
         id: weird_counter,
         data: object
     }));
-    $("#" + weird_counter + " .tablesorter").tablesorter();
+    var options = {valueNames: ["dbt_num", "dbt_query_text", "dbt_time", "dbt_caller",
+            "dbt_caller_caller"], plugins: [['fuzzySearch']]};
+    window["database_query_table_" + weird_counter] = new List("database_query_table_" + weird_counter, options);
+    options = {valueNames: ["lmt_time", "lmt_time", "lmt_time", "lmt_message",
+            "lmt_caller_file", "lmt_caller_line", "lmt_caller_caller", "lmt_caller_caller_file",
+            "lmt_caller_caller_line", "lmt_type"], plugins: [['fuzzySearch']]};
+    window["log_messages_table_" + weird_counter] = new List("log_messages_table_" + weird_counter, options);
+    options = {valueNames: ["tl_message", "tl_time"], plugins: [['fuzzySearch']]};
+    window["time_log_" + weird_counter] = new List("time_log_" + weird_counter, options);
 }
 
 var time_precision = 3;
@@ -649,5 +669,30 @@ function testPasswordInput(idOfInput, idOfResult, idOfSubmit) {
 setTimeout(function() {
     $(function() {
         $('#poll_tabs a:first').tab('show');
-    })
+    });
 }, 300);
+
+var user_list;
+$("body").ready(function() {
+    $("#user_table").ready(function() {
+        var options = {valueNames: ["id", "first_name", "last_name", "math_course",
+                "math_teacher", "user_mode", "activated", "visible", "comments_moderated",
+                "unanswered_ucquestions", "mail_adress", "is_selected"], plugins: [['fuzzySearch']]};
+        window.user_table_list = new List("user_table", options);
+    });
+    $("#not_reviewed_comments_table").ready(function() {
+        var options = {valueNames: ["comment_id", "comment_text", "commented_user", "commenting_user", "comment_date"],
+            plugins: [['fuzzySearch']]};
+        window.not_reviewed_comments_table_list = new List("not_reviewed_comments_table", options);
+    });
+    $("#quote_stats_table").ready(function() {
+        var options = {valueNames: ["qst_gender", "qst_name", "qst_number", "qst_rating"],
+            plugins: [['fuzzySearch']]};
+        window.quote_stats_table_list = new List("quote_stats_table", options);
+    });
+    $("#rumor_stats_table").ready(function() {
+        var options = {valueNames: ["rst_gender", "rst_name", "rst_number", "rst_rating"],
+            plugins: [['fuzzySearch']]};
+        window.rumor_stats_table_list = new List("rumor_stats_table", options);
+    });
+});

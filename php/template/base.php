@@ -68,7 +68,7 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
         $menus = array(
             "images" => array("Bilder", $env->images_subtitle),
             "quotes" => array("Zitate", $env->quotes_subtitle),
-            "rumors" => array("Stimmt es...", $env->rumors_subtitle),
+            "rumors" => array("Stimmt es&mldr;", $env->rumors_subtitle),
             "user/all" => array("Schüler", $env->userall_subtitle)
         );
         if ($env->news_enabled) {
@@ -342,6 +342,7 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
         <script src="<?php echo tpl_url("js/plugins.js") ?>"></script>
         <script src="<?php echo tpl_url("js/application.js") ?>"></script>
         <!--<script src="<?php echo tpl_url("js/libs/modernizr-2.5.3.js") ?>"></script>-->
+        <script src="<?php echo tpl_url("js/libs/list.js") ?>"></script>
         <script src="<?php echo tpl_url("js/script.js?100223") ?>"></script>
     <? else: ?>
         <? if ($editor_needed): ?>
@@ -350,14 +351,10 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
         <script src="<?php echo tpl_url("js/min/scripts.min.js?4242424223") ?>"></script>
     <? endif ?>
     <script>
-        $(".tablesorter").ready(function() {
-            $(".tablesorter").tablesorter();
-        });
         $("body").ready(function() {
     <? if (Auth::canViewLogs()): ?>
                 add_log_object(<?= json_encode(logArray()) ?>);
     <? endif ?>
-            $(".tablesorter").tablesorter();
     <?php echo $js ?>
         });
         max_file_size = <?= $env->max_upload_pic_size * 1048576 ?>;
