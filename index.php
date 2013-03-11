@@ -20,7 +20,7 @@
 define('DEBUG', isset($_REQUEST["debug"]));
 //define('DEBUG', true);
 define("UNMINIFIED_SOURCE", true);
-define('SHOW_LOGS_TO_ADMIN', false);
+//define('SHOW_LOGS_TO_ADMIN', false);
 define("BASE_DIR", __DIR__);
 define("BEGIN_TIME", microtime(true));
 

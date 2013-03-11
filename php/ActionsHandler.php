@@ -42,4 +42,8 @@ class ActionsHandler extends ToroHandler {
         }
     }
 
+    public static function _get($slug = ""){
+        $handler = new ActionsHandler();
+        $handler->get($slug);
+    }
 }

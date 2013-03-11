@@ -68,7 +68,10 @@ class ToroApplication {
         $discovered_handler = NULL;
         $regex_matches = array();
         $method_arguments = NULL;
-
+        $url_arr = parse_url(URL);
+        if (strstr($path_info, $url_arr["path"]) != false) {
+            $path_info = str_replace($url_arr["path"] . '/index.php', '', $path_info);
+        }
         foreach ($this->_handler_route_pairs as $handler) {
             list($pattern, $handler_name) = $handler;
 

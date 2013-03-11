@@ -61,7 +61,7 @@ function tpl_stats_page($teacher_with_quote_rating_and_count, $teacher_with_rumo
             </tbody>
         </table>
     </div>
-    <h2>Stimmt es&mldr;-Beiträge mit Lehrername im Text</h2>
+    <h2>Stimmt es...-Beiträge mit Lehrername im Text</h2>
     <div id="rumor_stats_table">
         <input placeholder="Suche" onkeyup="rumor_stats_table_list.fuzzySearch($(this).val())" autocomplete="off"/>
         <table class="table table-striped stats teacher_table">

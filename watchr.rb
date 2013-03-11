@@ -14,14 +14,16 @@ script.watch('less/.*\.less$') do |f|
   runCommand("cssmin css/project.css --compress > css/project.min.css");
   puts " done in #{((Time.now - time) * 1000).round}ms...";
 end
-script.watch('js/(lib/)?[a-z.0-9]+\.js') do |f|
-  begin
-    minimizeJSFile f[0]
-    print " concenate... "
-    concentateJSFiles()
-    puts ' done...'
-  rescue Exception => ex
-      puts ex.to_s.red
+script.watch('js/.*\.js$') do |f|
+  if not f[0] =~ /min[.]js/
+	  begin
+	    minimizeJSFile f[0]
+	    print " concenate... "
+	    concentateJSFiles()
+	    puts ' done...'
+	  rescue Exception => ex
+	      puts ex.to_s.red
+	  end
   end
 end
 script.watch('coffee/(lib/)?[a-z0-9.]+\.coffee') do |f|
@@ -62,25 +64,29 @@ def concentateJSFiles
     not_concenate = ["js/libs/jquery-1.7.2.js", "js/libs/modernizr-2.5.3.min.js"]
     not_concenate_min = not_concenate.map {|x| "js/min/" + File.basename(x).gsub(".js", ".min.js")}
     files = Dir.glob("js/min/*.js") + Dir.glob("js/min/lib/*.js") - ["js/min/scripts.min.js"] - not_concenate_min
-    File.open( "js/min/scripts.min.js", "w" ) do |f_out|
+    files = ['handlebars-1.0.0.beta.6.min.js', 'bootstrap.min.js', 'plugins.min.js', 'application.min.js', 'modernizr-2.5.3.min.js', 'list.min.js', 'script.min.js']
+    File.open(File.dirname(__FILE__) + "/js/min/scripts.min.js", "w" ) do |f_out|
         files.each do |f_name|
-            f_out.puts("\n//@ sourceMappingURL=#{f_name}.map")
-            File.open(f_name) do |f_in|
-                f_in.each {|f_str| f_out.puts(f_str) }
-            end
+            if File.exists?('js/min/' + f_name)
+		    File.open('js/min/' + f_name) do |f_in|
+			f_in.each {|f_str| f_out.puts(f_str) }
+		    end
+	     end
         end
-    end
+end
+=begin
     bool = false
     (Dir.glob("js/libs/*.js") + Dir.glob("js/*.js") - not_concenate).each do |f|
-        basename = File.basename(f)
+	basename = File.basename(f)
 	name_app = f =~ /(lib\/)/ ? "lib/" : ""
 	if !files.include? 'js/min/' + name_app + File.basename(f).gsub(".js", ".min.js")
-             minimizeJSFile f
-	     puts
-	     bool = true
+		minimizeJSFile f, true
+		puts
+		bool = true
 	end
     end
     concentateJSFiles() if bool
+=end
 end
 concentateJSFiles()
 handler = Watchr.handler.new;

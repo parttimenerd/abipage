@@ -68,7 +68,7 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
         $menus = array(
             "images" => array("Bilder", $env->images_subtitle),
             "quotes" => array("Zitate", $env->quotes_subtitle),
-            "rumors" => array("Stimmt es&mldr;", $env->rumors_subtitle),
+            "rumors" => array("Stimmt es...", $env->rumors_subtitle),
             "user/all" => array("Schüler", $env->userall_subtitle)
         );
         if ($env->news_enabled) {
@@ -171,7 +171,7 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
         <head>
             <meta charset="utf-8"/>
             <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-
+            <link type="text/plain" rel="author" href="<?= tpl_url("humans.txt")?>" />
             <title><?php echo ($title != null ? ($title . $env->title_sep . $env->title) : '') ?></title>
             <!--<meta name="author" content="Johannes Bechberger"/>-->
             <meta name="viewport" content="width=device-width"/>
@@ -186,8 +186,8 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
                 <link href="<?php echo tpl_url("css/project.min.css") ?>" rel="stylesheet"/>   
             <? endif; ?>
             <link href="<?php echo tpl_url("css/style.css?42") ?>" rel="stylesheet"/>
-            <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
-            <script>window.jQuery || document.write('<script src="<?php echo tpl_url("js/lib/jquery-1.7.2.js") ?>"><\/script>')</script>
+            <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+            <script>window.jQuery || document.write('<script src="<?php echo tpl_url("js/min/jquery.min.js") ?>"><\/script>')</script>
             <script src="<?php echo tpl_url("js/passwordmeter2.js") ?>"></script>
             <link rel = "shortcut icon" href = "<?php echo tpl_url($env->favicon) ?>"/>
             <!--Le HTML5 shim, for IE6-8 support of HTML5 elements-->
@@ -317,7 +317,7 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
     </div>
     <!--</div> /container -->
     <? if (Auth::canViewLogs()) tpl_log_container() ?>
-    
+
     <div id="side_bar_helper_div"/>
     <div id="more_helper_div"/>
     <!-- Le javascript

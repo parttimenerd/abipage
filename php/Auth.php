@@ -146,11 +146,11 @@ class Auth {
         }
         return self::$user;
     }
-    
-    public static function getAccessKey(){
+
+    public static function getAccessKey() {
         return self::getUser() != null ? self::$user->getAccessKey() : '';
     }
-    
+
     public static function hasAccess() {
         return self::getUser() ? self::getUser()->compareAccessKey(isset($_REQUEST["access_key"]) ? $_REQUEST["access_key"] : "") : false;
     }
@@ -179,7 +179,7 @@ class Auth {
         return self::getUser() != null ? (self::$user->getMode() == User::ADMIN_MODE) : false;
     }
 
-    public static function isFirstAdmin(){
+    public static function isFirstAdmin() {
         return self::getUserID() == 1;
     }
 
@@ -194,10 +194,10 @@ class Auth {
         return $user != null && (Auth::isSameUser($user) || Auth::isAdmin() || (Auth::getUserMode() > $user->getMode() && Auth::getUserMode() < User::EDITOR_MODE));
     }
 
-    public static function isLoggedIn(){
+    public static function isLoggedIn() {
         return self::getUser() != null;
     }
-    
+
     public static function isNotActivated() {
         return self::$user_not_activated;
     }
@@ -209,7 +209,7 @@ class Auth {
 
     public static function canViewLogs() {
         global $env;
-        return ($env->show_logs || defined(SHOW_LOGS_TO_ADMIN)) && Auth::isAdmin();
+        return ($env->show_logs || (defined("SHOW_LOGS_TO_ADMIN") && SHOW_LOGS_TO_ADMIN) ) && Auth::isAdmin();
     }
 
     public static function canWriteNews() {
@@ -263,16 +263,17 @@ class Auth {
     public static function canSeeDebugOutput() {
         return Auth::isAdmin();
     }
-    
-    public static function canSetUserVisibility(){
+
+    public static function canSetUserVisibility() {
         return Auth::isAdmin();
     }
-    
-    public static function canEditUserPolls(){
+
+    public static function canEditUserPolls() {
         return Auth::isEditor();
     }
-    
-    public static function canViewDashboard(){
+
+    public static function canViewDashboard() {
         return Auth::isModerator();
     }
+
 }
