@@ -74,7 +74,7 @@ function loadItems() {
     if (this.lock === undefined || this.lock === false) {
         this.lock = true;
         $this = this;
-        if (window._page <= max_page) {
+        if (window._page < max_page) {
             /*if (chocolat_options != {}){
              last_item = $(".imagelist .item").last();
              } else {
