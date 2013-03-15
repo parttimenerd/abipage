@@ -171,7 +171,7 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
         <head>
             <meta charset="utf-8"/>
             <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-            <link type="text/plain" rel="author" href="<?= tpl_url("humans.txt")?>" />
+            <link type="text/plain" rel="author" href="<?= tpl_url("humans.txt") ?>" />
             <title><?php echo ($title != null ? ($title . $env->title_sep . $env->title) : '') ?></title>
             <!--<meta name="author" content="Johannes Bechberger"/>-->
             <meta name="viewport" content="width=device-width"/>
@@ -186,21 +186,21 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
                 <link href="<?php echo tpl_url("css/project.min.css") ?>" rel="stylesheet"/>   
             <? endif; ?>
             <link href="<?php echo tpl_url("css/style.css?42") ?>" rel="stylesheet"/>
-            <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+            <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
             <script>window.jQuery || document.write('<script src="<?php echo tpl_url("js/min/jquery.min.js") ?>"><\/script>')</script>
             <script src="<?php echo tpl_url("js/passwordmeter2.js") ?>"></script>
             <link rel = "shortcut icon" href = "<?php echo tpl_url($env->favicon) ?>"/>
             <!--Le HTML5 shim, for IE6-8 support of HTML5 elements-->
             <!--[if lt IE 9]>
-            <script src = "http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+            <script src = "https://html5shim.googlecode.com/svn/trunk/html5.js"></script>
         <![endif]-->
-            <link href='http://fonts.googleapis.com/css?family=PT+Sans|Josefin+Sans:400,700,italic,300|Just+Me+Again+Down+Here' rel='stylesheet' type='text/css'/>
+            <link href='https://fonts.googleapis.com/css?family=PT+Sans|Josefin+Sans:400,700|Just+Me+Again+Down+Here' rel='stylesheet' type='text/css'/>
             <!--
                 Thanks for looking behind the surface of the code.
                 Please visit the github repo of the CMS behind the website (https://github.com/parttimenerd/abipage) to find out more about the internals and help developing this program.
                 The whole code is licensed under the GNU GPL, so you're able to use parts of it.
             
-                The CMS is developed by some (currently one) nerds, please take a look at the humans.txt to find out more about them.
+                The CMS is developed by some (currently one and two helping) nerds, please take a look at the humans.txt to find out more about them.
             -->
         </head>
 
@@ -219,7 +219,7 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
                             foreach ($menus as $key => $value):
                                 if (!isset($value["dropdown"])):
                                     ?>
-                                    <li class="<?php $key == $class ? "active" : "" ?>">
+                                    <li class="<?= $key == $class ? "active" : "" ?>">
                                         <a href="<?php echo tpl_url($key) ?>"><?php echo $value[0] ?></a>
                                     </li>
                                     <?php
@@ -227,7 +227,7 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
                                     $dropdown = $value["dropdown"];
                                     $head = $value["head"];
                                     ?>
-                                    <li class="<?php echo (array_key_exists($class, $dropdown) || $key == $class) ? 'active' : '' ?> dropdown">
+                                    <li class="<?= (array_key_exists($class, $dropdown) || $key == $class) ? 'active' : '' ?> dropdown">
                                         <a class="dropdown-toggle" data-toggle="dropdown" data-target="#" href="<?php echo tpl_url($key) ?>">
                                             <?php echo $head[0] ?>
                                             <b class="caret"></b>
@@ -257,7 +257,7 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
             tpl_enable_javascript();
 //            tpl_html5_please()
             ?>
-            <!--[if lt IE 10]><p class=chromeframe>Your browser is <em>ancient!</em> <a href="http://browsehappy.com/">Upgrade to a different browser</a>.</p><![endif]-->
+            <!--[if lt IE 10]><p class=chromeframe>Your browser is <em>ancient!</em> <a href="https://browsehappy.com/">Upgrade to a different browser</a>.</p><![endif]-->
             <header class="jumbotron subhead" id="overview">
                 <h1><? if ($header_icon != "") tpl_icon($header_icon, "", "", "header-icon") ?><?php echo $title ?></h1>
                 <p class="lead">
@@ -302,8 +302,8 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
     <footer class="footer">
         <p>Powered by <a href="https://github.com/parttimenerd/abipage/">abipage</a>.
             Designed and built by <a href="https://uqudy.serpens.uberspace.de">Johannes Bechberger</a>
-            with <a href="http://twitter.github.com/bootstrap/">Twitter Bootstrap</a>
-            and <a href="<?= tpl_url("img/icons/icon_credits.txt") ?>">Icons</a> from the <a href="http://thenounproject.com">Noun Project</a>.
+            with <a href="https://twitter.github.com/bootstrap/">Twitter Bootstrap</a>
+            and <a href="<?= tpl_url("img/icons/icon_credits.txt") ?>">Icons</a> from the <a href="https://thenounproject.com">Noun Project</a>.
             <a href="<?php echo tpl_url("humans.txt") ?>">humans.txt</a>
         <p><a href="<?= tpl_url("impress") ?>">Impressum</a>. 
             <a href="<?= tpl_url("terms_of_use") ?>">Nutzungsbedingungen</a>. 
@@ -657,7 +657,7 @@ function tpl_html5_please() {
                         Modernizr.html5please.cb = opts.nope;
                         var script = document.createElement('script');
                         var ref = document.getElementsByTagName('script')[0];
-                        var url = 'http://api.html5please.com/' + features.join('+') + '.json?callback=Modernizr.html5please.cb' + (opts.options ? ('&' + opts.options) : '') + '&html';
+                        var url = 'https://api.html5please.com/' + features.join('+') + '.json?callback=Modernizr.html5please.cb' + (opts.options ? ('&' + opts.options) : '') + '&html';
                         script.src = url;
                         ref.parentNode.insertBefore(script, ref);
                         return false;
@@ -679,7 +679,7 @@ function tpl_enable_javascript() {
     <div class="alert alert-error">
         Um den vollen Funktionsumfang dieser Webseite zu erfahren, benötigen Sie JavaScript.
         Eine Anleitung wie Sie JavaScript in Ihrem Browser einschalten, befindet sich 
-        <a href="http://www.enable-javascript.com/de/" target="_blank">hier</a>.
+        <a href="https://www.enable-javascript.com/de/" target="_blank">hier</a>.
     </div>
     </noscript>
     <?

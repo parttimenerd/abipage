@@ -112,7 +112,7 @@ class User {
         } else {
             $str = "CONCAT(first_name, ' ', last_name) AS 'name' ";
         }
-        $res = $db->query("SELECT $str FROM " . DB_PREFIX . "user WHERE first_name LIKE '%" . $namearr[0] . "%' OR last_name LIKE '%" . $namearr[1] . "%' OR first_name LIKE '%" . $namearr[1] . "%' OR last_name LIKE '%" . $namearr[0] . "%' " . (!$also_unvisible ? " AND visible=1 " : "") . "ORDER BY last_name, first_name ASC");
+        $res = $db->query("SELECT $str FROM " . DB_PREFIX . "user WHERE (first_name LIKE '%" . $namearr[0] . "%' OR last_name LIKE '%" . $namearr[1] . "%' OR first_name LIKE '%" . $namearr[1] . "%' OR last_name LIKE '%" . $namearr[0] . "%') " . (!$also_unvisible ? " AND visible=1 " : "") . "ORDER BY last_name, first_name ASC");
         $arr = mysqliResultToArr($res);
         if ($as_namearray) {
             $retarr = $arr;
