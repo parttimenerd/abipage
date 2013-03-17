@@ -227,9 +227,10 @@ Hallo ' . encodeUmlauts($toName . ',<br/><br/>').'
 </body>							
 </html>';
         $topic = "=?utf-8?b?".base64_encode($topic)."?=";
+        $title = "=?utf-8?b?".base64_encode(TITLE)."?=";
         if (is_a($to, "User"))
             $to = $to->getMailAdress();
-        mail($to, $topic, $text, "From: " . TITLE . "<" . ($this->system_mail_adress != "" ? $this->system_mail_adress : ("info@" . $_SERVER['HTTP_HOST'])) . ">\r\n"
+        mail($to, $topic, $text, "From: " . $title . "<" . ($this->system_mail_adress != "" ? $this->system_mail_adress : ("info@" . $_SERVER['HTTP_HOST'])) . ">\r\n"
                 . "X-Mailer: PHP/" . phpversion() . "\r\nMIME-Version: 1.0\r\nContent-Type: text/html; charset=utf8\r\n");
     }
 
