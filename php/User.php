@@ -327,7 +327,7 @@ class User {
 
     public function sendUserCommentedMail($commenting_user, $text) {
         $user_str = self::getStringRep($commenting_user, true);
-        $this->sendMail("Kommentar von " . $user_str, $user_str . " schrieb folgenden Kommentar: \n" . $text);
+        $this->sendMail("" . $user_str, $user_str . " schrieb folgenden Kommentar an ihre Benutzerseite: \n" . $text);
     }
 
     public static function getStringRep($user, $disallow_me = false) {
@@ -464,7 +464,7 @@ class User {
         global $env;
         if (!$this->activated) {
             if ($send_mail)
-                $env->sendMail($this, "Ihr Benutzerkonto wurde aktiviert", "Ihr Benutzerkonto wurde aktiviert, sie können nun auf die Seite zugreifen.\n\nIhr \"" . $env->title . "\"-Team");
+                $env->sendMail($this, "Ihr Benutzerkonto wurde aktiviert", "Ihr Benutzerkonto wurde aktiviert, Sie können nun auf die Seite zugreifen.");
             $this->activated = true;
             $this->updateDB();
         }
@@ -479,7 +479,7 @@ class User {
         global $env;
         $this->crypt_str = Auth::crypt($pwd);
         if ($mail_user) {
-            $env->sendMail($this->mail_adress, "Passwort verändert", "Benutzername: " . $this->name . "\nPasswort: " . $pwd);
+            $env->sendMail($this->mail_adress, "Ihr Passwort verändert", "Ihre neuen Anmeldedaten lautenen: \n Benutzername: " . $this->name . "\nPasswort: " . $pwd);
         }
         $this->updateDB();
     }
@@ -539,7 +539,7 @@ class User {
             $this->db->query("DELETE FROM " . DB_PREFIX . $table . " WHERE $field=$this->id");
         $this->mode = User::NO_MODE;
         if ($this->mode > User::NO_MODE)
-            $this->sendMail("Account wurde gelöscht", "Ihr Benutzeraccount wurde gelöscht\n\nIhr \"" . $env->title . "\"-Team");
+            $this->sendMail("Account wurde gelöscht", "Ihr Benutzeraccount wurde gelöscht.");
     }
 
     public function getAccessKey() {
