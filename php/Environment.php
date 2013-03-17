@@ -206,6 +206,7 @@ class Environment {
         $toName = is_a($to, "User") ? $to->getName() : User::getByEMailAdress($to)->getName();
         $text = '<html>
 <head>
+<meta charset="utf-8"/>
 <title>' . $this->title . ' | ' . TITLE . '</title>
 </head>
 <body style="margin: 0; font-family: Voltaire, Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 13px; line-height: 18px; color: #333333; background-color: #ffffff;">
@@ -219,12 +220,13 @@ class Environment {
 <div>
 <div style="width: auto; min-height: 20px; padding: 19px; margin-bottom: 20px; background-color: #f5f5f5; border: 1px solid #eee; border: 1px solid rgba(0, 0, 0, 0.05); -webkit-border-radius: 4px; -moz-border-radius: 4px; border-radius: 4px; -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05); -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05); box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);">
 <div>               
-Hallo ' . $toName . ',<br/><br/>
-' . $text . '
+Hallo ' . encodeUmlauts($toName . ',<br/><br/>').'
+' . encodeUmlauts($text) . '
 <br/><br/>Ihr ' . $this->title . '-Team
 </div></div></div></div></div>
 </body>							
 </html>';
+        $topic = "=?utf-8?b?".base64_encode($topic)."?=";
         if (is_a($to, "User"))
             $to = $to->getMailAdress();
         mail($to, $topic, $text, "From: " . TITLE . "<" . ($this->system_mail_adress != "" ? $this->system_mail_adress : ("info@" . $_SERVER['HTTP_HOST'])) . ">\r\n"
