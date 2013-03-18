@@ -220,14 +220,14 @@ class Environment {
 <div>
 <div style="width: auto; min-height: 20px; padding: 19px; margin-bottom: 20px; background-color: #f5f5f5; border: 1px solid #eee; border: 1px solid rgba(0, 0, 0, 0.05); -webkit-border-radius: 4px; -moz-border-radius: 4px; border-radius: 4px; -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05); -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05); box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);">
 <div>               
-Hallo ' . encodeUmlauts($toName . ',<br/><br/>').'
-' . encodeUmlauts($text) . '
+Hallo ' . $toName . ',<br/><br/>
+' . $text . '
 <br/><br/>Ihr ' . $this->title . '-Team
 </div></div></div></div></div>
 </body>							
 </html>';
-        $topic = "=?utf-8?b?".base64_encode($topic)."?=";
         $title = "=?utf-8?b?".base64_encode(TITLE)."?=";
+        $topic = "=?utf-8?b?".base64_encode($topic)."?=";
         if (is_a($to, "User"))
             $to = $to->getMailAdress();
         mail($to, $topic, $text, "From: " . $title . "<" . ($this->system_mail_adress != "" ? $this->system_mail_adress : ("info@" . $_SERVER['HTTP_HOST'])) . ">\r\n"
