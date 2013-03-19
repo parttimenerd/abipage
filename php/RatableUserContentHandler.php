@@ -52,6 +52,10 @@ class RatableUserContentHandler extends ToroHandler {
         }
         $phrase = isset($_GET["phrase"]) ? $_GET["phrase"] : "";
         $this->list->appendSearchAfterPhrase($phrase);
+        if (isset($_GET["id"]) && intval($_GET["id"]) > 0) {
+            $this->list->setMustIncludeId($_GET["id"]);
+            tpl_add_js("document.getElementById('" . intval($_GET["id"]) . "').scrollIntoView()");
+        }
         if (isset($_GET["page"]))
             $this->list->setStart($this->items_per_page * (intval($_GET["page"]) - 1));
 

@@ -38,6 +38,7 @@ abstract class RatableUserContentList {
         "time"
     );
     protected $start = 0;
+    protected $must_include_id = -1;
 
     /** $fromapp = ", table"; $where_app = "AND id=0" */
     public function __construct($table, $response_allowed = false, $has_anonymous_field = true, $order_by = "time", $order_direction = "desc", $from_app = "", $where_app = "") {
@@ -82,13 +83,52 @@ abstract class RatableUserContentList {
             $start = $this->start;
         $user = Auth::getUser();
         $arr = array();
+        $number_of_fetched_items = $this->items_per_page;
         if ($this->getCount() > 0) {
             if ($start > $this->getCount()) {
                 $start = ($this->getPageCount() * $this->items_per_page) - $this->items_per_page;
             }
             $ano_app = !Auth::canSeeNameWhenSentAnonymous() ? ', userid = 0' : '';
+
+            if ($this->must_include_id > -1) {
+                $new_number = -1;
+                if ($this->response_allowed) {
+                    $new_must_include_id = $this->must_include_id;
+                    $res = $this->db->query("SELECT response_to FROM " . $this->table . " WHERE response_to != -1 AND id = " . $this->must_include_id) or die($this->db->error);
+                    $arr2 = mysqliResultToArr($res, true);
+                    if (!empty($arr2)) {
+                        $new_must_include_id = $arr["response_to"];
+                    }
+                    $res = $this->db->query("SELECT id, @rownum := @rownum+1 AS 'row' FROM " . $this->table . " AS t, (SELECT @rownum:=0) r WHERE response_to = -1 "
+                            . $this->where_app . " ORDER BY " . $this->order_by . " " . $this->order_direction . " LIMIT " . $start . ", 1000") or die($this->db->error);
+                    $arr2 = mysqliResultToArr($res);
+                    foreach ($arr2 as $key => $value) {
+                        if ($value["id"] == $new_must_include_id) {
+                            $new_number = $value["row"];
+                            break;
+                        }
+                    }
+                } else {
+                    $res = $this->db->query("SELECT id, @rownum := @rownum+1 AS 'row' FROM " . $this->table . ", (SELECT @rownum:=0) r WHERE " . $this->where_app
+                            . " ORDER BY " . $this->order_by . " " . $this->order_direction . " LIMIT " . $start) or die($this->db->error);
+                    $arr2 = mysqliResultToArr($res);
+                    foreach ($arr2 as $key => $value) {
+                        if ($value["id"] == $this->must_include_id) {
+                            $new_number = $value["row"];
+                            break;
+                        }
+                    }
+                }
+                if ($new_number > 0) {
+                    $fac = ceil($new_number * 1.0 / $this->items_per_page);
+                    $number_of_fetched_items = $fac * $this->items_per_page;
+                }
+            }
+
             //$start = intval($start) - (intval($start) % $this->items_per_page);
-            $res = $this->db->query("SELECT " . $this->table . ".rating AS rating, " . $this->table . ".*" . $ano_app . ", (SELECT " . $this->table . "_ratings.rating FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id AND userid=" . $user->getID() . ") AS own_rating, (SELECT COUNT(*) FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id) AS rating_count FROM " . $this->table . ", " . DB_PREFIX . "user u " . $this->from_app . " WHERE u.id = userid AND u.activated = 1 " . ($this->response_allowed ? ("AND " . $this->table . ".response_to = -1") : "") . $this->where_app . " ORDER BY " . $this->order_by . " " . $this->order_direction . " LIMIT " . $start . ", " . $this->items_per_page) or die($this->db->error);
+            $res = $this->db->query("SELECT " . $this->table . ".rating AS rating, " . $this->table . ".*" . $ano_app . ", (SELECT " . $this->table . "_ratings.rating FROM "
+                    . $this->table . "_ratings WHERE itemid=" . $this->table . ".id AND userid=" . $user->getID() . ") AS own_rating, (SELECT COUNT(*) FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id) AS rating_count "
+                    . " FROM " . $this->table . ", " . DB_PREFIX . "user u " . $this->from_app . " WHERE u.id = userid AND u.activated = 1 " . ($this->response_allowed ? ("AND " . $this->table . ".response_to = -1") : "") . $this->where_app . " ORDER BY " . $this->order_by . " " . $this->order_direction . " LIMIT " . $start . ", " . intval($number_of_fetched_items)) or die($this->db->error);
             if ($res != null) {
                 while ($result = $res->fetch_array()) {
                     if (isset($result["response_to"]))
@@ -110,7 +150,7 @@ abstract class RatableUserContentList {
                 }
             }
         }
-        $retarr = array("items" => $arr, "start" => $start, "page" => ($start / $this->items_per_page) + 1);
+        $retarr = array("items" => $arr, "start" => ($start + $number_of_fetched_items) - $this->items_per_page, "page" => ($start / ($start + $number_of_fetched_items)) + 1, "focused_id" => $this->must_include_id);
         return $retarr;
     }
 
@@ -125,17 +165,24 @@ abstract class RatableUserContentList {
                 $result["type"] = $this->type;
                 $ruci = new RatableUserContentItem($result);
             }
-        }
-        if ($this->response_allowed && $ruci && $ruci->canHaveResponses()) {
-            $res = $this->db->query("SELECT " . $this->table . ".rating AS rating, " . $this->table . ".*, (SELECT " . $this->table . "_ratings.rating FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id AND userid=" . $user->getID() . ") AS own_rating, (SELECT COUNT(*) FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id) AS rating_count FROM " . $this->table . ", " . DB_PREFIX . "user u " . $this->from_app . " WHERE u.id = userid AND u.activated = 1 " . $this->where_app . " AND " . $this->table . ".response_to = " . $cid . " ORDER BY " . $this->table . ".time ASC") or die($this->db->error);
-            if ($res != null) {
-                while ($result = $res->fetch_array()) {
-                    $result["type"] = $this->type;
-                    $ruci->responses[] = new RatableUserContentItem($result);
+            if ($this->response_allowed && $ruci && $ruci->canHaveResponses()) {
+                $res = $this->db->query("SELECT " . $this->table . ".rating AS rating, " . $this->table . ".*, (SELECT " . $this->table . "_ratings.rating FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id AND userid=" . $user->getID() . ") AS own_rating, (SELECT COUNT(*) FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id) AS rating_count FROM " . $this->table . ", " . DB_PREFIX . "user u " . $this->from_app . " WHERE u.id = userid AND u.activated = 1 " . $this->where_app . " AND " . $this->table . ".response_to = " . $cid . " ORDER BY " . $this->table . ".time ASC") or die($this->db->error);
+                if ($res != null) {
+                    while ($result = $res->fetch_array()) {
+                        $result["type"] = $this->type;
+                        $ruci->responses[] = new RatableUserContentItem($result);
+                    }
                 }
             }
         }
         return $ruci;
+    }
+
+    public function doesItemExist($id) {
+        $cid = intval($id);
+        $user = Auth::getUser();
+        $res = $this->db->query("SELECT * FROM " . $this->table . " WHERE id=$cid") or die($this->db->error);
+        return $res != null && mysqli_num_rows($res) > 0;
     }
 
     public function updateRating($id) {
@@ -159,7 +206,7 @@ abstract class RatableUserContentList {
         $this->db->query("UPDATE " . $this->table . " SET rating=" . $avg . ", data='" . json_encode($data) . "' WHERE id=" . $cid) or die($this->db->error);
         return array($avg, $count, $data);
     }
-    
+
     public function rate($id, $rating, $user = null) {
         $user = Auth::getUser();
         $cid = intval($id);
@@ -257,9 +304,16 @@ abstract class RatableUserContentList {
         return $this;
     }
 
-    public function resetCount(){
+    public function resetCount() {
         $this->item_count = -1;
         $this->getCount();
     }
-    
+
+    public function setMustIncludeId($id) {
+        $cid = intval($id);
+        if ($cid > 0) {
+            $this->must_include_id = $cid;
+        }
+    }
+
 }

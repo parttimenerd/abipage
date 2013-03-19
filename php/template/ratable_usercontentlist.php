@@ -376,7 +376,8 @@ function tpl_item_delete_span(RatableUserContentItem $ruci) {
  * @param RatableUserContentItem $ruci item
  */
 function tpl_rating(RatableUserContentItem $ruci) {
-    $can_rate = !Auth::isSameUser($ruci->userid);
+    global $env;
+    $can_rate = !Auth::isSameUser($ruci->userid) && $env->ruc_items_ratable;
     ?>
     <span id="<?php echo $ruci->id ?>rating" class="rating">
         <?php if ($can_rate) { ?>

@@ -109,6 +109,7 @@ function tpl_action($action, $with_time = true, $before_html = '', $after_html =
         tpl_timediff_span(time() - $action["time"], $action["time"]);
         echo " ";
     }
+    $ruc_linkapp = "?id=" . $action["itemid"];
     switch ($action["type"]) {
         case "add_user_comment":
             echo "Kommentar bei ";
@@ -118,15 +119,15 @@ function tpl_action($action, $with_time = true, $before_html = '', $after_html =
             echo "Kommentar gelöscht";
             break;
         case "add_quote":
-            $url = tpl_url('quotes');
+            $url = tpl_url('quotes' . $ruc_linkapp);
             echo '<a href="' . $url . '">Zitat</a> von ' . $action["person"];
             break;
         case "add_rumor":
-            $url = tpl_url('rumors');
+            $url = tpl_url('rumors' . $ruc_linkapp);
             echo '<a href="' . $url . '">Stimmt es...</a> Beitrag geschrieben';
             break;
         case "upload_image":
-            $url = tpl_url('images');
+            $url = tpl_url('images' . $ruc_linkapp);
             echo '<a href="' . $url . '">Bild</a> hochgeladen';
             break;
         case "new_user":
