@@ -97,8 +97,9 @@ abstract class RatableUserContentList {
                     $res = $this->db->query("SELECT response_to FROM " . $this->table . " WHERE response_to != -1 AND id = " . $this->must_include_id) or die($this->db->error);
                     $arr2 = mysqliResultToArr($res, true);
                     if (!empty($arr2)) {
-                        $new_must_include_id = $arr["response_to"];
+                        $new_must_include_id = $arr2["response_to"];
                     }
+ 
                     $res = $this->db->query("SELECT id, @rownum := @rownum+1 AS 'row' FROM " . $this->table . " AS t, (SELECT @rownum:=0) r WHERE response_to = -1 "
                             . $this->where_app . " ORDER BY " . $this->order_by . " " . $this->order_direction . " LIMIT " . $start . ", 1000") or die($this->db->error);
                     $arr2 = mysqliResultToArr($res);
@@ -124,7 +125,6 @@ abstract class RatableUserContentList {
                     $number_of_fetched_items = $fac * $this->items_per_page;
                 }
             }
-
             //$start = intval($start) - (intval($start) % $this->items_per_page);
             $res = $this->db->query("SELECT " . $this->table . ".rating AS rating, " . $this->table . ".*" . $ano_app . ", (SELECT " . $this->table . "_ratings.rating FROM "
                     . $this->table . "_ratings WHERE itemid=" . $this->table . ".id AND userid=" . $user->getID() . ") AS own_rating, (SELECT COUNT(*) FROM " . $this->table . "_ratings WHERE itemid=" . $this->table . ".id) AS rating_count "
