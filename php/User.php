@@ -327,7 +327,7 @@ class User {
 
     public function sendUserCommentedMail($commenting_user, $text) {
         $user_str = self::getStringRep($commenting_user, true);
-        $this->sendMail("" . $user_str, $user_str . " schrieb folgenden Kommentar an ihre Benutzerseite: \n" . $text);
+        $this->sendMail("Kommentar von " . $user_str, $user_str . " schrieb folgenden Kommentar an ihre Benutzerseite: \n" . $text);
     }
 
     public static function getStringRep($user, $disallow_me = false) {
@@ -479,7 +479,7 @@ class User {
         global $env;
         $this->crypt_str = Auth::crypt($pwd);
         if ($mail_user) {
-            $env->sendMail($this->mail_adress, "Ihr Passwort verändert", "Ihre neuen Anmeldedaten lautenen: \n Benutzername: " . $this->name . "\nPasswort: " . $pwd);
+            $env->sendMail($this->mail_adress, "Ihr Passwort wurde geändert", "Ihre neuen Anmeldedaten lautenen: \n Benutzername: " . $this->name . "\nPasswort: " . $pwd);
         }
         $this->updateDB();
     }
