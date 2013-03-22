@@ -435,19 +435,21 @@ function tpl_no_subnav() {
                      * @param string $link link of the title
                      * @param string $link_title title of the link of the title
                      */
-                    function tpl_item_before($title = "", $icon = "", $classapp = "", $id = "", $link = "", $link_title = "") {
+                    function tpl_item_before($title = "", $icon = "", $classapp = "", $id = "", $link = "", $link_title = "", $header_text_id = "", $content_id = "") {
                         ?>
                         <div class="well item <?php echo $classapp ?>" id="<?php echo $id ?>" style="width: auto">
                             <?php if ($title != ""): ?>
                                 <span class="item-header">
                                     <? if ($icon != "") tpl_icon($icon) ?>
                                     <? if ($link != "") echo "<a href=\"$link\"" . ($link_title != "" ? (" title='" . $link_title . "'") : "") . ">" ?>
+                                    <? if ($header_text_id != "") echo '<span id="' . $header_text_id . '">' ?>
                                     <?= $title ?>
+                                    <? if ($header_text_id != "") echo '</span>' ?>
                                     <? if ($link != "") echo "</a>" ?>
                                 </span>
                                 <hr/>
                             <?php endif ?>
-                            <div class="item-content">
+                            <div class="item-content" <?= $content_id != "" ? ('id="' . $content_id . '"') : "" ?>>
                                 <?php
                             }
 

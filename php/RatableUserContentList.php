@@ -39,9 +39,10 @@ abstract class RatableUserContentList {
     );
     protected $start = 0;
     protected $must_include_id = -1;
+    private $editable_textfields;
 
     /** $fromapp = ", table"; $where_app = "AND id=0" */
-    public function __construct($table, $response_allowed = false, $has_anonymous_field = true, $order_by = "time", $order_direction = "desc", $from_app = "", $where_app = "") {
+    public function __construct($table, $response_allowed = false, $editable_textfields = array(), $has_anonymous_field = true, $order_by = "time", $order_direction = "desc", $from_app = "", $where_app = "") {
         global $env, $db;
         $this->items_per_page = $env->items_per_page;
         $this->table = DB_PREFIX . $table;
@@ -55,6 +56,7 @@ abstract class RatableUserContentList {
         $this->has_anonymous_field = $has_anonymous_field;
         if ($this->has_anonymous_field)
             $this->order_by_dic["anonymous"] = 'isanonymous';
+        $this->editable_textfields = $editable_textfields;
     }
 
     public function getCount() {
@@ -89,7 +91,6 @@ abstract class RatableUserContentList {
                 $start = ($this->getPageCount() * $this->items_per_page) - $this->items_per_page;
             }
             $ano_app = !Auth::canSeeNameWhenSentAnonymous() ? ', userid = 0' : '';
-
             if ($this->must_include_id > -1) {
                 $new_number = -1;
                 if ($this->response_allowed) {
@@ -99,9 +100,9 @@ abstract class RatableUserContentList {
                     if (!empty($arr2)) {
                         $new_must_include_id = $arr2["response_to"];
                     }
- 
+
                     $res = $this->db->query("SELECT id, @rownum := @rownum+1 AS 'row' FROM " . $this->table . " AS t, (SELECT @rownum:=0) r WHERE response_to = -1 "
-                            . $this->where_app . " ORDER BY " . $this->order_by . " " . $this->order_direction . " LIMIT " . $start . ", 1000") or die($this->db->error);
+                            . $this->where_app . " ORDER BY " . $this->order_by . " " . $this->order_direction . " LIMIT " . $start . ", 10000") or die($this->db->error);
                     $arr2 = mysqliResultToArr($res);
                     foreach ($arr2 as $key => $value) {
                         if ($value["id"] == $new_must_include_id) {
@@ -110,12 +111,12 @@ abstract class RatableUserContentList {
                         }
                     }
                 } else {
-                    $res = $this->db->query("SELECT id, @rownum := @rownum+1 AS 'row' FROM " . $this->table . ", (SELECT @rownum:=0) r WHERE " . $this->where_app
-                            . " ORDER BY " . $this->order_by . " " . $this->order_direction . " LIMIT " . $start) or die($this->db->error);
+                    $res = $this->db->query("SELECT id, @rownum := @rownum+1 AS 'row' FROM " . $this->table . ", (SELECT @rownum:=0) r " . ($this->where_app != "" ? ("WHERE " . $this->where_app) : "")
+                            . " ORDER BY " . $this->order_by . " " . $this->order_direction . " LIMIT " . $start . ", 10000") or die($this->db->error);
                     $arr2 = mysqliResultToArr($res);
                     foreach ($arr2 as $key => $value) {
                         if ($value["id"] == $this->must_include_id) {
-                            $new_number = $value["row"];
+                            $new_number = intval($value["row"]);
                             break;
                         }
                     }
@@ -236,6 +237,34 @@ abstract class RatableUserContentList {
             Actions::addAction($id, Auth::getUserName(), "delete_" . $this->type);
         }
         return $this;
+    }
+
+    public function editItem($id, $args) {
+        $cid = intval($id);
+        $str = "";
+        $arr = array();
+        foreach ($args as $name => $val) {
+            if (array_search($name, $this->editable_textfields) !== false) {
+                $arr[$name] = sanitizeInputText($val);
+            }
+        }
+        foreach ($arr as $name => $val) {
+            if ($str == "") {
+                $str = " $name='$val' ";
+            } else {
+                $str .= ", $name='$val' ";
+            }
+        }
+        if ($str != "") {
+            $this->db->query("UPDATE " . $this->table . " SET " . $str . "WHERE id=$cid") or die("Can't edit item $cid: " . $this->db->error);
+            $this->afterEditImpl();
+            return true;
+        }
+        return false;
+    }
+
+    protected function afterEditImpl() {
+        
     }
 
     public function setOrderBy($order_by) {

@@ -23,7 +23,7 @@ class ImageList extends RatableUserContentList {
 
     public function __construct() {
         global $env;
-        parent::__construct("images", false, true);
+        parent::__construct("images", false, array("description", "category"), true);
         $this->items_per_page = $env->images_per_page;
         array_push($this->order_by_dic, "category");
         array_push($this->order_by_dic, "capture_time");
@@ -54,12 +54,12 @@ class ImageList extends RatableUserContentList {
         $this->db->query("UPDATE " . $this->table . " SET description = '" . sanitizeInputText($descr) . "' WHERE id=" . intval($id)) or die($this->db->error);
         return $this;
     }
-    
+
     public function setCategory($id, $category) {
         $this->db->query("UPDATE " . $this->table . " SET category = '" . sanitizeInputText($category) . "' WHERE id=" . intval($id)) or die($this->db->error);
         return $this;
     }
-    
+
     public function setExif($id, $exif) {
         $ctime = strtotime(isset($exif["DateTimeOriginal"]) ? $exif["DateTimeOriginal"] : $exif["DateTime"]);
         $datastr = $this->db->real_escape_string(json_encode($exif));
@@ -82,14 +82,26 @@ class ImageList extends RatableUserContentList {
         }
         $descr = sanitizeInputText($descr);
         $category = sanitizeInputText($category);
-        $this->db->query("INSERT INTO " . $this->table . "(id, userid, description, category, capture_time, format, time, rating, data) VALUES(NULL, " . $user->getID() . ", '" . $descr . "', '" . $category . "', 0, '" . $env->pic_format . "', " . $time . ", 0, '')") or die($this->db->error);
+        $this->db->query("INSERT INTO " . $this->table . "(id, userid, description,  category, capture_time, format, time, rating, data) VALUES(NULL, " . $user->getID() . ", '" . $descr . "', '" . $category . "', 0, '" . $env->pic_format . "', " . $time . ", 0, '')") or die($this->db->error);
         $id = $this->db->insert_id;
         Actions::addAction($id, $user->getName(), "upload_image");
         return $id;
     }
 
     protected function appendSearchAfterPhraseImpl($cphrase) {
-        $this->appendToWhereApp(" AND (MATCH(description) AGAINST('" . $cphrase . "') OR description LIKE '%" . $cphrase . "%' OR category LIKE '%" . $cphrase . "%')");
+        $this->appendToWhereApp("AND (MATCH(description) AGAINST('" . $cphrase . "') OR description LIKE '%" . $cphrase . "%' ");
+        $arr = explode(',', $cphrase);
+        $carr = array();
+        foreach ($arr as $val) {
+            $val = trim($val);
+            if ($val != "") {
+                $carr[] = $val;
+            }
+        }
+        for ($i = 0, $c = count($carr); $i < $c; $i++) {
+            $this->appendToWhereApp(" OR category LIKE '%" . $carr[$i] . "%'");
+        }
+        $this->appendToWhereApp(")");
     }
 
     public function getCategories() {
@@ -97,7 +109,14 @@ class ImageList extends RatableUserContentList {
         $arr = array();
         if ($res != null) {
             while ($a = $res->fetch_array())
-                $arr[] = $a["category"];
+                $category = $a["category"];
+            $catArr = explode(',', $category);
+            foreach ($catArr as $cat) {
+                $cat = trim($cat);
+                if ($cat != "") {
+                    $arr[] = $cat;
+                }
+            }
         }
         return $arr;
     }

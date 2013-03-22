@@ -432,23 +432,22 @@ class User {
         return $arr[1];
     }
 
-    public function setName($first_name, $last_name = "") {
-        $this->name = $first_name;
-        if ($last_name != "") {
-            $this->name .= " " . $last_name;
-        }
+    public function setName($name) {
+        $namearr = self::splitName(sanitizeInputText($name));
+        $this->first_name = $namearr[0];
+        $this->last_name = $namearr[1];
     }
 
     public function setMathCourse($course) {
-        $this->math_course = $course;
+        $this->math_course = intval($course);
     }
 
     public function setMathTeacher($teacher) {
-        $this->math_teacher = $teacher;
+        $this->math_teacher = sanitizeInputText($teacher);
     }
 
     public function setMailAdress($adress) {
-        $this->mail_adress = $adress;
+        $this->mail_adress = sanitizeInputText($adress);
     }
 
     public function setMode($mode) {
@@ -457,7 +456,7 @@ class User {
     }
 
     public function setActivated($activated) {
-        $this->activated = $activated;
+        $this->activated = $activated ? true : false;
     }
 
     public function activate($send_mail = true) {
@@ -489,7 +488,7 @@ class User {
     }
 
     public function setVisible($visible) {
-        $this->visible = $visible;
+        $this->visible = $visible ? true : false;
     }
 
     public function sendMail($topic, $text) {

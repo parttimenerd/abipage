@@ -173,7 +173,7 @@ div.wysiwyg iframe { clear: left;
 h1, h2, h3, h4, h5, h6, .navbar {
     font-family: 'Josefin Sans', Helvetica;
 }
-.item input, .item textarea, .alert-info, .item-content {
+.item input, .item textarea, .alert-info, .item-content, .edit_modal input {
     font-family: 'PT Sans'
 }
 /*input[type="text"],
@@ -190,15 +190,15 @@ input[type="url"],
 input[type="search"],
 input[type="tel"],
 input[type="color"],*/
-.item input:not([type="checkbox"]), textarea {
+.item input:not([type="checkbox"]), textarea, .edit_modal input {
     width: 100%;
 }
-.item input, textarea, .log_container input {
-    resize: none;
-    box-shadow: none;
-    border: none;
-    background-color: whiteSmoke;
-    transition: background-color linear 0.3s;
+.item input, textarea, .log_container input, .edit_modal input {
+    resize: none !important;
+    box-shadow: none !important;
+    border: none !important;
+    background-color: whiteSmoke !important;
+    transition: background-color linear 0.3s !important;
 }
 .log_container input {
     width: calc(100% - 20px) !important;
@@ -208,7 +208,7 @@ input[type="color"],*/
 .log_container input:focus {
     background-color: whiteSmoke;
 }
-.item input, .item label {
+.item input, .item label, .edit_modal input, .edit_modal label {
     font-size: 15px;
     line-height: 16px;
     height: 25px;
@@ -220,15 +220,15 @@ input[type="color"],*/
     margin-left: 30px;
     line-height: 30px;
 }
-.item input:hover, textarea:hover, .item input:focus, textarea:focus {
-    box-shadow: none;
-    border: none;
+.item input:hover, textarea:hover, .item input:focus, textarea:focus, .edit_modal input:hover, , .edit_modal input:focus {
+    box-shadow: none !important;
+    border: none !important;
 }
-.item input:focus, textarea:focus {
-    background-color: white;
+.item input:focus, textarea:focus, .edit_modal input:focus {
+    background-color: white !important;;
 }
-.item input:invalid {
-    background-color: rgba(255, 0, 0, 0.12);
+.item input:invalid, .edit_modal input:invalid {
+    background-color: rgba(255, 0, 0, 0.12) !important;
 }
 textarea {
     height: 150px;
@@ -451,7 +451,7 @@ table {
     height: 0.75em;
     margin-bottom: 0.35em;
 }
-.item-footer .delete_span_li button {
+.item-footer .delete_span_li button, .item-footer .edit_item_span_li button  {
     width: auto;
     text-align: right;
     margin-left: -10px;

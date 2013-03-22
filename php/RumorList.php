@@ -20,7 +20,7 @@
 class RumorList extends RatableUserContentList {
 
     public function __construct() {
-        parent::__construct("rumors", true);
+        parent::__construct("rumors", true, array("text"));
     }
 
     public function addRumor($text, $anonymous, $response_to = -1, $senduser = null, $time = -1) {

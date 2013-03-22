@@ -50,11 +50,15 @@ class RatableUserContentHandler extends ToroHandler {
         } else if (isset($_GET["start"]) && is_int($_GET["start"])) {
             $this->list->setStart(intval($_GET["start"]));
         }
-        $phrase = isset($_GET["phrase"]) ? $_GET["phrase"] : "";
-        $this->list->appendSearchAfterPhrase($phrase);
-        if (isset($_GET["id"]) && intval($_GET["id"]) > 0) {
-            $this->list->setMustIncludeId($_GET["id"]);
-            tpl_add_js("document.getElementById('" . intval($_GET["id"]) . "').scrollIntoView()");
+        if (isset($_GET["phrase"])) {
+            $phrase = $_GET["phrase"];
+            $this->list->appendSearchAfterPhrase($phrase);
+        } else {
+            $phrase = "";
+            if (isset($_GET["id"]) && intval($_GET["id"]) > 0) {
+                $this->list->setMustIncludeId($_GET["id"]);
+                tpl_add_js("document.getElementById('" . intval($_GET["id"]) . "').scrollIntoView()");
+            }
         }
         if (isset($_GET["page"]))
             $this->list->setStart($this->items_per_page * (intval($_GET["page"]) - 1));
@@ -143,6 +147,15 @@ class RatableUserContentHandler extends ToroHandler {
                     call_user_func($item->getTplFunctionName(), $item);
                     jsonAjaxResponseEndSend();
                 }
+            }
+        } else if (isset($_POST["edit"]) && Auth::canEditRucItems()) {
+            if (isset($_POST["edit"]["id"])) {
+                $this->list->editItem($_POST["edit"]["id"], $_POST["edit"]);
+                jsonAjaxResponseStart();
+                jsonAjaxResponseEndSend(array("success" => true, "args" => $_POST["edit"]));
+            } else {
+                jsonAjaxResponseStart();
+                jsonAjaxResponseEndSend(array("success" => false));
             }
         } else {
             $phrase = isset($_POST["phrase"]) ? $_POST["phrase"] : "";

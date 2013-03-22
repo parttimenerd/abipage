@@ -20,7 +20,7 @@
 class QuoteList extends RatableUserContentList {
 
     public function __construct() {
-        parent::__construct("quotes", true);
+        parent::__construct("quotes", true, array("person", "text"));
     }
 
     public function addQuote($person, $text, $anonymous, $response_to = -1, $teacherid = -1, $senduser = null, $time = -1) {
@@ -62,4 +62,8 @@ class QuoteList extends RatableUserContentList {
         $this->appendToWhereApp(" AND (MATCH(person, text) AGAINST('" . $cphrase . "') OR text LIKE '%" . $cphrase . "%' OR person LIKE '%" . $cphrase . "%') ");
     }
 
+    protected function afterEditImpl(){
+        Teacher::updateQuotes();
+    }
+    
 }

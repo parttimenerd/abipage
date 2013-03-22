@@ -52,6 +52,7 @@ function tpl_image_list($rucis, $page, $pages, $phrase = "", $as_page = true) {
         ?>
         </div>
         <?php
+        tpl_edit_image_item_hbs();
         tpl_after();
     } else {
         PiwikHelper::echoJSTrackerCode(false);
@@ -66,7 +67,7 @@ function tpl_image_list($rucis, $page, $pages, $phrase = "", $as_page = true) {
  */
 function tpl_image_upload_item($with_descr = true) {//"enctype" => "multipart/form-data"
     global $env;
-    //tpl_item_before_form(array("id" => "file_upload", "enctype" => "multipart/form-data"), "Bild hochladen", "camera", "item-send");
+//tpl_item_before_form(array("id" => "file_upload", "enctype" => "multipart/form-data"), "Bild hochladen", "camera", "item-send");
     tpl_item_before("Bild hochladen", "camera", "item-send", "drop-image-area");
     ?>     
     <div id="drop_area" onclick="$('#file_input').click()">
@@ -110,18 +111,29 @@ function tpl_image_item(RatableUserContentItem $ruci) {
         <img src="<?= tpl_url($env->upload_path . '/thumbs/' . $imgfile) ?>"/>
     </a><br/>
     <div class="img_descr">
-        <div class="descr_text">
-            <?= str_replace('&lt;br/>', "", formatText($ruci->description)) ?>
+        <div class="descr_text" id="<?= $ruci->id ?>_description">
+            <?= str_replace('&lt;br/>', "", $ruci->description) ?>
         </div>
         <? if ($ruci->capture_time > 10): ?>
             <div class="descr_ctime"> Aufnahmedatum: <?= date("d.m.y H:i", $ruci->capture_time) ?> </div>
         <? endif; ?>
         <? if ($ruci->category != ""): ?>
-            <div class="descr_category"> Kategorie: <a href="javascript:search('<?= $ruci->category ?>')"><?= $ruci->category ?></a> </div>
+            <div class="descr_category"> Kategorie: <a href="javascript:search('<?= $ruci->category ?>')" id="<?= $ruci->id ?>_category"><?= $ruci->category ?></a> </div>
         <? endif; ?>
     </div>
     <?
-    tpl_item_after_ruc($ruci);
+    tpl_item_after_ruc($ruci, array("category", "description"));
+}
+
+function tpl_edit_image_item_hbs($id = "item-edit-template") {
+    tpl_edit_item_hbs_before($id);
+    ?>    
+    <textarea placeholder="Beschreibung" id="{{id}}_em_description">{{description}}</textarea>
+    <input type="text" id="{{id}}_em_category" value="{{category}}" list="{{id}}_category_list" placeholder="Kategorie"/>
+    <?
+    $list = new ImageList();
+    tpl_datalist("{{id}}_category_list", $list->getCategories());
+    tpl_edit_item_hbs_after(array("description", "category"));
 }
 
 /**
@@ -147,7 +159,7 @@ function tpl_quote_list($rucis, $page, $pages, $phrase, $as_page = true) {
         tpl_quote_item($ruci);
     ?>
     <script>
-        var rating_url = "<?php echo tpl_url('quotes') ?>";
+                var rating_url = "<?php echo tpl_url('quotes') ?>";
     <?php if ($as_page) echo 'var page = ' . $page . ';' ?>
     <? if ($pages != -1): ?>
             window.max_page = pagecount = <?php echo $pages ?>;
@@ -159,6 +171,7 @@ function tpl_quote_list($rucis, $page, $pages, $phrase, $as_page = true) {
     <?php
     if ($as_page) {
         tpl_write_quote_response_item_hbs();
+        tpl_edit_quote_item_hbs();
         tpl_after();
     } else {
         PiwikHelper::echoJSTrackerCode(false);
@@ -196,6 +209,16 @@ function tpl_write_quote_response_item_hbs($id = "item-response-template") {
         ?></div><?
 }
 
+function tpl_edit_quote_item_hbs($id = "item-edit-template") {
+    tpl_edit_item_hbs_before($id);
+    ?>    
+    <input type="text" id="{{id}}_em_person" class="teacher_typeahead" value="{{person}}" list="teacher_datalist"/>
+    <? tpl_datalist("teacher_datalist", array_merge(Teacher::getNameList(), User::getNameList())) ?>
+    <textarea placeholder="Zitat" id="{{id}}_em_text">{{text}}</textarea>
+    <?
+    tpl_edit_item_hbs_after(array("person", "text"));
+}
+
 /**
  * Outputs a quote item
  * 
@@ -203,12 +226,12 @@ function tpl_write_quote_response_item_hbs($id = "item-response-template") {
  */
 function tpl_quote_item(RatableUserContentItem $ruci) {
     if ($ruci->isResponse()) {
-        tpl_item_before("", "", "content-item", $ruci->id, "", "");
+        tpl_item_before("", "", "content-item", $ruci->id, "", "", $ruci->id . '_person', $ruci->id . '_text');
     } else {
-        tpl_item_before($ruci->person, "speech_bubbles", "content-item", $ruci->id, "javascript:search('$ruci->person')", 'Nach Zitaten von/mit "' . $ruci->person . '" suchen');
+        tpl_item_before($ruci->person, "speech_bubbles", "content-item", $ruci->id, "javascript:search('$ruci->person')", 'Nach Zitaten von/mit "' . $ruci->person . '" suchen', $ruci->id . '_person', $ruci->id . '_text');
     }
     echo formatText($ruci->text, false);
-    tpl_item_after_ruc($ruci);
+    tpl_item_after_ruc($ruci, array("text", "person"));
 }
 
 /**
@@ -246,6 +269,7 @@ function tpl_rumor_list($rucis, $page, $pages, $phrase, $as_page = true) {
     <?
     if ($as_page) {
         tpl_write_rumor_response_item_hbs();
+        tpl_edit_rumor_item_hbs();
         tpl_after();
     } else {
         PiwikHelper::echoJSTrackerCode(false);
@@ -278,26 +302,34 @@ function tpl_write_rumor_response_item_hbs($id = "item-response-template") {
         <?
         tpl_item_after_buttons(array("{{button_answer_title}}" => array("onclick" => "sendRumor(false, {{response_to}})"), "{{button_answer_ano_title}}" => array("onclick" => "sendRumor(true, {{response_to}})"), "Schließen" => array("onclick" => "responseToItem({{response_to}})")));
         ?></div><?
-    }
+}
 
-    /**
-     * Outputs a rumor item
-     * 
-     * @param RatableUserContentItem $ruci rumor item
-     */
-    function tpl_rumor_item(RatableUserContentItem $ruci) {
-        tpl_item_before("", "", "content-item", $ruci->id);
-        echo formatText($ruci->text, false);
-        tpl_item_after_ruc($ruci);
-    }
+function tpl_edit_rumor_item_hbs($id = "item-edit-template") {
+    tpl_edit_item_hbs_before($id);
+    ?>    
+    <textarea placeholder="..., dass " id="{{id}}_em_text">{{text}}</textarea>
+    <?
+    tpl_edit_item_hbs_after(array("text"));
+}
 
-    /**
-     * Outputs the html code closing a RatableUserContent item container with an footer
-     * 
-     * @param RatableUserContentItem $ruci
-     */
-    function tpl_item_after_ruc(RatableUserContentItem $ruci) {
-        ?>
+/**
+ * Outputs a rumor item
+ * 
+ * @param RatableUserContentItem $ruci rumor item
+ */
+function tpl_rumor_item(RatableUserContentItem $ruci) {
+    tpl_item_before("", "", "content-item", $ruci->id, "", "", "", $ruci->id . '_text');
+    echo formatText($ruci->text, false);
+    tpl_item_after_ruc($ruci, array("text"));
+}
+
+/**
+ * Outputs the html code closing a RatableUserContent item container with an footer
+ * 
+ * @param RatableUserContentItem $ruci
+ */
+function tpl_item_after_ruc(RatableUserContentItem $ruci, $edit_args = array()) {
+    ?>
     </div>
     <hr/>
     <div class="item-footer <?php echo Auth::isModerator() ? "deletable" : '' ?>">
@@ -314,12 +346,19 @@ function tpl_write_rumor_response_item_hbs($id = "item-response-template") {
             <? if ($ruci->isDeletable()): ?>
                 <li class="delete_span_li hidden-phone"><? tpl_item_delete_span($ruci) ?></li>
             <? endif ?>
+            <? if (Auth::canEditRucItems()): ?>
+                <li class="edit_item_span_li hidden-phone"><? tpl_item_edit_span($ruci, $edit_args) ?></li>
+            <? endif ?>
         </ul>
     </div>
     </div>
     <?
-    if ($ruci->canHaveResponses())
+    if ($ruci->canHaveResponses()) {
         tpl_response_to_div($ruci);
+    }
+    if (Auth::canEditRucItems()) {
+        tpl_item_edit_div($ruci);
+    }
 }
 
 /**
@@ -356,6 +395,18 @@ function tpl_response_to_div(RatableUserContentItem $ruci) {
 function tpl_item_response_to_span(RatableUserContentItem $ruci) {
     ?>
     <span class="response_to_item"><button class="btn" onclick="responseToItem('<?= $ruci->getMakeResponseToID() ?>', '<?= $ruci->hasPersonVal() ? $ruci->person : '' ?>')"><?php tpl_icon("speech_bubbles", "Antworten") ?> Antworten</span>
+    <?
+}
+
+function tpl_item_edit_span(RatableUserContentItem $ruci, $edit_args = array()) {
+    ?>
+    <span class="edit_item"><button class="btn" onclick='editItem(<?= '"' . $ruci->id . '", ' . json_encode($edit_args, JSON_HEX_QUOT) ?>)'><?php tpl_icon("pencil", "Bearbeiten") ?></span>
+    <?
+}
+
+function tpl_item_edit_div(RatableUserContentItem $ruci) {
+    ?>
+    <div class="edit_item_container" id="<?= $ruci->id ?>_edit_item_container"></div>
     <?
 }
 
@@ -412,4 +463,43 @@ function tpl_average($rating, $count = -1, $data = array()) {
         <? endif; ?>
     </span>
     <?php
+}
+
+function tpl_edit_item_hbs_before($id = "item-edit-template") {
+    ?>    
+    <div id="<?= $id ?>" type="text/x-handlebars-template">
+        <div id="{{id}}_edit_modal" class="modal hide fade edit_modal" tabindex="-1" role="dialog" aria-labelledby="{{id}}_modal_label" aria-hidden="true">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <span class="item-header" id="{{id}}_modal_label">Beitrag bearbeiten</span>
+            </div>
+            <div class="modal-body">
+                <p> 
+                    <?
+                }
+
+                function tpl_edit_item_hbs_after($onclick_arr) {
+                    $onclick_arr_app = "";
+                    $arr = array();
+                    foreach ($onclick_arr as $value) {
+                        if ($value != ""){
+                            $arr[] = $value;
+                        }
+                    }
+                    foreach ($arr as $value) {
+                        if ($onclick_arr_app != ""){
+                            $onclick_arr_app .= ", ";
+                        }
+                        $onclick_arr_app .= "'" . $value . "'";
+                    }
+                    ?>
+                </p>
+            </div>
+            <div class = "modal-footer">
+                <button class = "btn" data-dismiss = "modal" aria-hidden = "true">Schließen</button>
+                <button class = "btn btn-primary submit-button" onclick="submitEditItem('{{id}}', [<?= $onclick_arr_app != "" ? $onclick_arr_app : "" ?>]);">Änderungen speichern</button>
+            </div>
+        </div>
+    </div>
+    <?
 }

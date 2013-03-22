@@ -399,6 +399,61 @@ function responseToItem(id, person) {
     }
 }
 
+function editItem(id, args) {
+    var container = $("#" + id + "_edit_item_container");
+    if (container) {
+        if (window.item_edit_template === undefined) {
+            window.item_edit_template = Handlebars.compile($("#item-edit-template").html());
+        }
+        var html = "";
+        var obj = {"id": id};
+        for (var i = 0; i < args.length; i++) {
+            var key = args[i];
+            obj[key] = $.trim($("#" + id + "_" + key).html());
+        }
+        html = item_edit_template(obj);
+        container.html(html);
+        var submitEle = $("#" + id + "_edit_modal .submit-button");
+        $("#" + id + "_edit_modal input").keydown(function(event) {
+            if (event.which === 13) {
+                submitEle.click();
+                event.preventDefault();
+            }
+        })
+        $('#' + id + "_edit_modal").modal('show');
+    } else {
+        container.html("");
+    }
+}
+
+function submitEditItem(id, args) {
+    var editarr = {};
+    for (var i = 0; i < args.length; i++) {
+        var key = args[i];
+        editarr[key] = $.trim($("#" + id + "_em_" + key).val());
+    }
+    editarr["id"] = id;
+    ajax({
+        data: {
+            edit: editarr
+        },
+        success: function(data) {
+            if (data["logs"] !== undefined) {
+                add_log_object(data["logs"]);
+            }
+            for (var key in editarr) {
+                if (key !== "id") {
+                    $("#" + id + "_" + key).html(editarr[key]);
+                }
+                if (key === "category") {
+                    $("#" + id + "_" + key).attr("href", "javascript:search('" + editarr[key] + "')");
+                }
+            }
+            $('#' + id + '_edit_modal').modal('hide');
+        }
+    });
+}
+
 function scrollToTop() {
 //$('body').animate({scrollTop:0}, 'slow');
 }

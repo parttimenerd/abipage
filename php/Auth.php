@@ -276,4 +276,8 @@ class Auth {
         return Auth::isModerator();
     }
 
+    public static function canEditRucItems() {
+        return Auth::isModerator();
+    }
+
 }

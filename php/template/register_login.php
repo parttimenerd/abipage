@@ -134,9 +134,9 @@ function tpl_new_password($action_url) {
  * @param string $id_prefix
  * @param string $placeholder_attr
  */
-function tpl_new_password_input($send_button_id, $id_prefix = "pwd", $placeholder_attr = "Neues Passwort"){
+function tpl_new_password_input($send_button_id, $id_prefix = "pwd", $required = true, $placeholder_attr = "Neues Passwort"){
     ?>
-    <input type="password" name="<?= $id_prefix ?>" id="<?= $id_prefix ?>pwd" value="" placeholder="<?= $placeholder_attr ?>" title="<?= $placeholder_attr ?>" onkeyup="$('#<?= $id_prefix ?>_repeat').val(this.value); testPasswordInput('<?= $id_prefix ?>pwd', '<?= $id_prefix ?>passwordmeter_result', '<?= $send_button_id ?>');" required="on" autocomplete="off"/><br/>
+    <input type="password" name="<?= $id_prefix ?>" id="<?= $id_prefix ?>pwd" value="" placeholder="<?= $placeholder_attr ?>" title="<?= $placeholder_attr ?>" onkeyup="$('#<?= $id_prefix ?>_repeat').val(this.value); testPasswordInput('<?= $id_prefix ?>pwd', '<?= $id_prefix ?>passwordmeter_result', '<?= $send_button_id ?>');" <?= $required ? 'required="on"' : "" ?> autocomplete="off"/><br/>
     <span id="<?= $id_prefix ?>passwordmeter_result"></span>
     <input type="hidden" name="<?= $id_prefix ?>_repeat" id="<?= $id_prefix ?>_repeat" value="" placeholder="<?= $placeholder_attr ?> wiederholen" title="<?= $placeholder_attr ?> wiederholen"/><br/>
     <input type="checkbox" onchange="$('#<?= $id_prefix ?>pwd')[0].type = this.checked ? 'text' : 'password'">
