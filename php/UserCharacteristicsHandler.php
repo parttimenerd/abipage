@@ -20,8 +20,9 @@
 class UserCharacteristicsHandler extends ToroHandler {
 
     public function get($slug = "") {
+        global $env;
         if ($slug == "") {
-            if (Auth::isViewingResults()) {
+            if (Auth::isViewingResults() || !$env->user_characteristics_editable) {
                 tpl_usercharacteristics_result_page(Auth::getUser(), UserCharacteristicsItem::getAll(Auth::getUser()));
             } else {
                 tpl_usercharacteristics_answer_page(UserCharacteristicsTopic::getAll());
@@ -30,7 +31,8 @@ class UserCharacteristicsHandler extends ToroHandler {
     }
 
     public function post($slug = "") {
-        if (isset($_POST["submit"])) {
+        global $env;
+        if (isset($_POST["submit"]) && $env->user_characteristics_editable) {
             foreach ($_POST as $key => $value) {
                 if (is_numeric($key)) {
                     $topic = UserCharacteristicsTopic::getByID($key);

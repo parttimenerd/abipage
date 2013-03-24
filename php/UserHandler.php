@@ -139,7 +139,7 @@ class UserHandler extends ToroHandler {
             }
             jsonAjaxResponse($data);
         } else if (isset($_POST["text"]) && strlen($_POST["text"]) >= 5 &&
-                $user->getID() != Auth::getUserID()) {
+                $user->getID() != Auth::getUserID() && $env->user_comments_editable) {
             $comment = $user->postUserComment($_POST["text"], isset($_POST["send_anonymous"]));
             jsonAjaxResponseStart();
             $data = array();

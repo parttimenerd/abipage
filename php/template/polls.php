@@ -62,7 +62,7 @@ function tpl_polls($polls, $show_results = false) {
         </div>
         <?
         if (!$show_results) {
-            ?><button class="btn" name="submit" type="submit">Absenden</button>
+            ?><button class="btn" name="submit" type="submit">Speichern</button>
         </form> <?
     }
     tpl_after();

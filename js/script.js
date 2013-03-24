@@ -252,12 +252,14 @@ if ($("#drop_area") !== null && $("#drop_area").length !== 0) {
             xhr.upload.onprogress = function(e) {
                 if (e.lengthComputable) {
                     percent = Math.round((e.loaded * 100) / e.total);
-                    progressbar.attr("style", "width: " + percent + "%; display: inline");
+                    progress.attr("style", "display: inline");
+                    progressbar.attr("style", "width: " + percent + "%");
                     if (percent < 90) {
                         progressbar.html(byteToMiB(e.loaded, 2) + "MiB von " + byteToMiB(e.total, 2) + "MiB hochgeladen");
                     } else {
+                        progress.attr("style", "display: inline");
                         progressbar.html("Erzeugung von Vorschaubildern...");
-                        progressbar.attr("style", "width: 100%; display: inline");
+                        progressbar.attr("style", "width: 100%");
                     }
                 }
             };

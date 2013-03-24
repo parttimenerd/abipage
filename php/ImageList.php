@@ -62,8 +62,10 @@ class ImageList extends RatableUserContentList {
 
     public function setExif($id, $exif) {
         $ctime = strtotime(isset($exif["DateTimeOriginal"]) ? $exif["DateTimeOriginal"] : $exif["DateTime"]);
-        $datastr = $this->db->real_escape_string(json_encode($exif));
-        $this->db->query("UPDATE " . $this->table . " SET capture_time = " . $ctime . ", data='" . $datastr . "' WHERE id=" . intval($id)) or var_dump($this->db->error);
+        if ($ctime != "") {
+            $datastr = $this->db->real_escape_string(json_encode($exif));
+            $this->db->query("UPDATE " . $this->table . " SET capture_time = " . $ctime . ", data='" . $datastr . "' WHERE id=" . intval($id)) or var_dump($this->db->error);
+        }
         return $this;
     }
 

@@ -163,6 +163,7 @@ Wenn ja, sollte Piwik installiert sein und diese Website hinzugefügt worden sei
                     "user_comments_editable" => array("default" => "true", "label" => "Können Benutzerkommentare geschrieben werden?", "type" => "checkbox"),
                     "user_characteristics_editable" => array("default" => "false", "label" => "Kann der eigene Steckbrief bearbeitet werden?", "type" => "checkbox"),
                     "user_polls_open" => array("default" => "false", "label" => "Ist die Umfragenseite sichtbar?", "type" => "checkbox"),
+                    "user_polls_answerable" => array("default" => "false", "label" => "Sind die Umfragen beantwortbar?", "type" => "checkbox"),
                     "system_mail_adress" => array("default" => "", "label" => "Mailadresse der Seite"),
                     "response_allowed" => array("default" => "true", "label" => "Können Kommentare zu Stimmt es...-Beiträgen und Zitaten geschrieben werden?", "type" => "checkbox"),
                     "show_logs" => array("default" => "false", "label" => "Werden die Loggingnachrichten den Admins angezeigt?", "type" => "checkbox"),

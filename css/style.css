@@ -356,9 +356,8 @@ table {
 .item-footer .progress {
     width: auto;
     display: none;
-    width: 70%;
+    width: calc(70% - 40px);
     float: right;
-    margin-top: -1.4em;
 }
 .item-footer .progress .bar {
     text-align: left;

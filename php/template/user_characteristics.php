@@ -21,9 +21,6 @@
 
 function tpl_usercharacteristics_result_page(User $user, array $itemarr, $as_page = true) {
     global $env;
-    if (!$env->user_characteristics_editable) {
-        return;
-    }
     if ($as_page) {
         tpl_before("user_characteristics", $user->getName(), tpl_get_user_subtitle($user));
         if ($user->hasNotAllUCQuestionsAnswered()) {
@@ -86,7 +83,7 @@ function tpl_usercharacteristics_answer_page(array $topics) {
         tpl_usercharacteristics_answer_topic($topic);
     }
     ?>
-        <input name="submit" class="btn uc_submit" type="submit"/>
+        <button name="submit" class="btn uc_submit" type="submit">Speichern</button>
     </form>
     <?
     tpl_after();
