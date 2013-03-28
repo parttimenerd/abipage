@@ -88,7 +88,7 @@ function tpl_user(User $user) {
     } else {
         tpl_before("user/" . str_replace(' ', '_', $user->getName()), $user->getName(), tpl_get_user_subtitle($user));
     }
-    if ($user->getID() != Auth::getUserID() && $env->user_comments_editable)
+    if ($user->getID() != Auth::getUserID() && $env->user_comments_editable && !$user->isBlocked())
         tpl_user_write_comment();
     foreach ($user->getUserComments($user->getID() == Auth::getUserID() || Auth::isModerator()) as $comment)
         tpl_user_comment($user, $comment);
@@ -125,7 +125,7 @@ function tpl_user_comment_not_reviewed_info() {
  */
 function tpl_user_comment($user, $comment) {
     tpl_item_before("", "", $comment["notified_as_bad"] ? " notified_as_bad" : "", $comment["id"]);
-    echo $comment["text"];
+    echo str_replace("\n", "<br/>", str_replace('\n', "<br/>", $comment["text"]));
     ?>
     </div>
     <hr/>

@@ -57,7 +57,7 @@ function tpl_home($news = array(), ActionArray $actions = null) {
 }
 
 /**
- * Outputs the home page for user who aren't logged in, shows only the mainpage text
+ * Outputs the home page for users who aren't logged in, shows only the mainpage text
  * 
  * @global Environment $env
  */
@@ -71,6 +71,20 @@ function tpl_home_no_user() {
     tpl_tiles($tiles, 6);*/
     tpl_item_before();
     echo formatText($env->mainpage_text);
+    tpl_item_after();
+    tpl_after();
+}
+
+/**
+ * Outputs the home page for users who are bloccked
+ * 
+ * @global Environment $env
+ */
+function tpl_home_blocked_user() {
+    global $env;
+    tpl_before("home", $env->title, $env->subtitle);
+    tpl_item_before();
+    echo formatText($env->blocked_user_mainpage_text);
     tpl_item_after();
     tpl_after();
 }

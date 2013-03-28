@@ -65,60 +65,64 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
     global $env, $store, $document_title;
     $usermenu = null;
     if (Auth::getUserMode() != User::NO_MODE) {
-        $menus = array(
-            "images" => array("Bilder", $env->images_subtitle),
-            "quotes" => array("Zitate", $env->quotes_subtitle),
-            "rumors" => array("Stimmt es...", $env->rumors_subtitle),
-            "user/all" => array("Schüler", $env->userall_subtitle)
-        );
-        if ($env->news_enabled) {
-            $meta_dropdown["news"] = array("Nachrichten", $env->news_subtitle);
-            if (Auth::canWriteNews())
-                $meta_dropdown["news/write"] = array("Nachricht schreiben", $env->news_write_subtitle);
-        }
-        if ($env->user_polls_open) {
-            $menus["polls"] = array("Umfragen", $env->polls_subtitle);
-        }
-        $menus["actions"] = array("Aktionen", $env->actions_subtitle);
-        if ($env->has_forum) {
-            $menus[$env->forum_url] = array("Forum", "");
-        }
-        if ($env->has_wiki) {
-            $menus[$env->wiki_url] = array("Wiki", "");
-        }
-        $menus["meta"] = array("head" => array("Meta", ""), "dropdown" => array());
-        if ($env->stats_open || Auth::isModerator()) {
-            $meta_dropdown["stats"] = array("Statistik", $env->stats_subtitle);
-        }
-        $userapp = array();
-        $document_title = $title;
-        if (Auth::getUser() != null) {
-            $user = Auth::getUser();
-            $usermenu = array("head" => array("Me", tpl_get_user_subtitle($user)));
-            if ($class == "user") {
-                $title = $user->getName();
-                $subtitle = tpl_get_user_subtitle($user);
+        if (!Auth::isBlocked()) {
+            $menus = array(
+                "images" => array("Bilder", $env->images_subtitle),
+                "quotes" => array("Zitate", $env->quotes_subtitle),
+                "rumors" => array("Stimmt es...", $env->rumors_subtitle),
+                "user/all" => array("Schüler", $env->userall_subtitle)
+            );
+            if ($env->news_enabled) {
+                $meta_dropdown["news"] = array("Nachrichten", $env->news_subtitle);
+                if (Auth::canWriteNews())
+                    $meta_dropdown["news/write"] = array("Nachricht schreiben", $env->news_write_subtitle);
             }
-            $userapp["user/me"] = array("Benutzerseite", tpl_get_user_subtitle($user));
-            $userapp["user/me/preferences"] = array("Einstellungen", $env->userpreferences_subtitle);
-            if ($env->user_characteristics_editable) {
-                $userapp["user_characteristics"] = array("Steckbrief", $env->uc_subtitle);
+            if ($env->user_polls_open) {
+                $menus["polls"] = array("Umfragen", $env->polls_subtitle);
             }
-            if (Auth::isModerator()) {
-                $meta_dropdown["usermanagement"] = array("Benutzerverwaltung", $env->usermanagement_subtitle);
-                $meta_dropdown["teacherlist"] = array("Lehrerliste", $env->teacherlist_subtitle);
-                $meta_dropdown["admin"] = array("Dashboard", $env->dashboard_subtitle);
+            $menus["actions"] = array("Aktionen", $env->actions_subtitle);
+            if ($env->has_forum) {
+                $menus[$env->forum_url] = array("Forum", "");
+            }
+            if ($env->has_wiki) {
+                $menus[$env->wiki_url] = array("Wiki", "");
+            }
+            $menus["meta"] = array("head" => array("Meta", ""), "dropdown" => array());
+            if ($env->stats_open || Auth::isModerator()) {
+                $meta_dropdown["stats"] = array("Statistik", $env->stats_subtitle);
+            }
+            $userapp = array();
+            $document_title = $title;
+            if (Auth::getUser() != null) {
+                $user = Auth::getUser();
+                $usermenu = array("head" => array("Me", tpl_get_user_subtitle($user)));
+                if ($class == "user") {
+                    $title = $user->getName();
+                    $subtitle = tpl_get_user_subtitle($user);
+                }
+                $userapp["user/me"] = array("Benutzerseite", tpl_get_user_subtitle($user));
+                $userapp["user/me/preferences"] = array("Einstellungen", $env->userpreferences_subtitle);
+                if ($env->user_characteristics_editable) {
+                    $userapp["user_characteristics"] = array("Steckbrief", $env->uc_subtitle);
+                }
+                if (Auth::isModerator()) {
+                    $meta_dropdown["usermanagement"] = array("Benutzerverwaltung", $env->usermanagement_subtitle);
+                    $meta_dropdown["teacherlist"] = array("Lehrerliste", $env->teacherlist_subtitle);
+                    $meta_dropdown["admin"] = array("Dashboard", $env->dashboard_subtitle);
 //                $meta_dropdown["user_characteristics/edit"] = array("Steckbriefverwaltung", $env->uc_management_subtitle);
-                $meta_dropdown["polls/add"] = array("Umfragen hinzufügen", $env->polls_management_subtitle);
+                    $meta_dropdown["polls/add"] = array("Umfragen hinzufügen", $env->polls_management_subtitle);
+                }
+                if (Auth::canViewPreferencesPage()) {
+                    $meta_dropdown["preferences"] = array("Einstellungen", $env->preferences_subtitle);
+                }
+                $menus["meta"]["dropdown"] = $meta_dropdown;
+                $usermenu["user_prefs"] = array("Einstellungen", $env->userpreferences_subtitle);
+                $userapp["logout"] = array("Abmelden", "");
+                $usermenu["dropdown"] = $userapp;
+                $menus["user"] = $usermenu;
             }
-            if (Auth::canViewPreferencesPage()) {
-                $meta_dropdown["preferences"] = array("Einstellungen", $env->preferences_subtitle);
-            }
-            $menus["meta"]["dropdown"] = $meta_dropdown;
-            $usermenu["user_prefs"] = array("Einstellungen", $env->userpreferences_subtitle);
-            $userapp["logout"] = array("Abmelden", "");
-            $usermenu["dropdown"] = $userapp;
-            $menus["user"] = $usermenu;
+        } else {
+            $menus = array();
         }
     } else {
         $menus = array(
@@ -277,7 +281,7 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
                     $has_sidebar = $subnav == true;
                     tpl_no_subnav();
                 }
-                if (Auth::isLoggedIn())
+                if (Auth::isLoggedIn() && !Auth::isBlocked())
                     tpl_uc_answer_info();
             }
 
@@ -292,7 +296,7 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
             function tpl_after() {
                 ?>         </div> <?php
                 global $env, $js, $has_sidebar, $editor_needed, $update_with_js, $document_title, $html_app;
-                if (Auth::getUserMode() != User::NO_MODE && $has_sidebar) {
+                if (Auth::getUserMode() != User::NO_MODE && !Auth::isBlocked() && $has_sidebar) {
                     tpl_actions_sidebar();
                 }
                 ?>

@@ -220,7 +220,7 @@ input[type="color"],*/
     margin-left: 30px;
     line-height: 30px;
 }
-.item input:hover, textarea:hover, .item input:focus, textarea:focus, .edit_modal input:hover, , .edit_modal input:focus {
+.item input:hover, textarea:hover, .item input:focus, textarea:focus, .edit_modal input:hover, .edit_modal input:focus {
     box-shadow: none !important;
     border: none !important;
 }
@@ -356,7 +356,7 @@ table {
 .item-footer .progress {
     width: auto;
     display: none;
-    width: calc(70% - 40px);
+    width: 70%;
     float: right;
 }
 .item-footer .progress .bar {

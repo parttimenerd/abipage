@@ -23,8 +23,13 @@ class MainHandler extends ToroHandler {
         global $env;
         if (!isset($_REQUEST["ajax"]) || !$_REQUEST["ajax"]) {
             if (Auth::getUserMode() != User::NO_MODE) {
+                if (Auth::getUserMode() != User::BLOCKED_MODE){
                 tpl_home(NewsList::getNews($env->number_of_news_shown_at_the_home_page), Actions::getLastActions());
-            } else {
+                } else {
+                    tpl_home_blocked_user();
+                }
+                
+                } else {
                 tpl_home_no_user();
             }
         } else {

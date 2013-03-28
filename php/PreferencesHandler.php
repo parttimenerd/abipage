@@ -117,6 +117,12 @@ Das Copyright an den Beiträgen geht mit dem Hochladen bzw. Schreiben auf dieser
 <p>Wenn Sie zu den Daten, die auf dieser Seite von ihnen gepseichert Auskunft erhalten möchten oder allgemein Fragen zum Datenschutz dieser Seite haben, kontaktieren sie bitte die im Impressum genannte Adresse.</p>",
                         "label" => "Datenschutz-Seitentext",
                         "type" => "textarea"
+                    ),
+                    "blocked_user_mainpage_text" => array(
+                        "default" => "Sie wurden auf dieser Seite gesperrt, weil sie gegen die Nutzungsbedindungen verstoßen haben.<br/>
+                            Bitte wenden sie sich an den Administrator dieser Seite (siehe Impressum), wenn sie mit der Blockierung nicht einverstanden sind.",
+                        "label" => "Hauptseitentext für gesperrte Benutzer",
+                        "type" => "textarea"
                     ))),
             "Forum" => array("id" => "forum_prefs", "rows" => array(
                     "has_forum" => array("default" => "false", "label" => "Befindet sich ein SMF-Forum in einem Unterpfad des Seitenordners?", "type" => "checkbox"),

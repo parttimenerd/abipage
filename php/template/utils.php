@@ -45,17 +45,18 @@ function tpl_infobox($strong_text, $message_text, $href = "") {
  */
 function tpl_usermode_combobox($name, $preset_modenum = User::NORMAL_MODE, $echo_all = false) {
     $arr = array(
-        User::NORMAL_MODE => "Normal",
-        User::EDITOR_MODE => "Editor",
+        User::BLOCKED_MODE + 1 => "Gesperrt",
+        User::NORMAL_MODE + 1 => "Normal",
+        User::EDITOR_MODE + 1 => "Editor",
     );
     if ($echo_all || Auth::isAdmin())
-        $arr = array_merge($arr, array(User::MODERATOR_MODE => "Moderator"));
+        $arr = array_merge($arr, array(User::MODERATOR_MODE + 1 => "Moderator"));
     if ($echo_all || Auth::isFirstAdmin())
-        $arr = array_merge($arr, array(User::ADMIN_MODE => "Administrator"));
+        $arr = array_merge($arr, array(User::ADMIN_MODE + 1 => "Administrator"));
     ?>
     <select style="display: inline;" name="<?php echo $name ?>" class="user_mode_combobox">
         <?php foreach ($arr as $key => $value): ?>
-            <option value="<?php echo $key ?>"<?php if ($key == $preset_modenum) echo ' selected="selected"' ?>>
+            <option value="<?php echo $key - 1 ?>"<?php if ($key == $preset_modenum) echo ' selected="selected"' ?>>
                 <?php echo $value ?>
             </option>
         <?php endforeach ?>
@@ -71,13 +72,14 @@ function tpl_usermode_combobox($name, $preset_modenum = User::NORMAL_MODE, $echo
  */
 function tpl_usermode_to_text($mode) {
     $arr = array(
-        User::ADMIN_MODE => "Administrator",
-        User::MODERATOR_MODE => "Moderator",
-        User::EDITOR_MODE => "Editor",
-        User::NORMAL_MODE => "Normal",
-        User::NO_MODE => "Gast"
+        User::ADMIN_MODE + 2 => "Administrator",
+        User::MODERATOR_MODE + 2 => "Moderator",
+        User::EDITOR_MODE + 2 => "Editor",
+        User::NORMAL_MODE + 2 => "Normal",
+        User::BLOCKED_MODE + 2 => "Gesperrt",
+        User::NO_MODE + 2 => "Gast"
     );
-    return $arr[isset($arr[$mode]) ? $mode : User::NORMAL_MODE];
+    return $arr[isset($arr[$mode + 2]) ? $mode + 2 : User::NORMAL_MODE + 2];
 }
 
 /**
@@ -94,7 +96,7 @@ function tpl_get_user_subtitle(User $user) {
     if ($user->getMathTeacher() != "") {
         $html .= ($html != "" ? "; " : "") . "Mathelehrer: " . $user->getMathTeacher();
     }
-    if ($user->isEditor()) {
+    if ($user->isEditor() || $user->isBlocked()) {
         $html .= ($html != "" ? "; " : "") . tpl_usermode_to_text($user->getMode());
     }
     $last_visit = tpl_user_last_visit($user->getID(), false);

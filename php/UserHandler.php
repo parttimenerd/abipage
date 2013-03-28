@@ -46,7 +46,7 @@ class UserHandler extends ToroHandler {
                 tpl_userlist(User::getNameSuggestions($_GET["phrase"], false, true), $_GET["phrase"], true);
                 jsonAjaxResponseEndSend();
             }
-        } else if (count($arr) == 2 && $arr[1] == "preferences" && Auth::canEditUser($user)) {
+        } else if (count($arr) == 2 && $arr[1] == "preferences" && Auth::canEditUser($user) && !$user->isBlocked()) {
             tpl_user_prefs($user);
         } else {
             tpl_user($user);
@@ -101,9 +101,13 @@ class UserHandler extends ToroHandler {
     }
 
     public function post($slug) {
+        global $env;
         $arr = explode('/', substr($slug, 1));
         $user = self::getUserFromSlug($slug);
-        if (count($arr) == 2 && $arr[1] == "preferences" && Auth::canEditUser($user)) {
+        if ($user == null) {
+            return;
+        }
+        if (count($arr) == 2 && $arr[1] == "preferences" && Auth::canEditUser($user) && !$user->isBlocked()) {
             if (isset($_POST["name"]) && $_POST["name"] != "") {
                 $user->setName($_POST["name"]);
             }
@@ -128,7 +132,7 @@ class UserHandler extends ToroHandler {
             $user->updateDB();
             Auth::login($_POST["name"], $_POST["password"]);
             $this->get($slug);
-        } else if (isset($_POST["id"]) && $user->getID() == Auth::getUserID()) {
+        } else if (isset($_POST["id"]) && $user->getID() == Auth::getUserID() && !$user->isBlocked()) {
             $data = array("id" => intval($_POST["id"]));
             if ($_POST["action"] == "notify") {
                 $user->notifyUserComment(intval($_POST["id"]));

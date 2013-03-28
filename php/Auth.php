@@ -167,6 +167,10 @@ class Auth {
         return self::getUser() != null ? self::$user->getID() : -1;
     }
 
+     public static function isBlocked() {
+        return self::getUser() != null ? (self::$user->getMode() == User::BLOCKED_MODE) : false;
+    }
+    
     public static function isEditor() {
         return self::getUser() != null ? (self::$user->getMode() >= User::EDITOR_MODE) : false;
     }

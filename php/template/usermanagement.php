@@ -45,7 +45,7 @@ function tpl_usermanagement(UserArray $userarr, $as_page = true, $urlapp = "") {
                         <th class="sort" data-sort="last_name">Nachname</th>
                         <th class="sort" data-sort="mail_adress">Mailadresse</th>
                         <th class="sort" data-sort="math_course">Mathekurs</th>
-                        <th class="sort" data-sort="math_teacher">Mathlehrer</th>
+                        <th class="sort" data-sort="math_teacher">Mathelehrer</th>
                         <th class="sort" data-sort="user_mode">Modus</th>
                         <th style="display: none"></th>
                         <th class="sort" data-sort="activated">Aktiviert</th>
@@ -74,7 +74,7 @@ function tpl_usermanagement(UserArray $userarr, $as_page = true, $urlapp = "") {
                             <td class="mail_adress"><a href="mailto:<?php echo $user->getMailAdress() ?>"><?php echo $user->getMailAdress() ?></a></td>
                             <td class="math_course"><?php echo $user->getMathCourse() ?></td>
                             <td class="math_teacher"><?php echo $user->getMathTeacher() ?></td>
-                            <td><?php echo tpl_usermode_to_text($user->getMode()) ?></td>
+                            <td class="user_mode"><?php echo tpl_usermode_to_text($user->getMode()) ?></td>
                             <td class="user_mode" style="display:none;"><?= $user->getMode() ?></td>
                             <td class="activated"><?php echo $user->isActivated() ? "Ja" : "Nein" ?></td>
                             <td class="visible"><?php echo $user->isVisible() ? "Ja" : "Nein" ?></td>

@@ -23,7 +23,8 @@ class User {
     const MODERATOR_MODE = 2;
     const EDITOR_MODE = 1;
     const NORMAL_MODE = 0;
-    const NO_MODE = -1;
+    const BLOCKED_MODE = -1;
+    const NO_MODE = -2;
     const ACCESS_KEY_LENGTH = 10;
 
     private static $name_list = array();
@@ -104,7 +105,7 @@ class User {
      * @param type $name
      * @return String[]
      */
-    public static function getNameSuggestions($name, $also_unvisible = false, $as_namearray = false) {
+    public static function getNameSuggestions($name, $also_unvisible_and_blocked = false, $as_namearray = false) {
         global $db;
         $namearr = User::splitName(sanitizeInputText($name));
         if ($as_namearray) {
@@ -112,7 +113,10 @@ class User {
         } else {
             $str = "CONCAT(first_name, ' ', last_name) AS 'name' ";
         }
-        $res = $db->query("SELECT $str FROM " . DB_PREFIX . "user WHERE (first_name LIKE '%" . $namearr[0] . "%' OR last_name LIKE '%" . $namearr[1] . "%' OR first_name LIKE '%" . $namearr[1] . "%' OR last_name LIKE '%" . $namearr[0] . "%') " . (!$also_unvisible ? " AND visible=1 " : "") . "ORDER BY last_name, first_name ASC");
+        $res = $db->query("SELECT DISTINCT $str FROM " . DB_PREFIX . "user 
+            WHERE (first_name LIKE '%" . $namearr[0] . "%' OR last_name LIKE '%" . $namearr[1] . "%' 
+                OR first_name LIKE '%" . $namearr[1] . "%' OR last_name LIKE '%" . $namearr[0] . "%') 
+                    " . (!$also_unvisible_and_blocked ? (" AND visible=1 AND mode!=" . self::BLOCKED_MODE . " ") : "" ) . "ORDER BY last_name, first_name ASC");
         $arr = mysqliResultToArr($res);
         if ($as_namearray) {
             $retarr = $arr;
@@ -345,16 +349,13 @@ class User {
     }
 
     public static function getNameList() {
+        global $env;
         if (empty(self::$name_list)) {
-            global $db;
-            $res = $db->query("SELECT CONCAT(first_name, ' ', last_name) as namestr FROM " . DB_PREFIX . "user ORDER BY last_name ASC");
-            $arr = array();
-            if ($res != null) {
-                while ($tarr = $res->fetch_array()) {
-                    $arr[] = $tarr["namestr"];
-                }
+            $arr = $env->getUserNames();
+            self::$name_list = array();
+            foreach ($arr as $val) {
+                self::$name_list[] = $val["both"];
             }
-            self::$name_list = $arr;
         }
         return self::$name_list;
     }
@@ -451,8 +452,12 @@ class User {
     }
 
     public function setMode($mode) {
+        global $env;
         $mode = intval($mode);
         $this->mode = $mode > User::ADMIN_MODE ? User::NORMAL_MODE : $mode;
+        if ($this->isBlocked()) {
+            $env->sendMail($this, "Ihr Benutzerkonto wurde blockiert", "Ihr Benutzerkonto wurde blockiert, Sie können nun nicht mehr auf die Seite zugreifen.");
+        }
     }
 
     public function setActivated($activated) {
@@ -627,6 +632,10 @@ class User {
             }
         }
         return $this->number_of_uc_questions_answered;
+    }
+
+    public function isBlocked() {
+        return $this->mode == self::BLOCKED_MODE;
     }
 
 }

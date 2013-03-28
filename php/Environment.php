@@ -68,8 +68,7 @@ class Environment {
         return new UserArray($arr);
     }
 
-    //HACK implement search
-    public function getUserNames($also_deactivated = false, $search_string = "", $also_unvisible = true) {
+    public function getUserNames($also_deactivated = false, $search_string = "", $also_unvisible_and_blocked = true) {
         global $db;
         //$key = $also_deactivated ? "also_deactivated" : "activated";
         $app = "";
@@ -79,12 +78,12 @@ class Environment {
             $search_string_c = str_replace(" ", "%", $db->real_escape_string($search_string));
             $app .= ($app == "" ? " WHERE " : " AND ") . "(first_name LIKE \"%$search_string_c%\" OR last_name LIKE \"%$search_string_c%\") ";
         }
-        if (!$also_unvisible) {
-            $app .= ($app == "" ? " WHERE " : " AND ") . " visible=" . 1;
+        if (!$also_unvisible_and_blocked) {
+            $app .= ($app == "" ? " WHERE " : " AND ") . " visible=" . 1 . " AND mode != " . User::BLOCKED_MODE;
         }
         //if ($this->__usernamesarr[$key] == null) {
         $arr = array();
-        $res = $db->query("SELECT first_name, last_name FROM " . DB_PREFIX . "user" . $app . " ORDER BY last_name ASC") or die($db->error);
+        $res = $db->query("SELECT DISTINCT first_name, last_name FROM " . DB_PREFIX . "user" . $app . " ORDER BY last_name ASC") or die($db->error);
         while ($user = $res->fetch_array()) {
             $arr[] = array("first" => $user['first_name'], "last" => $user['last_name'], "both" => $user['first_name'] . " " . $user['last_name']);
         }
