@@ -80,7 +80,9 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
             if ($env->user_polls_open) {
                 $menus["polls"] = array("Umfragen", $env->polls_subtitle);
             }
-            $menus["actions"] = array("Aktionen", $env->actions_subtitle);
+            if ($env->showed_actions != 0) {
+            $menus["actions"] = array("Aktionen", $env->actions_subtitle);            
+            }
             if ($env->has_forum) {
                 $menus[$env->forum_url] = array("Forum", "");
             }
