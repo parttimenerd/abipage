@@ -348,10 +348,10 @@ class User {
         Actions::addAction($db->insert_id, -1, "delete_user_comment");
     }
 
-    public static function getNameList() {
+    public static function getNameList($also_unvisible_and_blocked = true) {
         global $env;
         if (empty(self::$name_list)) {
-            $arr = $env->getUserNames();
+            $arr = $env->getUserNames(false, "" , $also_unvisible_and_blocked);
             self::$name_list = array();
             foreach ($arr as $val) {
                 self::$name_list[] = $val["both"];

@@ -128,7 +128,7 @@ function tpl_user_datalist() {
     global $html_app;
     if (!isset($html_app["user_datalist_div"])) {
         ob_start();
-        tpl_datalist("user_datalist", User::getNameList());
+        tpl_datalist("user_datalist", User::getNameList(false));
         $html_app["user_datalist_div"] = ob_get_clean();
         tpl_add_js('var user_datalist = $("#user_datalist").html();');
     }
