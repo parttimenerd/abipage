@@ -475,7 +475,7 @@ function tpl_input($args = array("name" => "default", "value" => "", "placeholde
             tpl_usermode_combobox($args["name"], $value == "" ? 0 : intval($value));
             break;
         case "color":
-            tpl_color_selector($args["name"], $value, $args["js_onchange"] != "" ? $args["js_onchange"] : "", $id);
+            tpl_color_selector($args["name"], $value, isset($args["js_onchange"]) && $args["js_onchange"] != "" ? $args["js_onchange"] : "", $id);
             break;
         case "email":
             echo '<input type="email" ' . $str . ' value="' . $value . '"/>';

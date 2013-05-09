@@ -360,6 +360,48 @@ class User {
         return self::$name_list;
     }
 
+    /**
+     * Produces a csv string of the visible users that you're able to import into limesurvey.
+     * @global Environment $env
+     */
+    public static function getCSVNameSet($min_written_items = 0, $min_rating_count = 0) {
+        global $env;
+        $str = "";
+        $users = $env->getUsers(true);
+        foreach ($users->getContainer() as $user) {
+            if ($str != "") {
+                $str .= "\n";
+            }
+            if ($user->getNumberOfRatings() >= $min_rating_count && $user->getNumberOfWrittenItems() >= $min_written_items) {
+                $str .= $user->getFirstName() . "," . $user->getLastName() . "," . $user->getMailAdress();
+            }
+        }
+        return $str;
+    }
+
+    public function getNumberOfRatings() {
+        $count = 0;
+        foreach (array("images", "quotes", "rumors") as $table) {
+            $query = "SELECT count(*) AS count FROM " . DB_PREFIX . $table . "_ratings WHERE userid = " . $this->id;
+            $arr = mysqliResultToArr($this->db->query($query), true);
+            $count += intval($arr["count"]);
+        }
+        return $count;
+    }
+
+    public function getNumberOfWrittenItems() {
+        $count = 0;
+        foreach (array("images", "quotes", "rumors") as $table) {
+            $query = "SELECT count(*) AS count FROM " . DB_PREFIX . $table . " WHERE userid = " . $this->id;
+            $arr = mysqliResultToArr($this->db->query($query), true);
+            $count += intval($arr["count"]);
+        }
+        $query = "SELECT count(*) AS count FROM " . DB_PREFIX . "user_comments WHERE commenting_userid = " . $this->id;
+        $arr = mysqliResultToArr($this->db->query($query), true);
+        $count += intval($arr["count"]);
+        return $count;
+    }
+
     public function getID() {
         return $this->id;
     }

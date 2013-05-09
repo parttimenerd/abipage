@@ -58,10 +58,10 @@ class Environment {
         //return $this->{$var};
     }
 
-    public function getUsers() {
+    public function getUsers($only_visible_and_activated = false) {
         global $db;
         $arr = array();
-        $res = $db->query("SELECT * FROM " . DB_PREFIX . "user ORDER BY last_name ASC") or die($db->error);
+        $res = $db->query("SELECT * FROM " . DB_PREFIX . "user " . ($only_visible_and_activated ? " WHERE activated = 1 AND visible = 1" : "") . " ORDER BY last_name ASC") or die($db->error);
         while ($user = User::getFromMySQLResult($res)) {
             $arr[] = $user;
         }
@@ -225,8 +225,8 @@ Hallo ' . $toName . ',<br/><br/>
 </div></div></div></div></div>
 </body>							
 </html>';
-        $title = "=?utf-8?b?".base64_encode(TITLE)."?=";
-        $topic = "=?utf-8?b?".base64_encode($topic)."?=";
+        $title = "=?utf-8?b?" . base64_encode(TITLE) . "?=";
+        $topic = "=?utf-8?b?" . base64_encode($topic) . "?=";
         if (is_a($to, "User"))
             $to = $to->getMailAdress();
         mail($to, $topic, $text, "From: " . $title . "<" . ($this->system_mail_adress != "" ? $this->system_mail_adress : ("info@" . $_SERVER['HTTP_HOST'])) . ">\n"

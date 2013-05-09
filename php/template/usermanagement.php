@@ -54,6 +54,8 @@ function tpl_usermanagement(UserArray $userarr, $as_page = true, $urlapp = "") {
                         <? if ($env->user_characteristics_editable): ?>
                             <th class="sort" data-sort="unanswered_ucquestions">Unbeantwortete Steckbrieffragen</th>
                         <? endif ?>
+                        <th class="sort" data-sort="written_items">Geschriebene Beiträge</th>
+                        <th class="sort" data-sort="ratings">Bewertungen</th>
                         <th>Link</th>
                         <th>Einstellungen</th>
                     </tr>
@@ -64,7 +66,7 @@ function tpl_usermanagement(UserArray $userarr, $as_page = true, $urlapp = "") {
                             <td>
                                 <? if (!Auth::isSameUser($user) && Auth::canEditUser($user)): ?>
                                     <input type="checkbox" onclick="var elem = $('#selected_<?= $user->getID() ?>');
-                        elem.html(elem.html() === 'a' ? 'b' : 'a')" value="true" name="<?php echo $user->getID() ?>" title="Auswählen"/>
+                            elem.html(elem.html() === 'a' ? 'b' : 'a')" value="true" name="<?php echo $user->getID() ?>" title="Auswählen"/>
                                        <? endif; ?>
                             </td>
                             <td class="is_selected" id="selected_<?= $user->getID() ?>" style="display: none">a</td>
@@ -82,6 +84,8 @@ function tpl_usermanagement(UserArray $userarr, $as_page = true, $urlapp = "") {
                             <? if ($env->user_characteristics_editable): ?>
                                 <td class="unanswered_ucquestions"><?= $user->getNumberOfUCQuestionsToBeAnswered() ?></td>
                             <? endif ?>
+                            <td class="written_items"><?= $user->getNumberOfWrittenItems() ?></td>
+                            <td class="ratings"><?= $user->getNumberOfRatings() ?></td>
                             <td><a href="<?= tpl_url('user/' . $user->getName()) ?>">Link</a></td>
                             <td><a href="<?= tpl_url('user/' . $user->getName() . '/preferences') ?>">Einstellungen</a></td>
                         </tr>

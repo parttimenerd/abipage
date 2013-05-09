@@ -43,7 +43,8 @@ class PageManager {
             ),
             User::ADMIN_MODE => array(
                 "preferences" => array("class" => "PreferencesHandler"),
-                "user_connection_visu(/.*)?" => array("class" => "UserConnectionVisuHandler")
+                "user_connection_visu(/.*)?" => array("class" => "UserConnectionVisuHandler"),
+                "namelist_csv" => array("class" => "NameListCSVHandler")
             ),
             User::MODERATOR_MODE => array(
                 "usermanagement" => array("class" => "UserManagementHandler"),

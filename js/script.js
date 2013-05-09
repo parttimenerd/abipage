@@ -504,7 +504,7 @@ function sendUserComment(is_anonymous) {
 }
 
 function setResultMode(view_results) {
-    ajax({
+    $.ajax({
         type: "POST",
         url: ajax_url + "/result_mode",
         data: {
