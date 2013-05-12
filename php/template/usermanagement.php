@@ -56,6 +56,7 @@ function tpl_usermanagement(UserArray $userarr, $as_page = true, $urlapp = "") {
                         <? endif ?>
                         <th class="sort" data-sort="written_items">Geschriebene Beiträge</th>
                         <th class="sort" data-sort="ratings">Bewertungen</th>
+                        <th class="sort" data-sort="ratings_written_items_sum" title="3 * Btrg. + Bew.">Gewertete Summe</th>
                         <th>Link</th>
                         <th>Einstellungen</th>
                     </tr>
@@ -84,8 +85,9 @@ function tpl_usermanagement(UserArray $userarr, $as_page = true, $urlapp = "") {
                             <? if ($env->user_characteristics_editable): ?>
                                 <td class="unanswered_ucquestions"><?= $user->getNumberOfUCQuestionsToBeAnswered() ?></td>
                             <? endif ?>
-                            <td class="written_items"><?= $user->getNumberOfWrittenItems() ?></td>
-                            <td class="ratings"><?= $user->getNumberOfRatings() ?></td>
+                            <td class="written_items"><?= $items = $user->getNumberOfWrittenItems() ?></td>
+                            <td class="ratings"><?= $ratings = $user->getNumberOfRatings() ?></td>
+                            <td class="ratings_written_items_sum"><?= $ratings + 3 * $items ?></td>
                             <td><a href="<?= tpl_url('user/' . $user->getName()) ?>">Link</a></td>
                             <td><a href="<?= tpl_url('user/' . $user->getName() . '/preferences') ?>">Einstellungen</a></td>
                         </tr>

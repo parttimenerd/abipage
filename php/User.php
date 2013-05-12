@@ -351,7 +351,7 @@ class User {
     public static function getNameList($also_unvisible_and_blocked = true) {
         global $env;
         if (empty(self::$name_list)) {
-            $arr = $env->getUserNames(false, "" , $also_unvisible_and_blocked);
+            $arr = $env->getUserNames(false, "", $also_unvisible_and_blocked);
             self::$name_list = array();
             foreach ($arr as $val) {
                 self::$name_list[] = $val["both"];
@@ -364,16 +364,16 @@ class User {
      * Produces a csv string of the visible users that you're able to import into limesurvey.
      * @global Environment $env
      */
-    public static function getCSVNameSet($min_written_items = 0, $min_rating_count = 0) {
+    public static function getCSVNameSet($min_actions = -1, $min_written_items = 0, $min_rating_count = 0) {
         global $env;
-        $str = "";
+        $str = "firstname, lastname, email";
         $users = $env->getUsers(true);
         foreach ($users->getContainer() as $user) {
-            if ($str != "") {
-                $str .= "\n";
-            }
-            if ($user->getNumberOfRatings() >= $min_rating_count && $user->getNumberOfWrittenItems() >= $min_written_items) {
-                $str .= $user->getFirstName() . "," . $user->getLastName() . "," . $user->getMailAdress();
+            $ratings = $user->getNumberOfRatings();
+            $items = $user->getNumberOfWrittenItems();
+            $actions = $ratings + 3 * $items;
+            if (($min_actions != -1 && $actions >= $min_actions) || ($min_actions == -1 && $ratings >= $min_rating_count && $items >= $min_written_items)) {
+                $str .= "\n\"" . $user->getFirstName() . '","' . $user->getLastName() . '","' . $user->getMailAdress() . '"';
             }
         }
         return $str;

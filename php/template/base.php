@@ -81,7 +81,7 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
                 $menus["polls"] = array("Umfragen", $env->polls_subtitle);
             }
             if ($env->showed_actions != 0) {
-            $menus["actions"] = array("Aktionen", $env->actions_subtitle);            
+                $menus["actions"] = array("Aktionen", $env->actions_subtitle);
             }
             if ($env->has_forum) {
                 $menus[$env->forum_url] = array("Forum", "");
@@ -275,6 +275,9 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
                     if (count($subnav) > 1) {
                         $has_sidebar = true;
                     }
+                    if ($env->showed_actions == 0) {
+                        $has_sidebar = false;
+                    }
                     tpl_subnav($subnav["phrase"], isset($subnav["auto_search_forbidden"]) ? $subnav["auto_search_forbidden"] : false);
                 } /* else if ($class == "user"){ //HACK
                   $has_sidebar = true;
@@ -285,6 +288,9 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
                 }
                 if (Auth::isLoggedIn() && !Auth::isBlocked())
                     tpl_uc_answer_info();
+                if ($env->showed_actions == 0) {
+                    $has_sidebar = false;
+                }
             }
 
             /**

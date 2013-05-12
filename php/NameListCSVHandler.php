@@ -22,10 +22,11 @@ class NameListCSVHandler extends ToroHandler {
     public function get($slug = "") {
         $min_ratings = isset($_GET["min_ratings"]) ? intval($_GET["min_ratings"]) : 0;
         $min_items = isset($_GET["min_ratings"]) ? intval($_GET["min_items"]) : 0;
+        $min_actions = isset($_GET["min_actions"]) ? intval($_GET["min_actions"]) : -1;
         if (!isset($_GET["html"])) {
             header("Content-Disposition: attachment; filename*=UTF-8''namelist.csv");  
         }
-        echo User::getCSVNameSet($min_items, $min_ratings);
+        echo User::getCSVNameSet($min_actions, $min_items, $min_ratings);
     }
 
 }

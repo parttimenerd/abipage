@@ -111,6 +111,10 @@ function addLoadedItemsHTML(html, is_append) {
             }
             $('.imagelist a.item-content').Chocolat(chocolat_options);
         } else {
+           // hmtl = removeElements(html, ".alert-info");
+            html = $("<div>" + html + "</div>");
+            html.find(".alert-info").remove();
+            html = html.html();
             if (is_append) {
                 $('.content').append(html);
             } else {
@@ -120,7 +124,6 @@ function addLoadedItemsHTML(html, is_append) {
     }
 //last_item.focus();
 }
-
 
 jQuery.fn.reverse = [].reverse;
 
@@ -734,7 +737,8 @@ $("body").ready(function() {
     $("#user_table").ready(function() {
         var options = {valueNames: ["id", "first_name", "last_name", "math_course",
                 "math_teacher", "user_mode", "activated", "visible", "comments_moderated",
-                "unanswered_ucquestions", "mail_adress", "is_selected"], plugins: [['fuzzySearch']]};
+                "unanswered_ucquestions", "mail_adress", "is_selected", "written_items",
+                "ratings", "ratings_written_items_sum"], plugins: [['fuzzySearch']]};
         window.user_table_list = new List("user_table", options);
     });
     $("#not_reviewed_comments_table").ready(function() {

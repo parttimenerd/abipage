@@ -67,7 +67,7 @@ class UserHandler extends ToroHandler {
             if (Auth::isSameUser($user)) {
                 $this->get($slug);
             } else if (!$user) {
-                tpl_userlist($env->getUserNames());
+                $this->get($slug);
             } else {
                 tpl_user_page($user, UserCharacteristicsItem::getAll($user));
             }
