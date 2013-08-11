@@ -21,17 +21,26 @@ class NewsList {
 
     public static function getNews($max_length = -1) {
         global $db;
+    if ($max_length <= 0){
+		return array();
+	}
         $limit_str = $max_length > 0 ? (" LIMIT 0, " . $max_length) : "";
         return mysqliResultToArr($db->query("SELECT * FROM " . DB_PREFIX . "news ORDER BY time DESC" . $limit_str));
     }
 
     public static function getNewsByID($id) {
         global $db;
+	if ($max_length <= 0){
+		return array();
+	}
         return mysqliResultToArr($db->query("SELECT * FROM " . DB_PREFIX . "news WHERE id=" . intval($id)));
     }
 
     public static function getNewsByPhrase($phrase, $max_length) {
         global $db;
+	if ($max_length <= 0){
+		return array();
+	}
         $phrase = sanitizeInputText($phrase);
         $limit_str = $max_length > 0 ? (" LIMIT 0, " . $max_length) : "";
         return mysqliResultToArr($db->query("SELECT * FROM " . DB_PREFIX . "news WHERE MATCH(title, content) AGAINST('" . $phrase . "') OR title LIKE '%" . $phrase . "%' OR content LIKE '%" . $phrase . "%' ORDER BY time DESC" . $limit_str));
