@@ -91,7 +91,7 @@ class DeletedItemsList {
             }
             $authorid = $item["commenting_userid"];
             $author_time = $item["time"];
-            $data["commented_user"] = $item["commented_user"];
+            $data["commented_userid"] = $item["commented_userid"];
             $data["notified_as_bad"] = intval($item["notified_as_bad"]) == 1;
             $data["reviewed"] = $item["reviewed"];
             $data["text"] = $item["text"];

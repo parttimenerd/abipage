@@ -56,7 +56,7 @@ function deleteItemModal(id, delete_action){
         var obj = {
             id: id,
             cause: window.item_delete_cause,
-            delete_action: delete_action === "user_comment" ? "deleteUserComment(" + id + ")" : "deleteItem(" + id + "); $('#" + id + "_delete_modal').modal('hide')"
+            delete_action: (delete_action === "user_comment" ? "deleteUserComment(" + id + ")" : "deleteItem(" + id + ")") + "; $('#" + id + "_delete_modal').modal('hide')"
         };
         html = item_delete_template(obj);
         container.html(html);
