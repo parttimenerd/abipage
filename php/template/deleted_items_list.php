@@ -69,7 +69,13 @@ function tpl_deleted_items_list_part($deleted_items, $type) {
             <? foreach ($deleted_items as $item):
                 ?>
                 <tr>
-                    <td><? tpl_userlink($item["authorid"]) ?></td>
+                    <td>
+                        <?
+                        if ($type != DeletedItemsList::USER_COMMENT || (!Auth::isSameUser($item["commented_user"]) || !$item["isanonymous"])) {
+                            tpl_userlink($item["authorid"]);
+                        }
+                        ?>
+                    </td>
                     <td><? tpl_time_span($item["author_time"]) ?></td>
                     <? if ($type != DeletedItemsList::IMAGE): ?>
                         <? if ($type == DeletedItemsList::QUOTE): ?>
