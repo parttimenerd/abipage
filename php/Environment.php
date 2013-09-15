@@ -83,7 +83,7 @@ class Environment {
         }
         //if ($this->__usernamesarr[$key] == null) {
         $arr = array();
-        $res = $db->query("SELECT DISTINCT first_name, last_name FROM " . DB_PREFIX . "user" . $app . " ORDER BY last_name ASC") or die($db->error);
+        $res = $db->query("SELECT DISTINCT first_name, last_name FROM " . DB_PREFIX . "user" . $app . " ORDER BY last_name, first_name ASC") or die($db->error);
         while ($user = $res->fetch_array()) {
             $arr[] = array("first" => $user['first_name'], "last" => $user['last_name'], "both" => $user['first_name'] . " " . $user['last_name']);
         }

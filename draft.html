@@ -1,0 +1,426 @@
+<!--
+Copyright (C) 2013 Parttimenerd
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    </head>
+    <body>
+        This article is an collection of my thoughts on the syntax of the POOL programming language. It may evolve and be updated (and written) over time. Furthermore it's like a blue print for my later work on the parser and the grammar, therefore it's written like a language reference. It's my first article of this kind (and its using terms from Java, JavaScript and Ruby), but I hope it's none the less readable and gives a good (and deep) overview of the language.
+
+        #Notes on the formatting of this article
+        <ul>
+            <li>Uppercased words or words in brackets are placeholder.</li>
+            <li><code>CODE #-&gt; VALUE</code> means that the <code>CODE</code> returns (or emmits) <code>VALUE</code></li>
+            <li><code>CODE #~&gt; VALUE</code> means that the <code>CODE</code> returns (or emmits) something equivalent to <code>VALUE</code></li>
+            <li><code>, ...</code> means that the pattern used before the comma is repeated</li>
+        </ul>
+        <h1>Syntax basis and philosophy</h1>
+        The syntax of the language is heavily based on the syntax of JavaScript (JavaScript is even to some extend valid pool code) and Ruby as JavaScript has an easy syntax and I like Ruby (it's syntax is great and easy to understand). Therefore the syntax for simple comments, assignments, property access, method calls and primitive data types (I mean numbers, arrays, strings and booleans) is the same as in JavaScript (and Ruby) and so I assume that you understand this parts of the syntax when used here, I set it for now at side and cover them after core parts of the syntax later.
+
+        The philosophy of this syntax to emphasize that everything (yes, everthing) is an object and to allow as much flexibility as possible.
+        <h1>Objects</h1>
+        Objects are the base of the language, so their syntax one is really simple (an bourroughed from JavaScript):
+        <code>obj = {"KEY": [value or expression], ...}</code>, if <code>KEY</code> is a valid variable name or not a string <code>obj = {KEY: [value or expression], ...}</code> or an empty object <code>empty_object = {}</code>.
+        Elements of the object can be accessed either with <code>obj["KEY"]</code> or if <code>KEY</code> is a valid variable name <code>obj.KEY</code>. Not existing properties have the value <code>nil</code>, if a not existing method is called on this object, it's <code>undefined_method</code> function is called (as you may have recognized, I use the term <code>method</code> and the term <code>function</code> mostly as synonyms). Inside the object, you can directly access its properties with just <code>KEY</code> if <code>KEY<code> is a valid variable name (but later more on this topic).</code></code>
+
+        Every object has some properties and methods built in (which can be overriden, but be really careful), some of them have aliases for convenience:
+
+        <dl><dt><code>$size</code></dt><dd>the number of key value pairs in the object minus the built in ones (and the ones beginning with <code>$</code>.</dd><dt><code>function $contains(KEY)</code></dt><dd>checks whether the object contains the <code>KEY</code></dd><dt><code>function $delete(KEY)</code></dt><dd>deletes the <code>KEY</code> value pair</dd><dt><code>this</code> or <code>$this</code></dt><dd>the current object</dd><dt><code>$parent</code></dt><dd>the object this object is a part of - the parent object.
+                <code>@KEY</code> is a short cut for <code>$parent.KEY</code></dd><dt><code>$module</code></dt><dd>the module this object is part of (<code>$module</code> and <code>$parent</code> could possibly be the same)</dd><dt><code>$type</code> or <code>$class</code></dt><dd>type of the object:
+                <code>obj.$type == "Object"</code>: the object is a simple object<code>obj.$type == "Module"</code>: the object is a module<code>obj.$type == "Function"</code>: the object is a functionelse the class name of object, alias for <code>$class.name</code>
+
+            </dd><dt><code>$class</code></dt><dd>Class object this object is an instantiation of.
+                Normal object: Object, ...
+                Class object: Object</dd><dt><code>function undefined_method([method name], [parameter object])</code></dt><dd>This method is called whenever a not existing method is called on this object (e.g. <code>obj.not_existing_method(34)</code>). The default implementation throws an exception.</dd><dt><code>$private</code></dt><dd>An object containing the private properties of this object.
+
+            </dd><dt><code>$protected</code></dt><dd>An object containing the private properties of this object which are also accesible from subclasses (is only important in class definitions)</dd><dt><code>$module_private</code></dt><dd>An object containing the properties accesible from within the same module.
+                The object inherits some more built in methods and properties which will be described in a detailed object reference.</dd></dl>
+        <h1>Modules</h1>
+        Modules are simply objects with a different syntax, the ability to import functions and objects of another module in to it via the built in <code>import([module reference or module name])</code> function (if there is no such module, the interpreter searches and requires the appropiate file if their is one, if not throws an error). The code inside a module is excecuted when it's loaded or required (via function <code>require("FILE_NAME")</code>, if FILE_NAME has no file ending, the function adds <code>.pool</code>). Modules can be nested in side one another, <b>but not into objects</b>.
+
+        Their syntax is easy:
+        <code>
+            module MODULE_NAME {
+        </code>
+
+        [CODE]
+        }
+
+        <code></code>
+        or in a more literal and Ruby like style:
+        <code>
+            module MODULE_NAME
+            [CODE]
+            end
+        </code>
+        Example:
+        <code>
+            module Test.Module //Every valid reference is alowed. Just Test has to be a module (it will be created if is doesn't exist)
+            import(IO) //IO is a built in module
+            obj = {"3": 3} //creates an object, that can be accessed from the outside via Test.Module.obj
+            end
+        </code>
+        Every code outside a module (and modules outside of other modules) are placed into the <code>STDModule</code>.
+        As Modules are (after they're loaded) some kind of objects they inherit the built in functions and properties of them.
+        <h1>Functions</h1>
+        Define a function:
+        <code>
+            function [variable name]([parameter list]){
+            [CODE]
+            }
+        </code>
+
+        Define a closure:
+        <code>
+            [variable name] = function([parameter list]){
+            [CODE]
+            }
+        </code>
+        Or in a shorter way
+        <code>
+            [variable name] = {|[parameter list]|
+            [CODE]
+            }
+        </code>
+        or (of course)
+        <code>
+            [variable name] = do |[parameter list]|
+            [Code]
+            end
+        </code>
+        <code>||</code> can be omited if the closure has no parameters.
+
+        Closure and functions are over all the same, in fact the only difference between the two is, that functions allow back referencing (the interpreter recognizes them during parsing). Therefore function can be used as closures and so everything I say about functions will (if I say nothing explicit) also apply to closures.
+        The parameter list: <code>[parameter (a normal variable name, the given value is assigned to)], [another parameter], ...</code>
+
+        Or if you want to set a default value for one parameter:
+        <code>[parameter]: [default value], ...</code>
+        If you use an expression instead of an explicit value, the value will be evaluated every time the default value is used. But if you put a <code>~</code> in front of the colon (<code>~:</code>) the value will only be evaluated once and then cached (so don't use <code>$caller</code> there). It's also important, that the scope of such an expression is the function scope (you're able to use <code>$caller</code>, <code>$this</code>, ...).
+        If you want to auto clone the given value of a parameter (I know, it's the other way aorund in PHP but hopefully it's not to hard to memoize the difference) you can prefix <code>PARAMETER</code> with an ampersand (<code>&amp;PARAMETER</code>).
+        You're able to preset a return value for a given set of parameters of a function:
+        <code>
+            FUNCTION(3) = 4
+        </code>
+
+        Built in variables of of the function object:
+
+        <dl>
+            <dt><code>this</code> or <code>$this</code></dt>
+            <dd>the current function object</dd>
+            <dt><code>$this.$caller</code> or simply <code>$caller</code></dt>
+            <dd>the caller function object</dd><dt><code>$local</code></dt>
+            <dd>the local variables</dd><dt><code>$param</code></dt>
+            <dd>the current parameter object, <code>$param = {[first parameter name]: [value], ..., $other = []}</code>.
+                If a parameter isn't given, it's value is nil, if a parameter is given without a corresponding parameter name, it's added to the <code>$other</code> array
+                <b>Please don't use constructs like the caller of the parent object, as it's value is going to be <code>nil</code> and therefore is useless.</b></dd>
+            <dt><code>$default</code></dt>
+            <dd>the parameter default values, <code>$default = {[first parameter with default value]: [default value], ...}</code></dd>
+            <dt><code>$ast</code>:</dt>
+            <dd>it will probably be added later and will allow the modification of the Abstract Syntax Tree of the function body.</dd>
+            <dt><code>$yield</code></dt>
+            <dd>Closure the function is called with. Short for <code>$param.$yield</code></dd>
+        </dl>
+
+        Instead you only using the keywords <code>function</code> or <code>def</code> you're also able to create special function types by pefixing these words, <code>[prefix]function</code> or <code>[prefix]function</code> (they can also be combined). Special types and their prefixes are the following:
+
+        <dl>
+            <dt><code>sef_</code></dt>
+            <dd>sef stands for "side effect free". This function type caches the results in <code>$cache = {[parameter object]: [function result], ...}</code> (could be changed in the future)</dd>
+            <dt><code>pdf_</code></dt>
+            <dd>pdf stands for "preset default value". It's a function type that returns the same function with the given parameters preset (their default values, to be correct), if other parameters (with no default values) aren't set.</dd>
+        </dl>
+        They're simply short cuts for setting the value of the property <code>$is_pdf</code> or <code>$is_sef</code> to <code>true</code> accordingly.
+        Example:
+        <code>
+            pdf_function pow(base, exponent) { base ** exponent }
+            pow_two = pow(exponent: 2) #-&gt; {|base, exponent: 2| base ** exponent}
+            pow_two(3) #-&gt; 9
+        </code>
+        <h2>Return values</h2>
+        Values are returned explicit via <code>return VALUE</code> or implicit (the value of the last expression is returned).
+        <h2>Call a function</h2>
+        You call a function as you would expect via <code>FUNCTION([first parameter], [second], ...)</code>. You're able to replace <code>[first parameter]</code> with <code>[parameter name]: [parameter value]</code> to set the value of a special parameter out of the normal order (e.g. <code>FUNCTION([first parameter], [parameter name]: [value], [second parameter])</code>). To pass a <code>nil</code> value for a parameter, you can either type <code>nil</code> directly, or omit the value (e.g. <code>FUNCTION([first parameter],, [third parameter])</code>, <code>FUNCTION([first parameter], [parameter name]:, [third parameter])</code>). A <code>nil</code> value is replaced by the default value of the parameter (if there's one).
+        You can optionally pass an code block stored in the <code>$yield</code> variable in the function:
+        <code>
+            FUNCTION(PARAMETERS) CLOSURE
+            arr.search() {|a, b| a &gt; b }
+        </code>
+
+        Variable names
+        Valid variable (and function and module) names consist of an alphabetical or <code>_</code> character or a dollar sign optionally followed by alpha numerical or <code>_</code> characters and optionally ended by a <code>?</code> or <code>!</code> character (or as an regular expression <code>/$?[a-zA-Z]*[a-zA-Z0-9_]*[!?]?/</code>).
+        Variable names are case sensitive and only allow ASCII characters (no UFT8).
+        The following are some naming conventions (partly coming from Ruby, JavaScript and Java and not enforced by the interpreter):
+        - functions returning <code>boolean</code>s end with a <code>?</code>
+        - only functions that modify the object, they're called on, and with a <code>!</code>
+        - built in functions and properties of objects, functions, etc. start with a <code>$</code>, some have aliases for convenience that aren't (e.g. <code>$this</code> has the alias <code>this</code>).
+        - class and module names are camel cased, the other variable names not (using <code>_</code> instead)
+
+        Comments
+        As I said at the beginning of this article, you're able to write comments as you're used to in JavaScript or Ruby, both syntaxes are supported:
+        One line comment:
+        <code>//COMMENT TEXT</code> or <code>#COMMENT TEXT</code>
+        Multi line comment:
+        <code>
+            /*
+            MULTILINE
+            COMMENT
+            */
+        </code>
+        or
+        <code>
+            #MULTILINE
+            #COMMENT
+        </code>
+
+        Documentating of modules, classes and functions
+        Documentation consists of multi line comments in front of and is modeled after JavaDoc.
+        Structure of the comment text:
+        <code>
+            SHORT DESCRIPTION</code>
+
+        OPTIONAL DETAILED DESCRIPTION
+
+        OPTIONAL INFORMATION
+
+        (the second free line is optional)
+        Optional information tags (have to be in different lines):
+        - <code>@version VERSION</code>:
+        version of the class or etc.
+        - <code>@license LICENCE</code>
+        License the code is licensed under.
+        - <code>@author AUTHOR</code>
+        Author of the code
+        Function specific tags:
+        - <code>@param PARAMETER_NAME TYPE DESCRIPTION</code>
+        information for the parameter <code>PARAMETER_NAME</code>, if you want to write more than one type, just seperate the types by <code>|<code> characters (e.g. <code>TYPE1|TYPE2</code>.
+                - <code>@returns TYPE description</code>
+                information about the return type of the function</code></code>
+
+        Variable assignment
+        <code>=</code> (in object definitions <code>:</code> is used instead but it works similar) without a prefix is asimple assignment by reference. The allowed prefixes are the following:
+        - <code>~</code>: lazy assignment
+        the expression at the right side is evaluated the first time the value of variable is really used
+        - <code>&amp;</code>: assignment by value
+        assigns the cloned value of the right side expression to variable
+        - <code>:<code>: final assignment. (set is_final of the variable object to true)
+                - <code>?</code>: sets the value of the variable if it's current value is nil or null, can't be used to assign a value to a set of parameters of a function.
+                Assignements can be cascaded via commas: <code>[assignment], [assignment]</code></code></code>
+
+        Variables
+        :VAR : variable object containing the value of VAR
+        properties:
+        set : called when the value of the variable is set
+        get : called when the variable is accessed
+        is_final : true if constant
+        value : value of the variable
+
+        Class
+        class CLASS {new:: function(){}, super: class obj, static: {}, possible: array_get [i], push [&lt;&lt;], pop [&gt;&gt;], add [+], sub [-], mul[*], div [/], mod [%], pow [**]}
+        for usability reasons some of the magic is performed by the interpreter indirectly, to allow a simpler method definition. I can't write much about that, as it depends strongly on the implementation. New objects are created via <code>CLASS.new(PARAMTER)</code>
+
+        TODO write more text...
+        <h1>Built in types</h1>
+        Built in types are types with a native syntax, like Strings or Numbers
+        (but without modules, classes, object and functions in this context). The following lists them with their native syntax and a short description.
+
+        <dl>
+            <dt><code>Float</code></dt>
+            <dd>Syntax to create an floating point number 10: <code>10.0</code> or <code>10f</code> or <code>1.0E1</code> or <code>1fE1</code> (the number behind <code>E</code> is the exponent <code>x</code> in <code>zEx = (10 ** x) * z</code>) or (of course) <code>Float.new(10)</code></dd>
+            <dt><code>Integer</code></dt>
+            <dd>The syntax is equivalent to the <code>Float</code> syntax: <code>10</code> or <code>1E1</code> or <code>Integer.new(10)</code>.
+                If an <code>Integer</code> is used in a expression with a float it will be used as a float. In general float values are rounded to smaller integer if they are converted to an integer.</dd>
+            <dt><code>String</code></dt>
+            <dd>Strings are created via <code>"[characters, can span across lines]"</code> or <code>'[characters]'</code>. 
+                You can insert code into the string (it's result will be actually inserted) via <code>#{[CODE]}</code> into <code>"</code> Strings (backslash expression like <code>\n</code> are also only converted in this type of String
+                This code will be treated as a closure: <code>"TEXT #{[CODE]} TEXT"</code> 
+                is equivalent to <code>"TEXT" + {[CODE]}() + "TEXT"</code></dd>
+            <dt><code>Literal</code></dt>
+            <dd>Essentially Strings consisting of one character, no new class but used in the following as a term.
+            <dt><code>Boolean</code></dt>
+            <dd><code>true</code> or <code>TrueClass.new()</code>, <code>false</code> or <code>FalseClass.new()</code>. 
+                More information in the section about boolean expressions.</dd>
+            <dt><code>Nil</code></dt>
+            <dd><code>nil</code> or <code>NilClass.new()</code> acts like false in boolean expressions.
+                Is the value of an unknown variable or of a function or expression returning no value.</dd>
+            <dt><code>Null</code></dt>
+            <dd><code>null</code> or <code>NullClass.new()</code> acts like false in boolean expressions.
+                Is the value of known but unset variables. May be removed later.</dd>
+            <dt><code>Range</code></dt>
+            <dd><code>BEGIN..END</code> or <code>Range.new(BEGIN, END)</code>, <code>BEGIN...END</code>
+                or <code>Range.new(BEGIN, END, false)</code>. Range objects created using <code>..</code> 
+                run from the beginning to the end inclusively. Those created using <code>...</code>
+                exclude the end value. <code>BEGIN</code> and <code>END</code> can be of type Integer, Float or Literal.
+            </dd>
+            <dt><code>RegExp</code></dt>
+            <dd><code>/[Regular expression]/</code> or <code>RegExp.new('[Regular expression]')</code>.
+                Is a regular expressions, strings can be matched against.
+                The actuall regexp syntax is determined during implementation.</dd>
+        </dl>
+        <h1>Boolean expression</h1>
+        <code>
+            Every value except <code>null</code>, <code>nil</code> and <code>false</code> evaluates to <code>false</code> all other values evaluate to <code>true</code>. There are different types of modifiers in boolean expressions, listed below in their precendence.
+        </code>
+
+        <dl><dt><code>EXPR</code> or <code>(EXPR)</code></dt><dd>The value of the expression, which could also be a single value</dd><dt><code>!EXPR</code> or <code>not EXPR</code></dt><dd>Negates the following boolean</dd><dt><code>EXPR &amp;&amp; EXPR</code> or <code>EXPR and EXPR</code></dt><dd>Logical and.</dd><dt><code>EXPR || EXPR</code> or <code>EXPR or EXPR</code></dt><dd>Logical or.</dd><dt><code>EXPR xor EXPR</code></dt><dd>Exclusive or.</dd><dt><code>EXPR == EXPR</code> or <code>(EXPR).equals(EXPR)</code></dt><dd>True if both values are the same (no automatic casting, therefore no <code>===</code> is needed)</dd><dt><code>EXPR =~ EXPR</code></dt><dd>Used when only if one of the to values is an regular expression, the other value is tested against, or if the first value is a range and the second value is included in the range</dd></dl>
+        <h1>Control constructs</h1>
+        EXPR is a boolean expression. Variables defined in the code blocks are only visible in this code block, but variables of the sourrounding (module, class, object, function) scope can be accessed without any prefix.
+        An important information is that such constructs return the value of the last expression of their code and that you can break out such a construct via <code>break</code> (use <code>break DEPT</code> if you want jump out of the <code>DEPT</code>th parent construct), returns the value of the expression before the <code>break</code>.
+        <h2>Conditions</h2>
+        There are several ways to define a simple condition:
+        <code>
+            if (EXPR){
+            [CODE]
+            }
+        </code>
+        or with only a single of code:
+        <code>
+            if (EXPR) [single line of code]
+        </code>
+        or (maybe not implemented)
+        <code>
+            [single line of code] if (EXPR)
+        </code>
+        More advanced conditions with if and else:
+        <code>
+            if (EXPR){
+            [CODE]
+            } else {
+            [CODE]
+            }
+        </code>
+        or with only a single of code:
+        <code>
+            if (EXPR) [single line of code]
+            else (EXPR) [single line of code]
+        </code>
+        the same with several conditions:
+        <code>
+            if (EXPR){
+            [CODE]
+            } else if (EXPR) {
+            [CODE]
+            } else {
+            [CODE]
+            }
+        </code>
+
+        You can replace <code>if</code> with <code>unless</code> if you want to execute the code block when the boolean expression is false.
+        The ternary version is also allowed (as you know it): <code>EXPR ? CODE : CODE</code> .
+        <h2>Switch-case</h2>
+        <code><code><code>
+                    Switch case statements in POOL are similar to them of other languages like JavaScript, so I'm only going do cover the differences.
+                    <code>
+                        switch ([Value or variable, VAL]){
+                        case [EXPR]:
+                        [CODE]
+                        break;
+                        case [EXPR]: [CODE]; break
+                        case~ [EXPR]:
+                        [CODE executed if EXPR =~ VAL is true]
+                        break
+                        case+ [EXPR]:
+                        [CODE executed if EXPR is true]
+                        break
+                        else:
+                        [CODE executed if no other case-condition matches]
+                        }
+                    </code>
+                    If <code>switch</code> is replaced with <code>switch+</code> breaks will be auto inserted after each case statement.</code></code></code>
+        <h2>Loops</h2>
+        As you know and love them.
+        <h3>For loop</h3>
+        <code>
+            for ([assign a variable or not]; [condition tested after each loop cycle, or not (then you've got and endless loop)]; [statement executed after every loop cycle]){
+        </code>
+
+        [Code]
+        }
+        <h3>While loop</h3>
+        <code>
+            while(EXPR) {
+            [CODE]
+            }
+        </code>
+        or if you want execute code while the expression is false:
+        <code>
+            until(EXPR) {
+            [CODE]
+            }
+        </code>
+        <h3>Begin-while loop</h3>
+        <code>
+            begin {
+            [CODE]
+            } while (EXPR)
+        </code>
+        or if you want execute code while the expression is false:
+        <code>
+            begin {
+            [CODE]
+            } unless (EXPR)
+        </code>
+        <h3>Infinite loop</h3>
+        <code>
+            loop {
+            [CODE]
+            }
+        </code>
+        <h1>Exceptions</h1>
+        The specific exception classes are defined during the implementation. All exception classes extends the class <code>Exception</code>.
+        <h2>Exception throwing</h2>
+        <code>
+            throw [exception class].new([parameters])
+        </code>
+        Please add a <code>@throws</code> tag to the appropriate comment.
+        <h2>Exception handling</h2>
+        Exceptions are handled with a Java like syntax:
+        <code>
+            try {
+            [unsafe code]
+            } catch ([Exception class, if you catch more than one, seperate them with a vertical bar] [variable the thrown exception is assigned to]) {
+            [CODE]
+            }
+        </code>
+        You can optionally add a <code>finally { [CODE] } </code> after the catch statement, <code>CODE</code> will than be certainly executed and you can add serveral catch statements after the first.
+    
+        <h1>Embed other languages</h1>
+        <code>
+            &lt;?[handler short code]
+            [CODE in another language]
+            ?&gt;
+        </code>
+        Handlers can be assigned via the method <code>assignLangHandler(shortCode, handler)</code>,
+        where <code>shortCode</code> is a string like <code>"html"</code> and <code>handler</code> 
+        is a closure or function with the first parameter being the code string and the second
+        the context the <code>code</code> is called in.
+        Example, integrating HTML:
+        <code>
+            assignLangHandler("html", {|code, _| print code }
+            
+            #Example usage
+            function hello(){
+            &lt;?html
+            hello
+            ?&gt;
+            }
+            
+            hello() #Output: hello
+        </code>
+    </body>
+</html>

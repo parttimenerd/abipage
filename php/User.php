@@ -342,8 +342,9 @@ class User {
         return $user != null ? $user->getName() : "Anonym";
     }
 
-    public static function deleteUserComment($id) {
-        $db = Database::getConnection();
+    public static function deleteUserComment($id, $cause = "") {
+        global $db;
+        DeletedItemsList::addDeletedItemToList(DeletedItemsList::USER_COMMENT, $id, $cause);
         $db->query("DELETE FROM " . DB_PREFIX . "user_comments WHERE id=" . intval($id) . " AND commenting_userid!=" . Auth::getUserID()) or die($db->error);
         Actions::addAction($db->insert_id, -1, "delete_user_comment");
     }

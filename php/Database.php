@@ -31,6 +31,7 @@ class Database {
             if (defined('DEBUG')) {
                 self::$db = new DebugDBWrapper(self::$db);
             }
+                    self::setup();
             return self::$db;
         }
     }
@@ -43,7 +44,7 @@ class Database {
     }
 
     public static function setup() {
-        self::connect();
+        //self::connect();
         self::$db->query('CREATE TABLE IF NOT EXISTS ' . DB_PREFIX . "user(id INT AUTO_INCREMENT PRIMARY KEY, first_name VARCHAR(30), last_name VARCHAR(30), math_course TINYINT, math_teacher VARCHAR(30), mail_adress VARCHAR(40), mode TINYINT, activated TINYINT, visible TINYINT, crypt_str VARCHAR(250), data TEXT, FULLTEXT(first_name, last_name, math_teacher, mail_adress)) ENGINE = MYISAM") or die("Can't create user table: " . self::$db->error);
         self::$db->query('CREATE TABLE IF NOT EXISTS ' . DB_PREFIX . "preferences(`key` VARCHAR(40) PRIMARY KEY, value TEXT, FULLTEXT(`key`, value)) ENGINE = MYISAM") or die("Can't create preferences table: " . self::$db->error);
         self::$db->query('CREATE TABLE IF NOT EXISTS ' . DB_PREFIX . "keyvaluestore(id INT AUTO_INCREMENT PRIMARY KEY, `key` VARCHAR(40), value TEXT, userid INT, FULLTEXT(`key`, value)) ENGINE = MYISAM") or die("Can't create keyvaluestore table: " . self::$db->error);
@@ -61,6 +62,8 @@ class Database {
         self::$db->query('CREATE TABLE IF NOT EXISTS ' . DB_PREFIX . "teacher(id INT AUTO_INCREMENT PRIMARY KEY, first_name VARCHAR(30), last_name VARCHAR(30), namestr VARCHAR(35), ismale TINYINT, FULLTEXT(namestr)) ENGINE = MYISAM") or die("Can't create teacher table: " . self::$db->error);
         self::$db->query('CREATE TABLE IF NOT EXISTS ' . DB_PREFIX . "news(id INT AUTO_INCREMENT PRIMARY KEY, title VARCHAR(100), content TEXT, time BIGINT, userid INT, FULLTEXT(title, content)) ENGINE = MYISAM") or die("Can't create news table: " . self::$db->error);
         self::$db->query('CREATE TABLE IF NOT EXISTS ' . DB_PREFIX . "actions(id INT AUTO_INCREMENT PRIMARY KEY, userid INT, itemid INT, person VARCHAR(50), type VARCHAR(20), time BIGINT)") or die("Can't create news table: " . self::$db->error);
+        self::$db->query('CREATE TABLE IF NOT EXISTS ' . DB_PREFIX . "deleted_items(id INT AUTO_INCREMENT PRIMARY KEY, type INT, itemid INT, deleting_userid INT, authorid INT, data TEXT, delete_cause TEXT, author_time BIGINT, delete_time BIGINT)");// or die("Can't create deleted_items table: " . self::$db->error);
+        self::$db->query('CREATE TABLE IF NOT EXISTS ' . DB_PREFIX . "edited_items(id INT AUTO_INCREMENT PRIMARY KEY, type INT, itemid INT, editing_userid INT, authorid INT, data_before TEXT, data_after TEXT, edit_cause TEXT, author_time BIGINT, edit_time BIGINT)") or die("Can't create edited_items table: " . self::$db->error);
     }
 
 }

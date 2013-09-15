@@ -46,17 +46,28 @@ function fillStars(id, rating) {
 }
 
 function deleteItem(id) {
-    if (confirm("Wollen sie diesen Beitrag wirklich löschen?")) {
+    var input = prompt("Wollen sie diesen Beitrag wirklich löschen? Dann geben sie bitte einen Grund an: ",
+            this.item_delete_cause !== undefined ? this.item_delete_cause : "");
+    if (input === null) {
+        return;
+    }
+    if (input.length > 0) {
+        this.item_delete_cause = input;
+    }
+    if (this.item_delete_cause !== undefined) {
         ajax({
             data: {
                 "delete": 0,
-                "id": id
+                "id": id,
+                "cause": this.item_delete_cause
             },
             func: function(data) {
                 $("#" + data["id"]).remove();
             },
             needs: ["id"]
         });
+    } else {
+        deleteItem(id);
     }
 }
 
@@ -111,7 +122,7 @@ function addLoadedItemsHTML(html, is_append) {
             }
             $('.imagelist a.item-content').Chocolat(chocolat_options);
         } else {
-           // hmtl = removeElements(html, ".alert-info");
+            // hmtl = removeElements(html, ".alert-info");
             html = $("<div>" + html + "</div>");
             html.find(".alert-info").remove();
             html = html.html();
@@ -555,15 +566,28 @@ function timespanText(timediff) {
 window.setInterval("updateTimespans()", 5000);
 
 function deleteUserComment(id) {
-    ajax({
-        data: {
-            "deleteComment": id
-        },
-        func: function(data) {
-            $("#" + data["id"]).remove();
-        },
-        needs: ["id"]
-    });
+    var input = prompt("Wollen sie diesen Kommentar wirklich löschen? Dann geben sie bitte einen Grund an: ",
+            this.item_delete_cause !== undefined ? this.item_delete_cause : "");
+    if (input === null) {
+        return;
+    }
+    if (input.length > 0) {
+        this.item_delete_cause = input;
+    }
+    if (this.item_delete_cause !== undefined) {
+        ajax({
+            data: {
+                "deleteComment": id,
+                "cause": this.item_delete_cause
+            },
+            func: function(data) {
+                $("#" + data["id"]).remove();
+            },
+            needs: ["id"]
+        });
+    } else {
+        deleteUserComment(id);
+    }
 }
 
 function ajax(args) {

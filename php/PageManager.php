@@ -52,7 +52,8 @@ class PageManager {
                 "teacherlist" => array("class" => "TeacherListHandler"),
 //                "uc_management" => array("class" => "UserCharacteristicsManagementHandler"),
 //                "up_management" => array("class" => "UserPollsManagementHandler"),
-                "stats" => array("class" => "StatsHandler", "is_open" => $env->stats_open)
+                "stats" => array("class" => "StatsHandler", "is_open" => $env->stats_open),
+                "deleted_items_list" => array("class" => "DeletedItemsListHandler")
             ),
             self::DEFAULT_MIN_UMODE => array(
                 "user(/.*)?" => array("class" => "UserHandler"),

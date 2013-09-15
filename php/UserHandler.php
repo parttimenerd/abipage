@@ -160,8 +160,8 @@ class UserHandler extends ToroHandler {
                 PiwikHelper::addTrackGoalJS("Anonymous contribution");
             PiwikHelper::addTrackGoalJS("User commented", $_POST["text"]);
             jsonAjaxResponseEndSend($data);
-        } else if (isset($_POST["deleteComment"]) && Auth::canDeleteUserComment()) {
-            User::deleteUserComment(intval($_POST["deleteComment"]));
+        } else if (isset($_POST["deleteComment"]) && Auth::canDeleteUserComment() && !Auth::isSameUser($user)) {
+            User::deleteUserComment(intval($_POST["deleteComment"]), isset($_POST["cause"]) ? $_POST["cause"] : "");
             jsonAjaxResponse(array("id" => intval($_POST["deleteComment"])));
         }
     }

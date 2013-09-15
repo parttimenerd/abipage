@@ -166,7 +166,12 @@ function tpl_user_span($user_id = -1, $with_icon = true, $anonymous = false, $ca
  */
 function tpl_url($relative_url) {
     if (substr($relative_url, 0, 4) != "http") {
-        return URL . '/' . str_replace(' ', '_', $relative_url);
+        $url_part = str_replace(' ', '_', $relative_url);
+        if (strstr($url_part, "/") == 0) {
+            return URL . $url_part;
+        } else {
+            return URL . '/' . $url_part;
+        }
     } else {
         return $relative_url;
     }

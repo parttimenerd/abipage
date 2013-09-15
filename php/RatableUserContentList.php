@@ -155,6 +155,11 @@ abstract class RatableUserContentList {
         return $retarr;
     }
 
+    /**
+     * 
+     * @param type $id
+     * @return \RatableUserContentItem
+     */
     public function getItemByID($id) {
         $cid = intval($id);
         $user = Auth::getUser();
@@ -222,7 +227,8 @@ abstract class RatableUserContentList {
         return array("rating" => $this->updateRating($id), "edited" => $edit);
     }
 
-    public function deleteItem($id, $trigger_action = true) {
+    public function deleteItem($id, $cause = "", $trigger_action = true) {
+        DeletedItemsList::addDeletedItemToList(DeletedItemsList::stringToTypeID($this->type), $id, $cause);
         $cid = intval($id);
         $this->db->query("DELETE FROM " . $this->table . " WHERE id=" . $cid) or die($this->db->error);
         $this->db->query("DELETE FROM " . $this->table . "_ratings WHERE itemid=" . $cid) or die($this->db->error);
@@ -230,7 +236,7 @@ abstract class RatableUserContentList {
             $res = $this->db->query("SELECT id FROM " . $this->table . " WHERE response_to=" . $cid) or die($this->db->error);
             if ($res != null) {
                 while ($arr = $res->fetch_array())
-                    $this->deleteItem($arr["id"], true);
+                    $this->deleteItem($arr["id"], $cause, true);
             }
         }
         if ($trigger_action) {

@@ -4,9 +4,9 @@
 
 /* TEAM */
   Developer: Johannes Bechberger
-  Site: uqudy.serpens.uberspace.de
+  Site: mostlynerdless.de
   Twitter: @parttimen3rd
-  E-Mail: johannes.bechberger@online.de
+  E-Mail: me@mostlynerdless.de
   Location: Germany
 
 /* THANKS */
@@ -16,7 +16,7 @@
   Patrick Haar: for new ideas and bug reports
 
 /* SITE */
-  Last update: 2012/03/09
+  Last update: 2013/15/09
   Standards: HTML5, CSS3, ECMAScript5, PHP5, Ruby1.9
   Components: Twitter Bootstrap, HTML5 Boilerplate, Modernizr, PHP Markdown, ToroPHP, jQuery, list.js with fuzzySearch plugin, Chocolat, Color picker, jQuery.bottom, Icons by The Noun Project, jQuery wysiwyg, handlebars.js, Swag handlebars.js helpers
   Doctype: HTML5

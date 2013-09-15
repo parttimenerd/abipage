@@ -114,6 +114,9 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
 //                $meta_dropdown["user_characteristics/edit"] = array("Steckbriefverwaltung", $env->uc_management_subtitle);
                     $meta_dropdown["polls/add"] = array("Umfragen hinzufügen", $env->polls_management_subtitle);
                 }
+                if (Auth::canSeeDeletedItemsList()) {
+                    $meta_dropdown["deleted_items_list"] = array("Gelöschte Beiträge", $env->deleted_items_list);
+                }
                 if (Auth::canViewPreferencesPage()) {
                     $meta_dropdown["preferences"] = array("Einstellungen", $env->preferences_subtitle);
                 }
@@ -209,118 +212,118 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
                 The CMS is developed by some (currently one and two helping) nerds, please take a look at the humans.txt to find out more about them.
             -->
         </head>
-
-        <!-- Navbar
-        ================================================== -->
-        <div class="navbar navbar-fixed-top">
-            <div class="navbar-inner">
-                <div class="container">
-                    <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-                        <span class="sign-icon">+</span>
-                    </button>
-                    <a class="brand" href="<?php echo $env->url ?>"><?php echo $env->title ?></a>
-                    <div class="nav-collapse collapse">
-                        <ul class="nav">
-                            <?php
-                            foreach ($menus as $key => $value):
-                                if (!isset($value["dropdown"])):
-                                    ?>
-                                    <li class="<?= $key == $class ? "active" : "" ?>">
-                                        <a href="<?php echo tpl_url($key) ?>"><?php echo $value[0] ?></a>
-                                    </li>
-                                    <?php
-                                else:
-                                    $dropdown = $value["dropdown"];
-                                    $head = $value["head"];
-                                    ?>
-                                    <li class="<?= (array_key_exists($class, $dropdown) || $key == $class) ? 'active' : '' ?> dropdown">
-                                        <a class="dropdown-toggle" data-toggle="dropdown" data-target="#" href="<?php echo tpl_url($key) ?>">
-                                            <?php echo $head[0] ?>
-                                            <b class="caret"></b>
-                                        </a>
-                                        <ul class="dropdown-menu">
-                                            <?php foreach ($dropdown as $key2 => $value2): ?>
-                                                <li><a href="<?php echo tpl_url($key2) ?>"><?php echo $value2[0] ?></a></li>
-                                            <?php endforeach ?>
-                                            <?php if ($key == "user" && $env->results_viewable && Auth::isEditor()): ?>
-                                                <li>
-                                                    <input id="result_mode" type="checkbox" onclick="setResultMode($(this).is(':checked'))"<?= $store->result_mode_ud ? 'checked="checked"' : "" ?>>Ergebnisse anzeigen</input>
-                                                </li>
-                                            <?php endif; ?>
-                                        </ul>
-                                    </li>
+        <body>
+            <!-- Navbar
+            ================================================== -->
+            <div class="navbar navbar-fixed-top">
+                <div class="navbar-inner">
+                    <div class="container">
+                        <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                            <span class="sign-icon">+</span>
+                        </button>
+                        <a class="brand" href="<?php echo $env->url ?>"><?php echo $env->title ?></a>
+                        <div class="nav-collapse collapse">
+                            <ul class="nav">
                                 <?php
-                                endif;
-                            endforeach
-                            ?>
-                        </ul>
+                                foreach ($menus as $key => $value):
+                                    if (!isset($value["dropdown"])):
+                                        ?>
+                                        <li class="<?= $key == $class ? "active" : "" ?>">
+                                            <a href="<?php echo tpl_url($key) ?>"><?php echo $value[0] ?></a>
+                                        </li>
+                                        <?php
+                                    else:
+                                        $dropdown = $value["dropdown"];
+                                        $head = $value["head"];
+                                        ?>
+                                        <li class="<?= (array_key_exists($class, $dropdown) || $key == $class) ? 'active' : '' ?> dropdown">
+                                            <a class="dropdown-toggle" data-toggle="dropdown" data-target="#" href="<?php echo tpl_url($key) ?>">
+                                                <?php echo $head[0] ?>
+                                                <b class="caret"></b>
+                                            </a>
+                                            <ul class="dropdown-menu">
+                                                <?php foreach ($dropdown as $key2 => $value2): ?>
+                                                    <li><a href="<?php echo tpl_url($key2) ?>"><?php echo $value2[0] ?></a></li>
+                                                <?php endforeach ?>
+                                                <?php if ($key == "user" && $env->results_viewable && Auth::isEditor()): ?>
+                                                    <li>
+                                                        <input id="result_mode" type="checkbox" onclick="setResultMode($(this).is(':checked'))"<?= $store->result_mode_ud ? 'checked="checked"' : "" ?>>Ergebnisse anzeigen</input>
+                                                    </li>
+                                                <?php endif; ?>
+                                            </ul>
+                                        </li>
+                                    <?php
+                                    endif;
+                                endforeach
+                                ?>
+                            </ul>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div><!-- navbar -->
-        <div class="container">
-            <?
-            tpl_enable_javascript();
+            </div><!-- navbar -->
+            <div class="container">
+                <?
+                tpl_enable_javascript();
 //            tpl_html5_please()
-            ?>
-            <!--[if lt IE 10]><p class=chromeframe>Your browser is <em>ancient!</em> <a href="https://browsehappy.com/">Upgrade to a different browser</a>.</p><![endif]-->
-            <header class="jumbotron subhead" id="overview">
-                <h1><? if ($header_icon != "") tpl_icon($header_icon, "", "", "header-icon") ?><?php echo $title ?></h1>
-                <p class="lead">
-                    <?php echo $subtitle ?></p>
-                <?php
-                global $has_sidebar;
-                $has_sidebar = $sidebar;
-                if (($subnav && count($subnav) >= 1) || $sidebar) {
-                    if (count($subnav) > 1) {
-                        $has_sidebar = true;
+                ?>
+                <!--[if lt IE 10]><p class=chromeframe>Your browser is <em>ancient!</em> <a href="https://browsehappy.com/">Upgrade to a different browser</a>.</p><![endif]-->
+                <header class="jumbotron subhead" id="overview">
+                    <h1><? if ($header_icon != "") tpl_icon($header_icon, "", "", "header-icon") ?><?php echo $title ?></h1>
+                    <p class="lead">
+                        <?php echo $subtitle ?></p>
+                    <?php
+                    global $has_sidebar;
+                    $has_sidebar = $sidebar;
+                    if (($subnav && count($subnav) >= 1) || $sidebar) {
+                        if (count($subnav) > 1) {
+                            $has_sidebar = true;
+                        }
+                        if ($env->showed_actions == 0) {
+                            $has_sidebar = false;
+                        }
+                        tpl_subnav($subnav["phrase"], isset($subnav["auto_search_forbidden"]) ? $subnav["auto_search_forbidden"] : false);
+                    } /* else if ($class == "user"){ //HACK
+                      $has_sidebar = true;
+                      tpl_no_subnav();
+                      } */ else {
+                        $has_sidebar = $subnav == true;
+                        tpl_no_subnav();
                     }
+                    if (Auth::isLoggedIn() && !Auth::isBlocked())
+                        tpl_uc_answer_info();
                     if ($env->showed_actions == 0) {
                         $has_sidebar = false;
                     }
-                    tpl_subnav($subnav["phrase"], isset($subnav["auto_search_forbidden"]) ? $subnav["auto_search_forbidden"] : false);
-                } /* else if ($class == "user"){ //HACK
-                  $has_sidebar = true;
-                  tpl_no_subnav();
-                  } */ else {
-                    $has_sidebar = $subnav == true;
-                    tpl_no_subnav();
                 }
-                if (Auth::isLoggedIn() && !Auth::isBlocked())
-                    tpl_uc_answer_info();
-                if ($env->showed_actions == 0) {
-                    $has_sidebar = false;
-                }
-            }
 
-            /**
-             * Outputs the footer of the page
-             * 
-             * @global Environment $env
-             * @global string $js JavaScript code to be appended to JS code in the footer
-             * @global boolean $has_sidebar has the page to be echoed with the actions sidebar?
-             * @global boolean $editor_needed needs the page to include the visual editor sources
-             */
-            function tpl_after() {
-                ?>         </div> <?php
-                global $env, $js, $has_sidebar, $editor_needed, $update_with_js, $document_title, $html_app;
-                if (Auth::getUserMode() != User::NO_MODE && !Auth::isBlocked() && $has_sidebar) {
-                    tpl_actions_sidebar();
-                }
-                ?>
-    </div>
-    <!-- Footer
-    ================================================== -->
-    <footer class="footer">
-        <p>Powered by <a href="https://github.com/parttimenerd/abipage/">abipage</a>.
-            Designed and built by <a href="https://uqudy.serpens.uberspace.de">Johannes Bechberger</a>
-            with <a href="https://twitter.github.com/bootstrap/">Twitter Bootstrap</a>
-            and <a href="<?= tpl_url("img/icons/icon_credits.txt") ?>">Icons</a> from the <a href="https://thenounproject.com">Noun Project</a>.
-            <a href="<?php echo tpl_url("humans.txt") ?>">humans.txt</a>
-        <p><a href="<?= tpl_url("impress") ?>">Impressum</a>. 
-            <a href="<?= tpl_url("terms_of_use") ?>">Nutzungsbedingungen</a>. 
-            <a href="<?= tpl_url("privacy") ?>">Datenschutz</a>.</p>
-    </footer>
+                /**
+                 * Outputs the footer of the page
+                 * 
+                 * @global Environment $env
+                 * @global string $js JavaScript code to be appended to JS code in the footer
+                 * @global boolean $has_sidebar has the page to be echoed with the actions sidebar?
+                 * @global boolean $editor_needed needs the page to include the visual editor sources
+                 */
+                function tpl_after() {
+                    ?>         </div> <?php
+                    global $env, $js, $has_sidebar, $editor_needed, $update_with_js, $document_title, $html_app;
+                    if (Auth::getUserMode() != User::NO_MODE && !Auth::isBlocked() && $has_sidebar) {
+                        tpl_actions_sidebar();
+                    }
+                    ?>
+        </div>
+        <!-- Footer
+        ================================================== -->
+        <footer class="footer">
+            <p>Powered by <a href="https://github.com/parttimenerd/abipage/">abipage</a>.
+                Designed and built by <a href="https://uqudy.serpens.uberspace.de">Johannes Bechberger</a>
+                with <a href="https://twitter.github.com/bootstrap/">Twitter Bootstrap</a>
+                and <a href="<?= tpl_url("img/icons/icon_credits.txt") ?>">Icons</a> from the <a href="https://thenounproject.com">Noun Project</a>.
+                <a href="<?php echo tpl_url("humans.txt") ?>">humans.txt</a>
+            <p><a href="<?= tpl_url("impress") ?>">Impressum</a>. 
+                <a href="<?= tpl_url("terms_of_use") ?>">Nutzungsbedingungen</a>. 
+                <a href="<?= tpl_url("privacy") ?>">Datenschutz</a>.</p>
+        </footer>
     </div><!--/.container -->
     <div class="go_up">
         <a href="#" onclick="scrollToTop()">

@@ -29,7 +29,7 @@ class ImageList extends RatableUserContentList {
         array_push($this->order_by_dic, "capture_time");
     }
 
-    public function deleteItem($id, $trigger_action = true) {
+    public function deleteItem($id, $cause = "", $trigger_action = true) {
         global $env;
         $cid = intval($id);
         $res = $this->db->query("SELECT id, format FROM " . $this->table . " WHERE id=" . $cid) or die($this->db->error);
@@ -38,7 +38,7 @@ class ImageList extends RatableUserContentList {
             $filename = $arr["id"] . '.' . $arr["format"];
             $file = BASE_DIR . $env->main_dir . '/' . $env->upload_path . '/' . $filename;
             $thumbfile = BASE_DIR . $env->main_dir . '/' . $env->upload_path . '/thumbs/' . $filename;
-            parent::deleteItem($cid, $trigger_action);
+            parent::deleteItem($cid, $cause, $trigger_action);
             if (file_exists($file)) {
                 unlink($file);
             }

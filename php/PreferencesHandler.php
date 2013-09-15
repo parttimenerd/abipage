@@ -63,6 +63,7 @@ class PreferencesHandler extends ToroHandler {
                     "usermanagement_subtitle" => array("default" => '"Alle Leute sind entweder charmant oder langweilig. Ich ergreife Partei für die Charmanten." - Oscar Wilde', "label" => "Benutzerverwaltungsseite"),
                     "teacherlist_subtitle" => array("default" => '"Wo Menschlichkeit geboten ist, steh&apos; nicht zurück - selbst hinter deinem Lehrer." - Konfuzius', "label" => "Lehrerlisteseite"),
                     "dashboard_subtitle" => array("default" => '"Herrschaft ist im Alltag primär: Verwaltung." - Max Weber', "label" => "Dashboard"),
+                    "deleted_items_list" => array("default" => '', "Gelöschte-Beiträge-Liste"),
                     "uc_management_subtitle" => array("default" => '"Everything is as important as everything else." - John Lennon', "label" => "Steckbriefverwaltungsseite"),
                     "polls_management_subtitle" => array("default" => '"Life is what happens to you, while you&apos;re busy making other plans" - John Lennon', "label" => "Umfragenverwaltungsseite"),
                     "preferences_subtitle" => array("default" => '"There are no problems, only solutions." - John Lennon', "label" => "Diese Seite"),

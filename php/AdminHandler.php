@@ -42,7 +42,7 @@ class AdminHandler extends ToroHandler {
                             if (isset($_POST["review"])) {
                                 User::reviewUserComment($key);
                             } else if (isset($_POST["delete"])) {
-                                User::deleteUserComment($key);
+                                User::deleteUserComment($key, isset($_POST["cause"]) ? $_POST["cause"] : "");
                             }
                         }
                     }

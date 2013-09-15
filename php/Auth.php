@@ -243,6 +243,10 @@ class Auth {
     public static function canDeleteUserComment() {
         return Auth::isModerator();
     }
+    
+    public static function canSeeDeletedItemsList(){
+        return Auth::isModerator();
+    }
 
     public static function canDeleteUser() {
         return Auth::isAdmin();

@@ -132,7 +132,7 @@ class RatableUserContentHandler extends ToroHandler {
             PiwikHelper::echoJSTrackerCode(false);
             jsonAjaxResponseEndSend();
         } else if (isset($_POST["delete"]) && Auth::canDeleteRucItem() && isset($_POST["id"])) {
-            if ($this->list->deleteItem(intval($_POST["id"]))) {
+            if ($this->list->deleteItem(intval($_POST["id"]), isset($_POST["cause"]) ? $_POST["cause"] : "")) {
                 jsonAjaxResponseStart();
                 PiwikHelper::addTrackGoalJS("Item deleted");
                 PiwikHelper::echoJSTrackerCode(false);
