@@ -159,7 +159,7 @@ function tpl_quote_list($rucis, $page, $pages, $phrase, $as_page = true) {
         tpl_quote_item($ruci);
     ?>
     <script>
-                var rating_url = "<?php echo tpl_url('quotes') ?>";
+        var rating_url = "<?php echo tpl_url('quotes') ?>";
     <?php if ($as_page) echo 'var page = ' . $page . ';' ?>
     <? if ($pages != -1): ?>
             window.max_page = pagecount = <?php echo $pages ?>;
@@ -359,6 +359,9 @@ function tpl_item_after_ruc(RatableUserContentItem $ruci, $edit_args = array()) 
     if (Auth::canEditRucItems()) {
         tpl_item_edit_div($ruci);
     }
+    if ($ruci->isDeletable()){
+        tpl_item_delete_div($ruci->id);
+    }
 }
 
 /**
@@ -410,6 +413,12 @@ function tpl_item_edit_div(RatableUserContentItem $ruci) {
     <?
 }
 
+function tpl_item_delete_div($id) {
+    ?>
+    <div class="delete_item_container" id="<?= $id ?>_delete_item_container"></div>
+    <?
+}
+
 /**
  * Outputs the delete span of the item
  * 
@@ -417,7 +426,7 @@ function tpl_item_edit_div(RatableUserContentItem $ruci) {
  */
 function tpl_item_delete_span(RatableUserContentItem $ruci) {
     ?>
-    <button class="del_item btn" onclick="deleteItem('<?= $ruci->id ?>')"><?php tpl_icon("delete", "Löschen") ?></button>
+    <button class="del_item btn" onclick="deleteItemModal('<?= $ruci->id ?>', 'item')"><?php tpl_icon("delete", "Löschen") ?></button>
     <?php
 }
 
@@ -482,12 +491,12 @@ function tpl_edit_item_hbs_before($id = "item-edit-template") {
                     $onclick_arr_app = "";
                     $arr = array();
                     foreach ($onclick_arr as $value) {
-                        if ($value != ""){
+                        if ($value != "") {
                             $arr[] = $value;
                         }
                     }
                     foreach ($arr as $value) {
-                        if ($onclick_arr_app != ""){
+                        if ($onclick_arr_app != "") {
                             $onclick_arr_app .= ", ";
                         }
                         $onclick_arr_app .= "'" . $value . "'";
@@ -498,6 +507,27 @@ function tpl_edit_item_hbs_before($id = "item-edit-template") {
             <div class = "modal-footer">
                 <button class = "btn" data-dismiss = "modal" aria-hidden = "true">Schließen</button>
                 <button class = "btn btn-primary submit-button" onclick="submitEditItem('{{id}}', [<?= $onclick_arr_app != "" ? $onclick_arr_app : "" ?>]);">Änderungen speichern</button>
+            </div>
+        </div>
+    </div>
+    <?
+    tpl_delete_item_hbs("Beitrag");
+}
+
+function tpl_delete_item_hbs($type_text, $id = "item-delete-template") {
+    ?>    
+    <div id="<?= $id ?>" type="text/x-handlebars-template">
+        <div id="{{id}}_delete_modal" class="modal hide fade delete_modal" tabindex="-1" role="dialog" aria-labelledby="{{id}}_modal_label" aria-hidden="true">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <span class="item-header" id="{{id}}_modal_label"><?= $type_text ?> löschen</span>
+            </div>
+            <div class="modal-body">
+                <textarea id="{{id}}_dm_cause" placeholder="Bitte geben sie noch kurz den Grund an, warum sie den <?= $type_text ?> löschen wollen">{{cause}}</textarea> 
+            </div>
+            <div class = "modal-footer">
+                <button class = "btn" data-dismiss = "modal" aria-hidden = "true">Schließen</button>
+                <button class = "btn btn-primary submit-button" onclick="{{delete_action}}">Löschen</button>
             </div>
         </div>
     </div>

@@ -81,7 +81,7 @@ function tpl_deleted_items_list_part($deleted_items, $type) {
                         <? if ($type == DeletedItemsList::QUOTE): ?>
                             <td><?= $item["person"] ?></td>
                         <? elseif ($type == DeletedItemsList::USER_COMMENT): ?>
-                            <td><? tpl_userlink($item["commented_user"]) ?></td>
+                            <td><? tpl_userlink($item["commented_userid"]) ?></td>
                             <td><?= $item["notified_as_bad"] ? "Ja" : "Nein" ?></td>
                         <? endif; ?>
                         <td><?= $item["text"] ?></td>

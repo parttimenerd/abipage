@@ -173,7 +173,7 @@ div.wysiwyg iframe { clear: left;
 h1, h2, h3, h4, h5, h6, .navbar {
     font-family: 'Josefin Sans', Helvetica;
 }
-.item input, .item textarea, .alert-info, .item-content, .edit_modal input {
+.item input, .item textarea, .alert-info, .item-content, .edit_modal input, .delete_modal textarea {
     font-family: 'PT Sans'
 }
 /*input[type="text"],
@@ -190,10 +190,10 @@ input[type="url"],
 input[type="search"],
 input[type="tel"],
 input[type="color"],*/
-.item input:not([type="checkbox"]), textarea, .edit_modal input {
+.item input:not([type="checkbox"]), textarea, .edit_modal input, .delete_modal textarea {
     width: 100%;
 }
-.item input, textarea, .log_container input, .edit_modal input {
+.item input, textarea, .log_container input, .edit_modal input, .delete_modal textarea {
     resize: none !important;
     box-shadow: none !important;
     border: none !important;

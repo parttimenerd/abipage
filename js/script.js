@@ -45,21 +45,42 @@ function fillStars(id, rating) {
     });
 }
 
+function deleteItemModal(id, delete_action){
+    var container = $("#" + id + "_delete_item_container");
+    if (container) {
+        if (window.item_delete_template === undefined) {
+            window.item_delete_template = Handlebars.compile($("#item-delete-template").html());
+        }
+        var html = "";
+        window.item_delete_cause = window.item_delete_cause !== undefined ? window.item_delete_cause : "";
+        var obj = {
+            id: id,
+            cause: window.item_delete_cause,
+            delete_action: delete_action === "user_comment" ? "deleteUserComment(" + id + ")" : "deleteItem(" + id + "); $('#" + id + "_delete_modal').modal('hide')"
+        };
+        html = item_delete_template(obj);
+        container.html(html);
+        var submitEle = $("#" + id + "_delete_modal .submit-button");
+        $("#" + id + "_delete_modal input").keydown(function(event) {
+            if (event.which === 13) {
+                submitEle.click();
+                event.preventDefault();
+            }
+        });
+        $('#' + id + "_delete_modal").modal('show');
+    } else {
+        container.html("");
+    }
+}
+
 function deleteItem(id) {
-    var input = prompt("Wollen sie diesen Beitrag wirklich löschen? Dann geben sie bitte einen Grund an: ",
-            this.item_delete_cause !== undefined ? this.item_delete_cause : "");
-    if (input === null) {
-        return;
-    }
-    if (input.length > 0) {
-        this.item_delete_cause = input;
-    }
-    if (this.item_delete_cause !== undefined) {
+    window.item_delete_cause = $.trim($("#" + id + "_dm_cause").val());
+    if (window.item_delete_cause.length > 0) {
         ajax({
             data: {
                 "delete": 0,
                 "id": id,
-                "cause": this.item_delete_cause
+                "cause": window.item_delete_cause
             },
             func: function(data) {
                 $("#" + data["id"]).remove();
@@ -67,7 +88,7 @@ function deleteItem(id) {
             needs: ["id"]
         });
     } else {
-        deleteItem(id);
+        deleteItemModal(id, "item");
     }
 }
 
@@ -566,19 +587,12 @@ function timespanText(timediff) {
 window.setInterval("updateTimespans()", 5000);
 
 function deleteUserComment(id) {
-    var input = prompt("Wollen sie diesen Kommentar wirklich löschen? Dann geben sie bitte einen Grund an: ",
-            this.item_delete_cause !== undefined ? this.item_delete_cause : "");
-    if (input === null) {
-        return;
-    }
-    if (input.length > 0) {
-        this.item_delete_cause = input;
-    }
-    if (this.item_delete_cause !== undefined) {
+    window.item_delete_cause = $.trim($("#" + id + "_dm_cause").val());
+    if (window.item_delete_cause.length > 0) {
         ajax({
             data: {
                 "deleteComment": id,
-                "cause": this.item_delete_cause
+                "cause": window.item_delete_cause
             },
             func: function(data) {
                 $("#" + data["id"]).remove();
@@ -586,7 +600,7 @@ function deleteUserComment(id) {
             needs: ["id"]
         });
     } else {
-        deleteUserComment(id);
+        deleteItemModal(id, "user_comment");
     }
 }
 

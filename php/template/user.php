@@ -92,6 +92,7 @@ function tpl_user(User $user) {
         tpl_user_write_comment();
     foreach ($user->getUserComments($user->getID() == Auth::getUserID() || Auth::isModerator()) as $comment)
         tpl_user_comment($user, $comment);
+    tpl_delete_item_hbs("Kommentar");
     ?>
     </div>
     <?php
@@ -148,13 +149,14 @@ function tpl_user_comment($user, $comment) {
             </li>
             <li class="delete_span_li"> 
                 <? if (Auth::canDeleteUserComment() && !Auth::isSameUser($user) && !Auth::isSameUser($comment["commenting_userid"])): ?>
-                    <span class="del_item"><?php tpl_icon("delete", "Löschen", "deleteUserComment('" . $comment["id"] . "')") ?></span>
+                    <span class="del_item"><?php tpl_icon("delete", "Löschen", "deleteItemModal('$comment[id]', 'user_comment')") ?></span>
                 <? endif; ?>
             </li>
         </ul>
     </div>
     </div>
     <?php
+    tpl_item_delete_div($comment["id"]);
 }
 
 /**
