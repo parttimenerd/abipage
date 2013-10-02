@@ -37,7 +37,7 @@ function tpl_deleted_items_list_part($deleted_items, $type) {
     } else if ($type == DeletedItemsList::IMAGE) {
         $title = "Gelöschte Bilder";
     } else {
-        $title = "Gelöschte Bentuzzerkommentare";
+        $title = "Gelöschte Benutzerkommentare";
     }
     tpl_item_before($title, "", "deleted_items_list");
     ?>
