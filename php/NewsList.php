@@ -53,7 +53,7 @@ class NewsList {
         $db->query("INSERT INTO " . DB_PREFIX . "news(id, title, content, time, userid) VALUES(NULL, '$ctitle', '$ccontent', " . time() . ", " . Auth::getUserID() . ")");
         Actions::addAction($db->insert_id, Auth::getUserName(), "write_news");
         if ($send_emails)
-            User::getAll()->sendMail($title, $content);
+            User::getAll(true, true)->sendMail($title, $content);
     }
 
 }
