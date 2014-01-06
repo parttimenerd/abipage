@@ -3,7 +3,7 @@
 /*
  * Copyright (C) 2012 Johannes Bechberger
  *
- * This program is free software: you can redistribute it and/or modify
+ * This program is free softwagesamre: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -142,7 +142,7 @@ Das Copyright an den Beiträgen geht mit dem Hochladen bzw. Schreiben auf dieser
                     "pic_format" => array("default" => "jpg", "label" => "Bildformat"),
                     "resize_original_image" => array("default" => "false", "type" => "checkbox", "label" => "Originalbild auf die Bilderbreite verkleinern?"),
                     "thumbnail_width" => array("default" => "800", "label" => "Breite der Vorschaubilder"),
-                    "max_uploads_size" => array("default" => "1000", "label" => "Maximale Gesammtgröße der hochgeladenden Bilder in MiB"),
+                    "max_uploads_size" => array("default" => "1000", "label" => "Maximale Gesamtgröße der hochgeladenden Bilder in MiB"),
                     "upload_path" => array("default" => "uploads", "label" => "Order in welchem die hochgeladenen Bilder gespeichert werden")
                 )),
             "Piwik" => array("id" => "piwik_prefs", "rows" => array(
