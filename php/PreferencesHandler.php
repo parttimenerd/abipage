@@ -166,7 +166,7 @@ Wenn ja, sollte Piwik installiert sein und diese Website hinzugefügt worden sei
                     "images_editable" => array("default" => "true", "label" => "Können Bilder hinzugefügt werden?", "type" => "checkbox"),
                     "quotes_editable" => array("default" => "true", "label" => "Können Zitate hinzugefügt werden?", "type" => "checkbox"),
                     "rumors_editable" => array("default" => "true", "label" => "Können Stimmt es... Beiträge geschrieben werden?", "type" => "checkbox"),
-                    "ruc_items_ratable" => array("default" => "true", "label" => "Können Bilder, Zitate und Stimmt es... Beiträge bewertet werden (wenn nicht wird jedem Benutzer die durschnittliche Bewerung angezeigt)? ", "type" => "checkbox"),
+                    "ruc_items_ratable" => array("default" => "true", "label" => "Können Bilder, Zitate und Stimmt es... Beiträge bewertet werden (wenn nicht wird jedem Benutzer die durschnittliche Bewertung angezeigt)? ", "type" => "checkbox"),
                     "user_comments_editable" => array("default" => "true", "label" => "Können Benutzerkommentare geschrieben werden?", "type" => "checkbox"),
                     "user_characteristics_editable" => array("default" => "false", "label" => "Kann der eigene Steckbrief bearbeitet werden?", "type" => "checkbox"),
                     "user_polls_open" => array("default" => "false", "label" => "Ist die Umfragenseite sichtbar?", "type" => "checkbox"),
