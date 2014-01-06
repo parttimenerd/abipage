@@ -161,7 +161,7 @@ class Environment {
         $img_types = array("jpeg", "gif", "png", "bmp", "jpg");
         if ((!empty($_FILES[$name])) && ($_FILES[$name]['error'] == 0)) {
             $filename = basename($_FILES[$name]['name']);
-            $ext = strtolower(substr($filename, strpos($filename, '.') + 1));
+            $ext = strtolower(substr($filename, strrpos($filename, '.') + 1));
             //$arr = explode("/", $_FILES["uploaded_file"]["type"]);
             if (in_array($ext, $img_types) && ($_FILES[$name]["size"] < $this->max_upload_pic_size * 1048576)) {
                 $full_img_dir = $this->main_dir . '/' . $dest_dir;
