@@ -117,7 +117,7 @@ function tpl_usercharacteristics_answer_topic(UserCharacteristicsTopic $topic) {
                 <input type="hidden" name="MAX_FILE_SIZE" value="<?= $env->max_upload_pic_size * 1048576 ?>"/>
                 <hr/>
             <? endif ?>
-            <strong>Neues Bild hochladen</strong>: (Kann etwas länger Dauern, bitte seien sie geduldig.)<br/>
+            <strong>Neues Bild hochladen</strong>: (Kann etwas länger dauern, bitte seien Sie geduldig)<br/>
             <input type="file" accept="image/*" name="<?= $topic->getID() ?>"/>
             (Das Bild darf maximal <?= $env->max_upload_pic_size ?>MB groß sein und sollte die Dateiendung .png, .jpg, .jpeg, .bmp oder .gif haben.)
             <?
