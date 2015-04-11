@@ -345,12 +345,13 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
                 var auto_update_interval = "<?= $env->auto_update_interval ?>";
                 var ajax_url = "<?= tpl_url("ajax") ?>";
                 var has_sidebar = <?= $has_sidebar ? "true" : "false" ?>;
-    </script>
+    </script> 
+    <script src="<?php echo tpl_url("js/libs/jquery.migrate.js") ?>"></script>
     <?= str_replace("&apos;", "'", str_replace("&quot;", '"', $env->footer_appendix)); ?>
     <?php if ($env->has_piwik) PiwikHelper::echoJSTrackerCode(true, $document_title) ?>
-    <? if (defined("UNMINIFIED_SOURCE") && UNMINIFIED_SOURCE !== false): ?>
+	<? if (defined("UNMINIFIED_SOURCE") && UNMINIFIED_SOURCE !== false): ?>	
         <script src="<?php echo tpl_url("js/libs/handlebars-1.0.0.beta.6.js") ?>"></script>
-        <script src="<?php echo tpl_url("js/libs/bootstrap.js") ?>"></script>
+	<script src="<?php echo tpl_url("js/libs/bootstrap.js") ?>"></script>
         <? if ($editor_needed): ?>
             <script src="<?php echo tpl_url("js/libs/jquery.wysiwyg.js") ?>"></script>
         <? endif ?>
@@ -362,7 +363,7 @@ function tpl_before($class = "", $title = "", $subtitle = "", $subnav = null, $s
     <? else: ?>
         <? if ($editor_needed): ?>
             <script src="<?php echo tpl_url("js/min/jquery.wysiwyg.min.js") ?>"></script>
-        <? endif ?>
+	<? endif ?>
         <script src="<?php echo tpl_url("js/min/scripts.min.js?4242424223") ?>"></script>
     <? endif ?>
     <script>
